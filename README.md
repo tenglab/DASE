@@ -46,10 +46,13 @@ colnames(pool_enhancer_df) <- c("chr", "start","end","name","score","strand", "s
 
 
 # path to bam file
-s1_r1_bam_path <- "~/Projects/super_enhancer/SE_paper_data/PEL_GSE136090/input/BC1_1_rmdup_sort.bam"
-s1_r2_bam_path  <- "~/Projects/super_enhancer/SE_paper_data/PEL_GSE136090/input/BC1_2_rmdup_sort.bam"
-s2_r1_bam_path <- "~/Projects/super_enhancer/SE_paper_data/PEL_GSE136090/input/BC3_1_rmdup_sort.bam"
-s2_r2_bam_path <- "~/Projects/super_enhancer/SE_paper_data/PEL_GSE136090/input/BC3_2_rmdup_sort.bam"
+s1_r1_bam_path <- "input/BC1_1_rmdup_sort.bam"
+
+s1_r2_bam_path <- "input/BC1_2_rmdup_sort.bam"
+
+s2_r1_bam_path <- "input/BC3_1_rmdup_sort.bam"
+
+s2_r2_bam_path <- "input/BC3_2_rmdup_sort.bam"
 
 
 # Input file:                                                                                                  
