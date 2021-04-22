@@ -12,12 +12,13 @@
 #' Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"
 #' @param bl_file super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX) (default=FALSE)
 #' @param has_bl_file if there is a blacklist file (default=FALSE)
-#' @param s1_r1_bam path of sample 1 replicate 1 bam file
 #' @param s1_r2_bam path of sample 1 replicate 2 bam file
 #' @param s2_r1_bam path of sample 2 replicate 1 bam file
 #' @param s2_r2_bam path of sample 2 replicate 2 bam file
 #' @param permut if you want permutation (default=TRUE)
 #' @param times permutation times (default=10)
+#' @param cutoff_v fold change lower and upper cutoff vector.
+#' if permutation is used, it will use the value calculated by permutation. (default=c(-1.5,1.5))
 #'
 #' @return
 #' A list of 6 datasets: permutation density plot, pattern plots of each SE,
@@ -35,20 +36,22 @@
 #' @export
 #' @examples
 #' # no blacklist with permutation 10 times
-#' se_main_list <- SEmain(se_in=pooled_rose,e_df=pooled_enhancer,
+#' se_main_list <- SEprofile(se_in=pooled_rose,e_df=pooled_enhancer,
 #' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,
 #' s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 #'
 #' # with blacklist and permutation 10 times
-#' se_main_list <- SEmain(se_in=pooled_rose,e_df=pooled_enhancer,bl_file= blacklist,
+#' se_main_list <- SEprofile(se_in=pooled_rose,e_df=pooled_enhancer,bl_file= blacklist,
 #' has_bl_file=TRUE, s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 #'
 #' # no blacklist nor permutation 10 times
-#' se_main_list <- SEmain(se_in=pooled_rose,e_df=pooled_enhancer,permut=FALSE,
+#' se_main_list <- SEprofile(se_in=pooled_rose,e_df=pooled_enhancer,permut=FALSE,
 #' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 #'
 
-SEmain <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE, permut=TRUE, times=10,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
+SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
+                   permut=TRUE, times=10,cutoff_v=c(-1.5,1.5),
+                   s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
 
   # Step 1: filter super-enhancer with SEfilter.R with or without SE blacklist file
   if (has_bl_file == TRUE) {
@@ -68,12 +71,13 @@ SEmain <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE, permut=TRUE, time
 
   if (permut == TRUE){
     step_3_out <- SEfitspline(e_deseq_out,merged_se_df)
+    cutoff_vector <- step_3_out$cutoff
   } else {
     step_3_out <- SEfitspline(e_deseq_out,merged_se_df,permut=FALSE)
+    cutoff_vector <- cutoff_v
   }
 
   se_fit_df <- step_3_out$se_fit_df
-  cutoff_vector <- step_3_out$cutoff
 
   # Step 4: using cutoff to get the segment pattern of each SE
   step_4_out <- SEpattern(se_fit_df,cutoff_vector)
