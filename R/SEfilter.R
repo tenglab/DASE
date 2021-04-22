@@ -17,7 +17,6 @@
 #' SE datasets identified in the blacklist, and merged SE metadata
 #'
 #' @import data.table
-#' @import GenomicRanges
 #'
 #' @export
 #' @examples
