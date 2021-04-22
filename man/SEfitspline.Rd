@@ -4,7 +4,7 @@
 \alias{SEfitspline}
 \title{Fit enhancer fold change}
 \usage{
-SEfitspline(e_deseq_out_df, se_df, times = 10, permut = TRUE)
+SEfitspline(e_deseq_out_df, se_df, times = 10, permut = FALSE)
 }
 \arguments{
 \item{e_deseq_out_df}{enhancer output file from enhancerFoldchange}
@@ -13,7 +13,7 @@ SEfitspline(e_deseq_out_df, se_df, times = 10, permut = TRUE)
 
 \item{times}{permutation times (default=10)}
 
-\item{permut}{if you want permutation (default=TRUE)}
+\item{permut}{if you want permutation (default=FALSE)}
 }
 \value{
 A list of 4 datasets: enhancer fitted dataset, permutation dataset, cutoff vector,

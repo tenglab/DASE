@@ -69,10 +69,10 @@ SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   e_deseq_out <- step_2_out$enhancer_deseq_result
 
   if (permut == TRUE){
-    step_3_out <- SEfitspline(e_deseq_out,merged_se_df)
+    step_3_out <- SEfitspline(e_deseq_out,merged_se_df,permut=T)
     cutoff_vector <- step_3_out$cutoff
   } else {
-    step_3_out <- SEfitspline(e_deseq_out,merged_se_df,permut=FALSE)
+    step_3_out <- SEfitspline(e_deseq_out,merged_se_df)
     cutoff_vector <- cutoff_v
   }
 
@@ -95,7 +95,7 @@ SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   out <- list()
   out$permut_plot <- step_3_out$density_plot
   out$e_fit_fc <- step_3_out$se_fit_df
-  out$fc_cutoff <- step_3_out$cutoff
+  out$fc_cutoff <- cutoff_vector
   out$pattern_plot <- step_4_out$plots
   out$se_segments <- step_4_out$se_segment_percent
   out$cate_rank <- step_5_out

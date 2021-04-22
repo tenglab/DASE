@@ -12,7 +12,7 @@
 #' @param e_deseq_out_df enhancer output file from enhancerFoldchange
 #' @param se_df merged SE metadata from SEfilter
 #' @param times permutation times (default=10)
-#' @param permut if you want permutation (default=TRUE)
+#' @param permut if you want permutation (default=FALSE)
 #'
 #' @return
 #' A list of 4 datasets: enhancer fitted dataset, permutation dataset, cutoff vector,
@@ -35,7 +35,7 @@
 #' # no permutation
 #' fit_list <- SEfitspline(enhancerFoldchange_out,se_meta,permut=FALSE)
 
-SEfitspline <- function(e_deseq_out_df,se_df,times=10,permut=TRUE){
+SEfitspline <- function(e_deseq_out_df,se_df,times=10,permut=FALSE){
   #--------------------------------------------------------------
   # create original bs-spline fit
   fit_out <- data.frame()
@@ -166,7 +166,7 @@ SEfitspline <- function(e_deseq_out_df,se_df,times=10,permut=TRUE){
 
   } else {
     density_p <- NA
-    final_cutoff <- c(-1.5, 1.5)
+    final_cutoff <- c(-1.5,1.5)
   }
 
   # creat final output list
