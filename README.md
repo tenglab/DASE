@@ -22,35 +22,44 @@ super-enhancer blacklist file
 
 # pre-process example
 ## rose SE output bed file
+```R
 main_sample_1_r1 &lt;- read.table("input/BC1_1_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
 main_sample_1_r2 <- read.table("input/BC1_2_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
 main_sample_2_r1 <- read.table("input/BC3_1_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
 main_sample_2_r2 <- read.table("input/BC3_2_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
+```
 
 ### merge sample and change the column name exact as follow
+```R
 se_df <- rbind(main_sample_1_r1,main_sample_2_r1,main_sample_1_r2,main_sample_2_r2)
 colnames(se_df) <- c("CHROM","START","STOP","REGION_ID","Signal","STRAND")
-
+```
 ### super-enhancer blacklist file (optional)
+```R
 blacklist_df <- read.table("../../ENCFF356LFX_blacklist.bed",sep = '\t')
+```
 
 ## macs2 output peak file
+```R
 enhancer_s1_r1 <- read.table("input/BC1_1_peaks.narrowPeak",sep='\t')
 enhancer_s1_r2 <- read.table("input/BC1_2_peaks.narrowPeak",sep='\t')
 enhancer_s2_r1 <- read.table("input/BC3_1_peaks.narrowPeak",sep='\t')
 enhancer_s2_r2 <- read.table("input/BC3_2_peaks.narrowPeak",sep='\t')
+```
 
 ### merge sample and change the column name exact as follow
+```R
 pool_enhancer_df <- rbind(enhancer_s1_r1,enhancer_s1_r2,enhancer_s2_r1,enhancer_s2_r2)
 colnames(pool_enhancer_df) <- c("chr", "start","end","name","score","strand", "signalValue","pValue","qValue","peak")
-
+```
 
 ## path to bam file
+```R
 s1_r1_bam_path <- "input/BC1_1_rmdup_sort.bam"
 s1_r2_bam_path <- "input/BC1_2_rmdup_sort.bam"
 s2_r1_bam_path <- "input/BC3_1_rmdup_sort.bam"
 s2_r2_bam_path <- "input/BC3_2_rmdup_sort.bam"
-
+```
 
 # Input file                                                                                                 
  1. se_df                                                                                                     
@@ -64,8 +73,11 @@ s2_r2_bam_path <- "input/BC3_2_rmdup_sort.bam"
 
 # Usage
 ## default: no blacklist file, permutation 10 times
-
+```R
 se_test_out <- SEmain(se_in = se_df, e_df = pool_enhancer_df, s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path, s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
+```
 
 ## with blacklist file, no permutation
+```R
 se_test_out <- SEmain(se_in = se_df, e_df = pool_enhancer_df, bl_file = blacklist_df,has_bl_file = TRUE, permut = FALSE,s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path,s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
+```
