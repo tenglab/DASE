@@ -12,18 +12,18 @@ Dependency:
 DESeq2, GenomicRanges, Rsubread, apeglm, data.table, ggplot2, splines
 
 
-# Files need to pre-process before using package                                                               
+## Files need to pre-process before using package                                                               
 1. merge ROSE *_peaks_Gateway_SuperEnhancers.bed output file                                                 
 2. merge macs2 *_peaks.narrowPeak output output file                                                         
 3. path to sorted bam files of each sample and replicates                                                    
                                                                                                               
-# Options:                                                                                                     
+## Options:                                                                                                     
 super-enhancer blacklist file                                                                                
 
-# pre-process example
-## rose SE output bed file
+## pre-process example
+### rose SE output bed file
 ```R
-main_sample_1_r1 &lt;- read.table("input/BC1_1_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
+main_sample_1_r1 <- read.table("input/BC1_1_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
 main_sample_1_r2 <- read.table("input/BC1_2_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
 main_sample_2_r1 <- read.table("input/BC3_1_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
 main_sample_2_r2 <- read.table("input/BC3_2_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
@@ -61,17 +61,16 @@ s2_r1_bam_path <- "input/BC3_1_rmdup_sort.bam"
 s2_r2_bam_path <- "input/BC3_2_rmdup_sort.bam"
 ```
 
-# Input file                                                                                                 
+# Usage
+## Input file                                                                                                 
  1. se_df                                                                                                     
  2. pool_enhancer_df                                                                                          
  3. s1_r1_bam_path, s1_r2_bam_path, s2_r1_bam_path, s2_r2_bam_path                                             
                                                                                                               
-# Options                                                                                                    
+## Options                                                                                                    
  1. blacklist_df                                                                                              
  2. if using permutation (Default fold change cutoff is (-1.5,1.5) if not using permutation)
 
-
-# Usage
 ## default: no blacklist file, permutation 10 times
 ```R
 se_test_out <- SEmain(se_in = se_df, e_df = pool_enhancer_df, s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path, s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
