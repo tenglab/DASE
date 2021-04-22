@@ -71,15 +71,16 @@ blacklist_df <- read.table("input/ENCFF356LFX_blacklist.bed",sep = '\t')
  3. s1_r1_bam_path, s1_r2_bam_path, s2_r1_bam_path, s2_r2_bam_path                                             
                                                                                                               
 ```R
-# default: no blacklist file, no permutation, default cutoff=c(-1.5,1.5), and sample are single end
+# default: no blacklist file, no permutation, default cutoff=c(-1.5,1.5), both samples are single end
 se_test_out <- SEprofile(se_in = main_df, e_df = pool_enhancer_df, 
                          s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path, 
                          s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
 
-# with blacklist, no permutation, personal defined cutoff
+# with blacklist, no permutation, personal defined cutoff, both samples are paired-end
 se_test_out <- SEprofile(se_in = main_df, e_df = pool_enhancer_df, 
                          bl_file = blacklist_df, has_bl_file = TRUE,
                          cutoff_v = c(-1.7,1.7),
+                         s1_pair = T, s2_pair = T,
                          s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path,
                          s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
                            
