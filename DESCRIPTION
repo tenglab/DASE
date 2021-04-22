@@ -1,15 +1,24 @@
 Package: SEprofiler
-Title: What the Package Does (One Line, Title Case)
+Title: Tools to identify super-enhancer (SE) subtle differences 
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Xiang",
+           family = "Liu",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
+           email = "Xiang.Liu@moffitt.org",
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Description: This package will categorize and rank super-enhancer subtle differences of two conditions given sample's ROSE SE calling output, macs2 peak output and bam files.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
+URL: https://github.com/tenglab/SEprofiler
+Imports:
+	DESeq2
+	GenomicRanges
+	Rsubread
+	apeglm
+	data.table
+	ggplot2
+	splines
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
