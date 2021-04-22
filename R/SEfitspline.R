@@ -166,7 +166,7 @@ SEfitspline <- function(e_deseq_out_df,se_df,times=10,permut=FALSE){
 
   } else {
     density_p <- NA
-    final_cutoff <- c(-1.5,1.5)
+    final_cutoff <- NA
   }
 
   # creat final output list
