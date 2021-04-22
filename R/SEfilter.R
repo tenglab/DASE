@@ -16,8 +16,8 @@
 #' A list of 3 datasets: filtered SE datasets with merged SE names,
 #' SE datasets identified in the blacklist, and merged SE metadata
 #'
-#' @import GenomicRanges
 #' @import data.table
+#' @import GenomicRanges
 #'
 #' @export
 #' @examples

@@ -54,14 +54,16 @@ The workflow of this function is "SEfilter -> enhancerFoldchange -> SEfitspline 
 }
 \examples{
 # no blacklist with permutation 10 times
-se_main_list <- SEmain(se_in=pooled_rose,e_df=pooled_enhancer,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+se_main_list <- SEmain(se_in=pooled_rose,e_df=pooled_enhancer,
+s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,
+s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 
 # with blacklist and permutation 10 times
 se_main_list <- SEmain(se_in=pooled_rose,e_df=pooled_enhancer,bl_file= blacklist,
-has_bl_file=TRUE, s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+has_bl_file=TRUE, s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 
 # no blacklist nor permutation 10 times
 se_main_list <- SEmain(se_in=pooled_rose,e_df=pooled_enhancer,permut=FALSE,
-s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 
 }

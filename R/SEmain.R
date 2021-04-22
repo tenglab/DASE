@@ -24,6 +24,7 @@
 #' enhancer fitted dataset, fold change cutoff vector,
 #' SE segment percentage dataset, and SE category./ranking dataset
 #'
+#' @import data.table
 #' @import GenomicRanges
 #' @import ggplot2
 #' @import DESeq2

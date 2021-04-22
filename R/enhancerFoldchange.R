@@ -19,6 +19,7 @@
 #' @return
 #' A list of 2 datasets: enhancer foldchang results dataset and sizefactor used in DESeq2
 #'
+#' @import data.table
 #' @import GenomicRanges
 #' @import DESeq2
 #' @import Rsubread
