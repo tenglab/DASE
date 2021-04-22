@@ -5,8 +5,6 @@ SEprofiler R package:
 
 Version 0.1.0
 
-github: https://github.com/tenglab/SEprofiler
-
 Dependency:
 
 DESeq2, GenomicRanges, Rsubread, apeglm, data.table, ggplot2, splines
