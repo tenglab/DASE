@@ -20,7 +20,7 @@ DESeq2, GenomicRanges, Rsubread, apeglm, data.table, ggplot2, splines
 ## Options:                                                                                                     
 super-enhancer blacklist file                                                                                
 
-## Pre-process example
+## Pre-process
 ### 1. ROSE SE output bed file
 ```R
 main_sample_1_r1 <- read.table("input/BC1_1_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
