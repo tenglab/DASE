@@ -21,6 +21,9 @@ devtools::install_github("https://github.com/tenglab/SEprofiler.git",auth_toke="
 
 # load package
 library(SEprofiler)
+
+# also need to load GenomicRanges
+library(GenomicRanges)
 ```
 
 ## Files need to pre-process before using package                                                               
