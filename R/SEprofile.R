@@ -12,6 +12,7 @@
 #' Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"
 #' @param bl_file super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX) (default=FALSE)
 #' @param has_bl_file if there is a blacklist file (default=FALSE)
+#' @param s1_r1_bam path of sample 1 replicate 1 bam file
 #' @param s1_r2_bam path of sample 1 replicate 2 bam file
 #' @param s2_r1_bam path of sample 2 replicate 1 bam file
 #' @param s2_r2_bam path of sample 2 replicate 2 bam file
@@ -19,6 +20,8 @@
 #' @param times permutation times (default=10)
 #' @param cutoff_v fold change lower and upper cutoff vector.
 #' if permutation is used, it will use the value calculated by permutation. (default=c(-1.5,1.5))
+#' @param s1_pair if sample 1 is paired-end (default=FALSE)
+#' @param s2_pair if sample 2 is paired-end (default=FALSE)
 #'
 #' @return
 #' A list of 6 datasets: permutation density plot, pattern plots of each SE,
@@ -49,8 +52,9 @@
 #'
 
 SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
-                   permut=FALSE, times=10,cutoff_v=c(-1.5,1.5),
-                   s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
+                      s1_pair=FALSE,s2_pair=FALSE,
+                      permut=FALSE, times=10,cutoff_v=c(-1.5,1.5),
+                      s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
 
   # Step 1: filter super-enhancer with SEfilter.R with or without SE blacklist file
   if (has_bl_file == TRUE) {
@@ -62,7 +66,8 @@ SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   # Step 2: get enhancer fold changes within each super-enhancer with enhancerFoldchange.R
   # Merged SE Output from step 1 as SE input for step 2
   merged_se_df <- step_1_out$se_merged
-  step_2_out <- enhancerFoldchange(e_df,merged_se_df,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+  step_2_out <- enhancerFoldchange(e_df,merged_se_df,s1_pair,s2_pair,
+                                   s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
 
   # Step 3: using weighted bs-spline to fit the fold change
   # and use permutation to get fold change significant cutoff

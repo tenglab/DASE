@@ -15,6 +15,8 @@
 #' @param s1_r2_bam path of sample 1 replicate 2 bam file
 #' @param s2_r1_bam path of sample 2 replicate 1 bam file
 #' @param s2_r2_bam path of sample 2 replicate 2 bam file
+#' @param s1_pair if sample 1 is paired-end (default=FALSE)
+#' @param s2_pair if sample 2 is paired-end (default=FALSE)
 #'
 #' @return
 #' A list of 2 datasets: enhancer foldchang results dataset and sizefactor used in DESeq2
@@ -29,7 +31,9 @@
 #' foldchange_list <- enhancerFoldchange(pool_enhancer_df,se_meta,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
 #'
 
-enhancerFoldchange <- function(e_df,se_df,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
+enhancerFoldchange <- function(e_df,se_df,
+                               s1_pair=FALSE,s2_pair=FALSE,
+                               s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
 
   # extract enhancers within merged super-enhancer
   in_se_df <- data.frame()
@@ -62,15 +66,35 @@ enhancerFoldchange <- function(e_df,se_df,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_ba
   colnames(fc_saf) <- c("GeneID","Chr","Start","End","Strand")
 
   # count each bam files
-  s1_r1_fc <- featureCounts(files=s1_r1_bam,annot.ext=fc_saf,
+  # check if sample 1 is  paired-end
+  if (s1_pair == F) {
+    s1_r1_fc <- featureCounts(files=s1_r1_bam,annot.ext=fc_saf,
                               isGTFAnnotationFile = "SAF")
-  s1_r2_fc <- featureCounts(files=s1_r2_bam,annot.ext=fc_saf,
+    s1_r2_fc <- featureCounts(files=s1_r2_bam,annot.ext=fc_saf,
                                   isGTFAnnotationFile = "SAF")
+  } else {
+    s1_r1_fc <- featureCounts(files=s1_r1_bam,annot.ext=fc_saf,
+                              isGTFAnnotationFile = "SAF",
+                              isPairedEnd=TRUE)
+    s1_r2_fc <- featureCounts(files=s1_r2_bam,annot.ext=fc_saf,
+                              isGTFAnnotationFile = "SAF",
+                              isPairedEnd=TRUE)
+  }
 
-  s2_r1_fc <- featureCounts(files=s2_r1_bam,annot.ext=fc_saf,
+  # check if smaple 2 is paired-end
+  if (s2_pair == F) {
+    s2_r1_fc <- featureCounts(files=s2_r1_bam,annot.ext=fc_saf,
                               isGTFAnnotationFile = "SAF")
-  s2_r2_fc <- featureCounts(files=s2_r2_bam,annot.ext=fc_saf,
+    s2_r2_fc <- featureCounts(files=s2_r2_bam,annot.ext=fc_saf,
                                   isGTFAnnotationFile = "SAF")
+  } else {
+    s2_r1_fc <- featureCounts(files=s2_r1_bam,annot.ext=fc_saf,
+                              isGTFAnnotationFile = "SAF",
+                              isPairedEnd=TRUE)
+    s2_r2_fc <- featureCounts(files=s2_r2_bam,annot.ext=fc_saf,
+                              isGTFAnnotationFile = "SAF",
+                              isPairedEnd=TRUE)
+  }
 
   # DESeq2 fold-change
   # make count matrix

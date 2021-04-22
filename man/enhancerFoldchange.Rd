@@ -4,13 +4,26 @@
 \alias{enhancerFoldchange}
 \title{Calculate the fold change of enhancers}
 \usage{
-enhancerFoldchange(e_df, se_df, s1_r1_bam, s1_r2_bam, s2_r1_bam, s2_r2_bam)
+enhancerFoldchange(
+  e_df,
+  se_df,
+  s1_pair = FALSE,
+  s2_pair = FALSE,
+  s1_r1_bam,
+  s1_r2_bam,
+  s2_r1_bam,
+  s2_r2_bam
+)
 }
 \arguments{
 \item{e_df}{pooled macs2 output file *_peaks.narrowPeak of all samples.
 Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"}
 
 \item{se_df}{merged SE metadata from SEfilter}
+
+\item{s1_pair}{if sample 1 is paired-end (default=FALSE)}
+
+\item{s2_pair}{if sample 2 is paired-end (default=FALSE)}
 
 \item{s1_r1_bam}{path of sample 1 replicate 1 bam file}
 
