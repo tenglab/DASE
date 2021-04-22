@@ -76,18 +76,18 @@ blacklist_df <- read.table("input/ENCFF356LFX_blacklist.bed",sep = '\t')
 # default: no blacklist file, no permutation, default cutoff=c(-1.5,1.5)
 se_test_out_1 <- SEprofile(se_in = main_df, e_df = pool_enhancer_df, 
                            s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path, 
-                           s2_r1_bam = s2_r1_bam_path,s2_r2_bam = s2_r2_bam_path)
+                           s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
 
 # with blacklist, no permutation, personal defined cutoff
-se_test_out_2 <- SEprofile(se_in = main_df,e_df = pool_enhancer_df, 
-                           bl_file = blacklist_df,has_bl_file = TRUE,
+se_test_out_2 <- SEprofile(se_in = main_df, e_df = pool_enhancer_df, 
+                           bl_file = blacklist_df, has_bl_file = TRUE,
                            cutoff_v = c(-1.7,1.7),
-                           s1_r1_bam = s1_r1_bam_path,s1_r2_bam = s1_r2_bam_path,
-                           s2_r1_bam = s2_r1_bam_path,s2_r2_bam = s2_r2_bam_path)
+                           s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path,
+                           s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
                            
 # with blacklist, with permutation (cutoff will defined by permutation)
-se_test_out_3 <- SEprofile(se_in = main_df,e_df = pool_enhancer_df, 
-                           bl_file = blacklist_df,has_bl_file = T, permut = T,
-                           s1_r1_bam = s1_r1_bam_path,s1_r2_bam = s1_r2_bam_path,
-                           s2_r1_bam = s2_r1_bam_path,s2_r2_bam = s2_r2_bam_path)
+se_test_out_3 <- SEprofile(se_in = main_df, e_df = pool_enhancer_df, 
+                           bl_file = blacklist_df, has_bl_file = T, permut = T,
+                           s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path,
+                           s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
 ```
