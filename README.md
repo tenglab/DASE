@@ -65,12 +65,7 @@ s2_r2_bam_path <- "~/Projects/super_enhancer/SE_paper_data/PEL_GSE136090/input/B
 # Using example:
 # default: no blacklist file, permutation 10 times
 
-se_test_out <- SEmain(se_in = se_df, e_df = pool_enhancer_df, 
-                      s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path,
-                      s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
+se_test_out <- SEmain(se_in = se_df, e_df = pool_enhancer_df, s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path, s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
 
 # with blacklist file, no permutation
-se_test_out <- SEmain(se_in = se_df, e_df = pool_enhancer_df, 
-                      bl_file = blacklist_df,has_bl_file = TRUE, permut = FALSE,
-                      s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path,
-                      s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
+se_test_out <- SEmain(se_in = se_df, e_df = pool_enhancer_df, bl_file = blacklist_df,has_bl_file = TRUE, permut = FALSE,s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path,s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
