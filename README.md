@@ -55,7 +55,7 @@ s2_r2_bam_path <- "input/BC3_2_rmdup_sort.bam"
 
 ### 4. super-enhancer blacklist file (optional)
 ```R
-blacklist_df <- read.table("ENCFF356LFX_blacklist.bed",sep = '\t')
+blacklist_df <- read.table("input/ENCFF356LFX_blacklist.bed",sep = '\t')
 ```
 
 # Usage
