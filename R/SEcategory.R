@@ -116,24 +116,32 @@ SEcategory <- function(se_seg_df,e_deseq_out) {
       temp_mid <- temp_cat_df[which(temp_cat_df$seg_loc == "mid"),]
       temp_other <- temp_cat_df[which(temp_cat_df$seg_loc != "mid"),]
 
-      if (temp_mid$seg_percent >= 0.9) {
-        temp_cat_df$category <- rep("Similar",nrow(temp_cat_df))
-        temp_cat_df$direction <- "none"
-
-      } else if (temp_mid$seg_percent < 0.9 & temp_mid$seg_percent >= 0.5) {
-        temp_cat_df$category <- rep("Shorten",nrow(temp_cat_df))
-        if (temp_other$seg_loc == "lower") {
-          temp_cat_df$direction <- "-"
+      if (nrow(temp_mid) != 0 ) {
+        if (temp_mid$seg_percent >= 0.9) {
+          temp_cat_df$category <- rep("Similar",nrow(temp_cat_df))
+          temp_cat_df$direction <- "none"
+        } else if (temp_mid$seg_percent < 0.9 & temp_mid$seg_percent >= 0.5) {
+          temp_cat_df$category <- rep("Shorten",nrow(temp_cat_df))
+          if (temp_other$seg_loc == "lower") {
+            temp_cat_df$direction <- "-"
+          } else {
+            temp_cat_df$direction <- "+"
+          }
         } else {
-          temp_cat_df$direction <- "+"
+          temp_cat_df$category <- rep("Strengthen/weaken",nrow(temp_cat_df))
+          if (temp_other$seg_loc == "lower") {
+            temp_cat_df$direction <- "-"
+          } else {
+            temp_cat_df$direction <- "+"
+          }
         }
-
       } else {
-        temp_cat_df$category <- rep("Strengthen/weaken",nrow(temp_cat_df))
-        if (temp_other$seg_loc == "lower") {
-          temp_cat_df$direction <- "-"
+        # if no middle part
+        temp_cat_df$category <- rep("Shifting",nrow(temp_cat_df))
+        if (temp_other$seg_loc[1] == "lower") {
+          temp_cat_df$direction <- "r"
         } else {
-          temp_cat_df$direction <- "+"
+          temp_cat_df$direction <- "l"
         }
       }
     }

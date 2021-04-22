@@ -119,21 +119,26 @@ SEpattern <- function(se_fit_df,cutoff_vector) {
         # get data point within each segment
         temp_seg <- temp_df[which(temp_df$width_mid >= x_cut_all[m_i] & temp_df$width_mid <= x_cut_all[m_i+1]),]
 
-        # get segment percentage
-        seg_percent <- sum(temp_seg$baseMean.1)/total_width
+        if (nrow(temp_seg) != 0) {
+          # get segment percentage
+          seg_percent <- sum(temp_seg$baseMean.1)/total_width
 
-        # using LFC of data point which has largest basemean to define segment location
-        max_basemean <- temp_seg[which.max(temp_seg$baseMean.1),]
-
-        if (max_basemean$log2FoldChange.1 < l_cut) {
-          part_res <- append(part_res,seg_percent,)
-          part_loc_res <- append(part_loc_res,"lower")
-        } else if (max_basemean$log2FoldChange.1 >= l_cut & max_basemean$log2FoldChange.1 <= u_cut) {
+          # using LFC of data point which has largest basemean to define segment location
+          max_basemean <- temp_seg[which.max(temp_seg$baseMean.1),]
+          if (max_basemean$log2FoldChange.1 < l_cut) {
+            part_res <- append(part_res,seg_percent,)
+            part_loc_res <- append(part_loc_res,"lower")
+          } else if (max_basemean$log2FoldChange.1 >= l_cut & max_basemean$log2FoldChange.1 <= u_cut) {
+            part_res <- append(part_res,seg_percent,)
+            part_loc_res <- append(part_loc_res,"mid")
+          } else {
+            part_res <- append(part_res,seg_percent,)
+            part_loc_res <- append(part_loc_res,"upper")
+          }
+        } else {
+          seg_percent <- 0
           part_res <- append(part_res,seg_percent,)
           part_loc_res <- append(part_loc_res,"mid")
-        } else {
-          part_res <- append(part_res,seg_percent,)
-          part_loc_res <- append(part_loc_res,"upper")
         }
       }
     }
@@ -150,8 +155,6 @@ SEpattern <- function(se_fit_df,cutoff_vector) {
 
     se_segment <- rbind(se_segment,temp_per_df)
   }
-
-
 
   # make final output
   out$plots <- plot_list

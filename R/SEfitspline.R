@@ -152,12 +152,16 @@ SEfitspline <- function(e_deseq_out_df,se_df,times=10,permut=FALSE){
     # check if there are number
     if (length(u_cut_v) != 0) {
       u_cut <- min(u_cut_v)
+    } else if (length(l_cut_v) != 0) {
+      u_cut <- -max(l_cut_v)
     } else {
       u_cut <- 1.5
     }
 
     if (length(l_cut_v) != 0) {
       l_cut <- max(l_cut_v)
+    } else if (length(u_cut_v) != 0) {
+      l_cut <- -min(u_cut_v)
     } else {
       l_cut <- -1.5
     }
