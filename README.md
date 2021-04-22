@@ -15,10 +15,7 @@ DESeq2, GenomicRanges, Rsubread, apeglm, data.table, ggplot2, splines
 ## Files need to pre-process before using package                                                               
 1. merge ROSE *_peaks_Gateway_SuperEnhancers.bed output file                                                 
 2. merge macs2 *_peaks.narrowPeak output output file                                                         
-3. path to sorted bam files of each sample and replicates                                                    
-                                                                                                              
-## Options:                                                                                                     
-super-enhancer blacklist file                                                                                
+3. path to sorted bam files of each sample and replicates                                                                     
 
 ## Pre-process
 ### 1. ROSE SE output bed file
@@ -64,10 +61,6 @@ blacklist_df <- read.table("input/ENCFF356LFX_blacklist.bed",sep = '\t')
  2. pool_enhancer_df                                                                                          
  3. s1_r1_bam_path, s1_r2_bam_path, s2_r1_bam_path, s2_r2_bam_path                                             
                                                                                                               
-## Options                                                                                                    
- 1. blacklist_df                                                                                              
- 2. if using permutation (Default fold change cutoff is (-1.5,1.5) if not using permutation)
-
 ```R
 # default: no blacklist file, permutation 10 times
 se_test_out <- SEmain(se_in = se_df, e_df = pool_enhancer_df, s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path, s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
