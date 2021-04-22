@@ -1,6 +1,6 @@
 Package: SEprofiler
 Title: Tools to identify super-enhancer (SE) subtle differences 
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
     person(given = "Xiang",
            family = "Liu",
@@ -11,14 +11,16 @@ Description: This package will categorize and rank super-enhancer subtle differe
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 URL: https://github.com/tenglab/SEprofiler
+Depends: 
+	R (>=4.0.3)
 Imports:
-	DESeq2
-	GenomicRanges
-	Rsubread
-	apeglm
-	data.table
-	ggplot2
-	splines
+	DESeq2 (>=1.30.1)
+	GenomicRanges (>=1.42.0)
+	Rsubread (>=2.4.3)
+	apeglm (>=1.12.0)
+	data.table (>=1.14.0)
+	ggplot2 (>=3.3.3)
+	splines (>=4.0.3)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
