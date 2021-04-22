@@ -114,6 +114,7 @@ SEfitspline <- function(e_deseq_out_df,se_df,times=10,permut=FALSE){
   } else {
     permut_out <- NA
   }
+
   #-----------------------------------------------------------------------------
   # plot density of original bs fit and new bs fit
   if (permut) {
@@ -145,9 +146,23 @@ SEfitspline <- function(e_deseq_out_df,se_df,times=10,permut=FALSE){
     root_point_2 <- solveroot(slope_df$log2FC,slope_df$slope,y0 = -r_xy)
 
     fc_cutoff <- append(root_point_1,root_point_2)
-    u_cut <- fc_cutoff[fc_cutoff > 1 & fc_cutoff < 2]
-    l_cut <- fc_cutoff[fc_cutoff > -2 & fc_cutoff < -1]
-    final_cutoff <- c(max(l_cut),min(u_cut))
+    u_cut_v <- fc_cutoff[fc_cutoff > 1 & fc_cutoff < 2]
+    l_cut_v <- fc_cutoff[fc_cutoff > -2 & fc_cutoff < -1]
+
+    # check if there are number
+    if (length(u_cut_v) != 0) {
+      u_cut <- min(u_cut_v)
+    } else {
+      u_cut <- 1.5
+    }
+
+    if (length(l_cut_v) != 0) {
+      l_cut <- max(l_cut_v)
+    } else {
+      l_cut <- -1.5
+    }
+
+    final_cutoff <- c(l_cut,u_cut)
 
     # plot density with cutoff line
     density_p <- ggplot(density_plot_df, aes(x = w_bs_spline,color = group))+
