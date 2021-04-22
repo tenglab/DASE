@@ -1,5 +1,5 @@
 # SEprofiler
-R package used to category and ranking super-enhancer (SE) subtle differences in two conditions.
+R package used to categorize and rank super-enhancer (SE) subtle differences in two conditions.
 
 SEprofiler R package:
 
