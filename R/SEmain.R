@@ -1,0 +1,100 @@
+#' Get SE category by one step
+#'
+#' A function to get the category and ranking of SEs in one step
+#'
+#' @details
+#' This function is the main function used to get the category and ranking of SEs.
+#' The workflow of this function is "SEfilter -> enhancerFoldchange -> SEfitspline -> SEpattern -> SEcategory"
+#'
+#' @param se_in pooled ROSE output file *_peaks_Gateway_SuperEnhancers.bed of all samples.
+#' Header needs to be "CHROM,START,STOP,REGION_ID,Signal,STRAND"
+#' @param e_df pooled macs2 output file *_peaks.narrowPeak of all samples.
+#' Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"
+#' @param bl_file super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX) (default=FALSE)
+#' @param has_bl_file if there is a blacklist file (default=FALSE)
+#' @param s1_r1_bam path of sample 1 replicate 1 bam file
+#' @param s1_r2_bam path of sample 1 replicate 2 bam file
+#' @param s2_r1_bam path of sample 2 replicate 1 bam file
+#' @param s2_r2_bam path of sample 2 replicate 2 bam file
+#' @param permut if you want permutation (default=TRUE)
+#' @param times permutation times (default=10)
+#'
+#' @return
+#' A list of 6 datasets: permutation density plot, pattern plots of each SE,
+#' enhancer fitted dataset, fold change cutoff vector,
+#' SE segment percentage dataset, and SE category./ranking dataset
+#'
+#' @import GenomicRanges
+#' @import ggplot2
+#' @import DESeq2
+#' @import Rsubread
+#' @import apeglm
+#' @import splines
+#'
+#' @export
+#' @examples
+#' # no blacklist with permutation 10 times
+#' se_main_list <- SEmain(se_in=pooled_rose,e_df=pooled_enhancer,
+#' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,
+#' s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
+#'
+#' # with blacklist and permutation 10 times
+#' se_main_list <- SEmain(se_in=pooled_rose,e_df=pooled_enhancer,bl_file= blacklist,
+#' has_bl_file=TRUE, s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
+#'
+#' # no blacklist nor permutation 10 times
+#' se_main_list <- SEmain(se_in=pooled_rose,e_df=pooled_enhancer,permut=FALSE,
+#' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
+#'
+
+SEmain <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE, permut=TRUE, times=10,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
+
+  # Step 1: filter super-enhancer with SEfilter.R with or without SE blacklist file
+  if (has_bl_file == TRUE) {
+    step_1_out <- SEfilter(se_in,bl_file,has_bl_file=TRUE)
+  } else {
+    step_1_out <- SEfilter(se_in)
+  }
+
+  # Step 2: get enhancer fold changes within each super-enhancer with enhancerFoldchange.R
+  # Merged SE Output from step 1 as SE input for step 2
+  merged_se_df <- step_1_out$se_merged
+  step_2_out <- enhancerFoldchange(e_df,merged_se_df,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+
+  # Step 3: using weighted bs-spline to fit the fold change
+  # and use permutation to get fold change significant cutoff
+  e_deseq_out <- step_2_out$enhancer_deseq_result
+
+  if (permut == TRUE){
+    step_3_out <- SEfitspline(e_deseq_out,merged_se_df)
+  } else {
+    step_3_out <- SEfitspline(e_deseq_out,merged_se_df,permut=FALSE)
+  }
+
+  se_fit_df <- step_3_out$se_fit_df
+  cutoff_vector <- step_3_out$cutoff
+
+  # Step 4: using cutoff to get the segment pattern of each SE
+  step_4_out <- SEpattern(se_fit_df,cutoff_vector)
+  se_seg_df <- step_4_out$se_segment_percent
+
+  # Step 5: get categories of each SE and ranking by category groups
+  step_5_out <- SEcategory(se_seg_df,e_deseq_out)
+
+  # make final output: final category and ranking file,
+  # permutation density plots
+  # pattern plots of each SEs,
+  # enhancer fitted fold change and counts,
+  # cutoff_vector,
+  # and SE segments profile to output list
+
+  out <- list()
+  out$permut_plot <- step_3_out$density_plot
+  out$e_fit_fc <- step_3_out$se_fit_df
+  out$fc_cutoff <- step_3_out$cutoff
+  out$pattern_plot <- step_4_out$plots
+  out$se_segments <- step_4_out$se_segment_percent
+  out$cate_rank <- step_5_out
+
+  return(out)
+}
