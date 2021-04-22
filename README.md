@@ -11,6 +11,17 @@ Dependency:
 
 DESeq2, GenomicRanges, Rsubread, apeglm, data.table, ggplot2, splines
 
+## Install
+```R
+# Public package
+devtools::install_github("https://github.com/tenglab/SEprofiler.git")
+
+# Private with token
+devtools::install_github("https://github.com/tenglab/SEprofiler.git",auth_toke="abc")
+
+# load package
+library(SEprofiler)
+```
 
 ## Files need to pre-process before using package                                                               
 1. merge ROSE *_peaks_Gateway_SuperEnhancers.bed output file                                                 
