@@ -50,6 +50,7 @@ SEfilter <- function (se_in,bl_file=FALSE,has_bl_file=FALSE) {
     }
   } else {
     se_filter_df_no_bl <- se_filter_df
+    se_filter_df_in_bl <- NA
   }
 
   # remove SE which are in the blacklist
