@@ -15,7 +15,7 @@
 #' @param s1_r2_bam path of sample 1 replicate 2 bam file
 #' @param s2_r1_bam path of sample 2 replicate 1 bam file
 #' @param s2_r2_bam path of sample 2 replicate 2 bam file
-#' @param permut if you want permutation (default=TRUE)
+#' @param permut if you want permutation (default=FALSE)
 #' @param times permutation times (default=10)
 #' @param cutoff_v fold change lower and upper cutoff vector.
 #' if permutation is used, it will use the value calculated by permutation. (default=c(-1.5,1.5))
@@ -50,7 +50,7 @@
 #'
 
 SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
-                   permut=TRUE, times=10,cutoff_v=c(-1.5,1.5),
+                   permut=FALSE, times=10,cutoff_v=c(-1.5,1.5),
                    s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
 
   # Step 1: filter super-enhancer with SEfilter.R with or without SE blacklist file

@@ -9,7 +9,7 @@ SEprofile(
   e_df,
   bl_file = FALSE,
   has_bl_file = FALSE,
-  permut = TRUE,
+  permut = FALSE,
   times = 10,
   cutoff_v = c(-1.5, 1.5),
   s1_r1_bam,
@@ -29,7 +29,7 @@ Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,p
 
 \item{has_bl_file}{if there is a blacklist file (default=FALSE)}
 
-\item{permut}{if you want permutation (default=TRUE)}
+\item{permut}{if you want permutation (default=FALSE)}
 
 \item{times}{permutation times (default=10)}
 
