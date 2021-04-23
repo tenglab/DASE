@@ -90,6 +90,23 @@ se_test_out <- SEprofile(se_in = main_df, e_df = pool_enhancer_df,
                          s1_pair = T, s2_pair = F,
                          s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path,
                          s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
+                         
+# save pattern plots to pdf
+dir.create("output/MCF7_K562/patterns")
+pattern_list <- se_profile_out$pattern_plot
+
+for (i in c(1:length(pattern_list))) {
+  # create out plot name
+  pdf_name <- paste(gsub(" pattern", "",pattern_list[[i]]$labels$title), ".pdf", sep="")
+  
+  pdf_full_path <- paste("output/patterns",pdf_name,sep="/")
+  
+  # save to pdf
+  pdf(file = pdf_full_path,width = 8, height = 4)
+    print(pattern_list[[i]])
+  dev.off()
+}
+
 ```
 ## Output list
  1. se_test_out$cate_rank: final SE categories and ranking
