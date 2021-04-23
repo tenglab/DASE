@@ -103,7 +103,7 @@ SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   out$fc_cutoff <- cutoff_vector
   out$pattern_plot <- step_4_out$plots
   out$se_segments <- step_4_out$se_segment_percent
-  out$cate_rank <- step_5_out
-
+  out$cate_rank <- step_5_out$se_cat_rank
+  out$box_plot <- step_5_out$cat_boxplot
   return(out)
 }

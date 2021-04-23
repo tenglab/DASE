@@ -13,6 +13,8 @@
 #' @return
 #' A dataset of final SE category and ranking.
 #'
+#' @import ggplot2
+#'
 #' @export
 #' @examples
 #' catRank_list <- SEcategory(segment_percentage_df,enhancerFoldchange_out)
@@ -302,7 +304,21 @@ SEcategory <- function(se_seg_df,e_deseq_out) {
   se_cat_rank <- unique(rbind(rank_sim_df[,-c(5,8,9)],rank_str_df[,-c(5,8,9)],
                        rank_sim_df[,-c(5,8,9)],rank_short_df[,-c(5,8,9)],
                        rank_v_df[,-c(5,8,9)],rank_shift_df[,-c(5:7,10)],rank_other_df))
-  return(se_cat_rank)
+
+  # create category boxplot
+
+  box_plot <- ggplot(data=se_cat_rank, aes(x=category))+
+    theme(axis.text.x = element_text(angle = 0,hjust = 1),
+          plot.title = element_text(hjust = 0.5))+
+    ggtitle("Super-enhancer category estimates")+
+    geom_bar()+
+    theme_classic()
+
+  # make final output
+  out <- list()
+  out$se_cat_rank <- se_cat_rank
+  out$cat_boxplot <- box_plot
+  return(out)
 }
 
 
