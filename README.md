@@ -69,7 +69,8 @@ blacklist_df <- read.table("input/ENCFF356LFX_blacklist.bed",sep = '\t')
  1. se_df                                                                                                     
  2. pool_enhancer_df                                                                                          
  3. s1_r1_bam_path, s1_r2_bam_path, s2_r1_bam_path, s2_r2_bam_path                                             
-                                                                                                              
+
+## Examples
 ```R
 # default: no blacklist file, no permutation, default cutoff=c(-1.5,1.5), both samples are single end
 se_test_out <- SEprofile(se_in = main_df, e_df = pool_enhancer_df, 
