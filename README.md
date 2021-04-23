@@ -92,7 +92,7 @@ se_test_out <- SEprofile(se_in = main_df, e_df = pool_enhancer_df,
                          s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
                          
 # save pattern plots to pdf
-dir.create("output/MCF7_K562/patterns")
+dir.create("output/patterns")
 pattern_list <- se_profile_out$pattern_plot
 
 for (i in c(1:length(pattern_list))) {
