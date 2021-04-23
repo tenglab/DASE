@@ -29,14 +29,14 @@ library(SEprofiler)
 ## Pre-process
 ### 1. ROSE SE output bed file
 ```R
-main_sample_1_r1 <- read.table("input/BC1_1_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
-main_sample_1_r2 <- read.table("input/BC1_2_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
-main_sample_2_r1 <- read.table("input/BC3_1_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
-main_sample_2_r2 <- read.table("input/BC3_2_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
+se_sample_1_r1 <- read.table("input/BC1_1_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
+se_sample_1_r2 <- read.table("input/BC1_2_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
+se_sample_2_r1 <- read.table("input/BC3_1_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
+se_sample_2_r2 <- read.table("input/BC3_2_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
 
 # merge sample and change the column name exact as follow
-se_df <- rbind(main_sample_1_r1,main_sample_2_r1,main_sample_1_r2,main_sample_2_r2)
-colnames(se_df) <- c("CHROM","START","STOP","REGION_ID","Signal","STRAND")
+pool_se_df <- rbind(se_sample_1_r1,se_sample_2_r1,se_sample_1_r2,se_sample_2_r2)
+colnames(pool_se_df) <- c("CHROM","START","STOP","REGION_ID","Signal","STRAND")
 ```
 
 ### 2. macs2 output peak file
@@ -66,19 +66,19 @@ blacklist_df <- read.table("input/ENCFF356LFX_blacklist.bed",sep = '\t')
 
 # Usage
 ## Input file                                                                                                 
- 1. se_df                                                                                                     
+ 1. pool_se_df                                                                                                     
  2. pool_enhancer_df                                                                                          
  3. s1_r1_bam_path, s1_r2_bam_path, s2_r1_bam_path, s2_r2_bam_path                                             
 
 ## Examples
 ```R
 # default: no blacklist file, no permutation, default cutoff=c(-1.5,1.5), both samples are single end
-se_test_out <- SEprofile(se_in = main_df, e_df = pool_enhancer_df, 
+se_test_out <- SEprofile(se_in = pool_se_df, e_df = pool_enhancer_df, 
                          s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path, 
                          s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
 
 # with blacklist, no permutation, personal defined cutoff, both samples are paired-end
-se_test_out <- SEprofile(se_in = main_df, e_df = pool_enhancer_df, 
+se_test_out <- SEprofile(se_in = pool_se_df, e_df = pool_enhancer_df, 
                          bl_file = blacklist_df, has_bl_file = TRUE,
                          cutoff_v = c(-1.7,1.7),
                          s1_pair = T, s2_pair = T,
@@ -86,7 +86,7 @@ se_test_out <- SEprofile(se_in = main_df, e_df = pool_enhancer_df,
                          s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
                            
 # with blacklist, with permutation (cutoff will defined by permutation), sample 1 is paired-end
-se_test_out <- SEprofile(se_in = main_df, e_df = pool_enhancer_df, 
+se_test_out <- SEprofile(se_in = pool_se_df, e_df = pool_enhancer_df, 
                          bl_file = blacklist_df, has_bl_file = T, permut = T,
                          s1_pair = T, s2_pair = F,
                          s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path,
