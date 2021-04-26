@@ -111,8 +111,9 @@ for (i in c(1:length(pattern_list))) {
 ```
 ## Output list
  1. se_test_out$cate_rank: final SE categories and ranking
- 2. se_test_out$permut_plot: permutation density plot if permut=T, return NA if permut=F
- 3. se_test_out$fc_cutoff: fold change cutoffs
- 4. se_test_out$e_fit_fc: counts fold change and fitted fold change of enhancer within SEs 
- 5. se_test_out$pattern_plot: list contain fitted line pattern plot of each SE
- 6. se_test_out$se_segments: SE segment percentage
+ 2. se_test_out$box_plot: boxplot of super-enhancer categories
+ 3. se_test_out$permut_plot: permutation density plot if permut=T, return NA if permut=F
+ 4. se_test_out$fc_cutoff: fold change cutoffs
+ 5. se_test_out$e_fit_fc: counts fold change and fitted fold change of enhancer within SEs 
+ 6. se_test_out$pattern_plot: list contain fitted line pattern plot of each SE
+ 7. se_test_out$se_segments: SE segment percentage
