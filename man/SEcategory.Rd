@@ -4,12 +4,12 @@
 \alias{SEcategory}
 \title{Category and ranking of SE}
 \usage{
-SEcategory(se_seg_df, e_deseq_out)
+SEcategory(se_seg_df, e_fit)
 }
 \arguments{
 \item{se_seg_df}{SE segment percentage file form SEpattern}
 
-\item{e_deseq_out}{enhancer deseq out file from enhancerFoldchange}
+\item{e_fit}{enhancer deseq out file from enhancerFoldchange}
 }
 \value{
 A dataset of final SE category and ranking.

@@ -11,6 +11,8 @@ SEprofile(
   has_bl_file = FALSE,
   s1_pair = FALSE,
   s2_pair = FALSE,
+  bw = F,
+  custom_range = F,
   permut = FALSE,
   times = 10,
   cutoff_v = c(-1.5, 1.5),
@@ -29,11 +31,15 @@ Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,p
 
 \item{bl_file}{super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX) (default=FALSE)}
 
-\item{has_bl_file}{if there is a blacklist file (default=FALSE)}
+\item{has_bl_file}{if there is a blacklist file (default=FALSE)
+#' @param custom_range a vector of extra customized blacklist to ignore.
+Format: c(chr:start-end, chr:start-end, ...) (default=FALSE).}
 
 \item{s1_pair}{if sample 1 is paired-end (default=FALSE)}
 
 \item{s2_pair}{if sample 2 is paired-end (default=FALSE)}
+
+\item{bw}{quantitative file are bigwig files (default=FALSE)}
 
 \item{permut}{if you want permutation (default=FALSE)}
 
@@ -42,13 +48,13 @@ Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,p
 \item{cutoff_v}{fold change lower and upper cutoff vector.
 if permutation is used, it will use the value calculated by permutation. (default=c(-1.5,1.5))}
 
-\item{s1_r1_bam}{path of sample 1 replicate 1 bam file}
+\item{s1_r1_bam}{path of sample 1 replicate 1 bam/bw file}
 
-\item{s1_r2_bam}{path of sample 1 replicate 2 bam file}
+\item{s1_r2_bam}{path of sample 1 replicate 2 bam/bw file}
 
-\item{s2_r1_bam}{path of sample 2 replicate 1 bam file}
+\item{s2_r1_bam}{path of sample 2 replicate 1 bam/bw file}
 
-\item{s2_r2_bam}{path of sample 2 replicate 2 bam file}
+\item{s2_r2_bam}{path of sample 2 replicate 2 bam/bw file}
 }
 \value{
 A list of 6 datasets: permutation density plot, pattern plots of each SE,

@@ -182,7 +182,6 @@ SEfitspline <- function(e_deseq_out_df,se_df,times=10,permut=FALSE){
       theme(axis.text.x = element_text(angle = 0,hjust = 1),
             plot.title = element_text(hjust = 0.5))
 
-
   } else {
     density_p <- NA
     final_cutoff <- NA

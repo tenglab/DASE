@@ -12,10 +12,14 @@
 #' Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"
 #' @param bl_file super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX) (default=FALSE)
 #' @param has_bl_file if there is a blacklist file (default=FALSE)
-#' @param s1_r1_bam path of sample 1 replicate 1 bam file
-#' @param s1_r2_bam path of sample 1 replicate 2 bam file
-#' @param s2_r1_bam path of sample 2 replicate 1 bam file
-#' @param s2_r2_bam path of sample 2 replicate 2 bam file
+#' #' @param custom_range a vector of extra customized blacklist to ignore.
+#' Format: c(chr:start-end, chr:start-end, ...) (default=FALSE).
+#'
+#' @param bw quantitative file are bigwig files (default=FALSE)
+#' @param s1_r1_bam path of sample 1 replicate 1 bam/bw file
+#' @param s1_r2_bam path of sample 1 replicate 2 bam/bw file
+#' @param s2_r1_bam path of sample 2 replicate 1 bam/bw file
+#' @param s2_r2_bam path of sample 2 replicate 2 bam/bw file
 #' @param permut if you want permutation (default=FALSE)
 #' @param times permutation times (default=10)
 #' @param cutoff_v fold change lower and upper cutoff vector.
@@ -28,6 +32,7 @@
 #' enhancer fitted dataset, fold change cutoff vector,
 #' SE segment percentage dataset, and SE category./ranking dataset
 #'
+#' @import rtracklayer
 #' @import data.table
 #' @import ggplot2
 #' @import DESeq2
@@ -52,22 +57,24 @@
 #'
 
 SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
-                      s1_pair=FALSE,s2_pair=FALSE,
+                      s1_pair=FALSE,s2_pair=FALSE, bw=F, custom_range=F,
                       permut=FALSE, times=10,cutoff_v=c(-1.5,1.5),
                       s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
 
   # Step 1: filter super-enhancer with SEfilter.R with or without SE blacklist file
-  if (has_bl_file == TRUE) {
-    step_1_out <- SEfilter(se_in,bl_file,has_bl_file=TRUE)
-  } else {
-    step_1_out <- SEfilter(se_in)
-  }
+  step_1_out <- SEfilter(se_in,bl_file,has_bl_file,custom_range)
 
   # Step 2: get enhancer fold changes within each super-enhancer with enhancerFoldchange.R
   # Merged SE Output from step 1 as SE input for step 2
   merged_se_df <- step_1_out$se_merged
-  step_2_out <- enhancerFoldchange(e_df,merged_se_df,s1_pair,s2_pair,
+
+  if (bw == F) {
+    step_2_out <- enhancerFoldchange(e_df,merged_se_df,s1_pair,s2_pair,
                                    s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+  } else {
+    step_2_out <- enhancerFoldchange_bw(e_df,merged_se_df,
+                                        s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+  }
 
   # Step 3: using weighted bs-spline to fit the fold change
   # and use permutation to get fold change significant cutoff
