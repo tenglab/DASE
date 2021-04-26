@@ -88,7 +88,7 @@ SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   se_seg_df <- step_4_out$se_segment_percent
 
   # Step 5: get categories of each SE and ranking by category groups
-  step_5_out <- SEcategory(se_seg_df,e_deseq_out)
+  step_5_out <- SEcategory(se_seg_df,se_fit_df)
 
   # make final output: final category and ranking file,
   # permutation density plots

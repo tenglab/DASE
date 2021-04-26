@@ -8,7 +8,7 @@
 #' firstly ranked by segment percentage, then by average fold change of enhancers within
 #'
 #' @param se_seg_df SE segment percentage file form SEpattern
-#' @param e_deseq_out enhancer deseq out file from enhancerFoldchange
+#' @param e_fit enhancer deseq out file from enhancerFoldchange
 #'
 #' @return
 #' A dataset of final SE category and ranking.
@@ -20,7 +20,7 @@
 #' catRank_list <- SEcategory(segment_percentage_df,enhancerFoldchange_out)
 #'
 
-SEcategory <- function(se_seg_df,e_deseq_out) {
+SEcategory <- function(se_seg_df,e_fit) {
 
   # remove all segement whose percentage is less than 0.05
   se_seg_filter <- se_seg_df[which(se_seg_df$seg_percent > 0.05),]
@@ -119,10 +119,10 @@ SEcategory <- function(se_seg_df,e_deseq_out) {
       temp_other <- temp_cat_df[which(temp_cat_df$seg_loc != "mid"),]
 
       if (nrow(temp_mid) != 0 ) {
-        if (temp_mid$seg_percent >= 0.9) {
+        if (temp_mid$seg_percent >= 0.95) {
           temp_cat_df$category <- rep("Similar",nrow(temp_cat_df))
           temp_cat_df$direction <- "none"
-        } else if (temp_mid$seg_percent < 0.9 & temp_mid$seg_percent >= 0.5) {
+        } else if (temp_mid$seg_percent < 0.95 & temp_mid$seg_percent >= 0.25) {
           temp_cat_df$category <- rep("Shorten",nrow(temp_cat_df))
           if (temp_other$seg_loc == "lower") {
             temp_cat_df$direction <- "-"
@@ -169,9 +169,9 @@ SEcategory <- function(se_seg_df,e_deseq_out) {
       # check only have upper/mid or lower/mid and part_2 is mid
       } else if ( length(unique(temp_cat_df$seg_loc)) == 2
                   & temp_p_2$seg_loc == "mid") {
-          if ( temp_p_2$seg_percent >= 0.9) {
+          if ( temp_p_2$seg_percent >= 0.95) {
             temp_cat_df$category <- rep("Similar",nrow(temp_cat_df))
-          } else if (temp_p_2$seg_percent < 0.9 & temp_p_2$seg_percent >= 0.5) {
+          } else if (temp_p_2$seg_percent < 0.95 & temp_p_2$seg_percent >= 0.25) {
               temp_cat_df$category <- rep("Shorten",nrow(temp_cat_df))
               if (temp_p_1$seg_loc == "lower") {
                 temp_cat_df$direction <- "-"
@@ -198,7 +198,7 @@ SEcategory <- function(se_seg_df,e_deseq_out) {
           } else {
             temp_cat_df$direction <- "+"
           }
-        } else if (temp_p_2$seg_percent < 0.1) {
+        } else if (temp_p_2$seg_percent <= 0.1) {
 
           temp_cat_df$category <- rep("Similar",nrow(temp_cat_df))
           temp_cat_df$direction <- "none"
@@ -249,9 +249,9 @@ SEcategory <- function(se_seg_df,e_deseq_out) {
 
   mean_fc_df <- data.frame()
   for (se in c(1:length(se_name))) {
-    temp_se <- e_deseq_out[which(e_deseq_out$se_merge_name == se_name[se]),]
+    temp_se <- e_fit[which(e_fit$se_merge_name == se_name[se]),]
     temp_se$mean_FC <- rep(mean(temp_se$log2FoldChange.1),nrow(temp_se))
-    temp_out <- unique(temp_se[,c(25,26)])
+    temp_out <- unique(temp_se[,c(25,28)])
     mean_fc_df <- rbind(mean_fc_df,temp_out)
   }
 
