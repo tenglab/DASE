@@ -58,16 +58,12 @@ enhancerFoldchange_bw <- function(e_df,se_df,
   e_merge_by_chr$e_merge_name <- apply(e_merge_by_chr[,c(1:3)],1, paste,collapse ="_" )
   e_merge_by_chr$e_merge_name <- gsub(" ","",e_merge_by_chr$e_merge_name)
 
-  # get range count for each sample
-  # input bw file
-  bw <- BigWigFileList(c(s1_r1_bw,s1_r2_bw,s2_r1_bw,s2_r2_bw))
-
-  chr_list <- unique(e_merge_by_chr$chr)
-
   # get counts from bw file for one sample
-  counts_df <- data.frame(e_merge_name = e_merge_by_chr$e_merge_name)
-  for (s in c(1: length(bw))) {
-    coverage <- import(bw[[s]], as = 'RleList')
+
+  # function to count bw file
+  count_bw <- function(bw_path,chr_list) {
+    bw <- BigWigFileList(bw_path)
+    coverage <- import(bw[[1]], as = 'RleList')
     s_count <- data.frame()
     for (i in c(1:length(chr_list))) {
       temp_chr <- e_merge_by_chr[which(e_merge_by_chr$chr == chr_list[i]),]
@@ -75,14 +71,26 @@ enhancerFoldchange_bw <- function(e_df,se_df,
       temp_coverage <- coverage[[chr_list[i]]]
       count <- as.numeric(sum(Views(temp_coverage, ranges(temp_ir))))
       temp_out <- cbind(temp_chr$e_merge_name,count)
-      colnames(temp_out) <- c("e_merge_name",paste("count",s))
+      colnames(temp_out) <- c("e_merge_name","count")
       rownames(temp_out) <- NULL
       s_count <- rbind(s_count,temp_out)
     }
-    counts_df <- merge(counts_df,s_count,by="e_merge_name")
+    return(s_count)
   }
 
-  count_matrix <- data.frame(counts_df[,-1], row.names=counts_df$e_merge_name)
+  # set mem.maxVSize to Inf otherwise will get memory limit error
+  mem.maxVSize(vsize = Inf)
+  chr_list <- unique(e_merge_by_chr$chr)
+  s1_1_count <- count_bw(s1_r1_bw,chr_list)
+  s1_2_count <- count_bw(s1_r2_bw,chr_list)
+  s2_1_count <- count_bw(s2_r1_bw,chr_list)
+  s2_2_count <- count_bw(s2_r2_bw,chr_list)
+
+  # get final count matrix
+  counts_merge_1 <- merge(s1_1_count,s1_2_count,by="e_merge_name")
+  counts_merge_2 <- merge(s2_1_count,s2_1_count,by="e_merge_name")
+  counts_merge <- merge(counts_merge_1,counts_merge_2,by="e_merge_name")
+  count_matrix <- data.frame(counts_merge[,-1], row.names=counts_merge$e_merge_name)
   colnames(count_matrix) <- c("S1_r1","S1_r2","S2_r1","S2_r2")
   count_matrix$S1_r1 <- as.integer(count_matrix$S1_r1)
   count_matrix$S1_r2 <- as.integer(count_matrix$S1_r2)
