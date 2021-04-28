@@ -142,6 +142,7 @@ enhancerFoldchange_bw <- function(e_df,se_df,
 
   # make output list
   out <- list()
+  out$lfc_shrink <- resLFC
   out$enhancer_deseq_result <- final_out_df
   out$size_factor <- size_factor
   return(out)
