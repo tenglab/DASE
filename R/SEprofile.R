@@ -105,6 +105,7 @@ SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   # and SE segments profile to output list
 
   out <- list()
+  out$lfc_shrink <- step_2_out$lfc_shrink
   out$se_meta <- step_1_out$se_merged
   out$permut_plot <- step_3_out$density_plot
   out$e_fit_fc <- step_3_out$se_fit_df

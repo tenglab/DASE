@@ -257,54 +257,93 @@ SEcategory <- function(se_seg_df,e_fit) {
 
   # rank similar
   temp_similar_df <- se_seg_w_cat_df[which(se_seg_w_cat_df$category=="Similar" & se_seg_w_cat_df$seg_loc == "mid"),]
-  similar_df <- aggregate(data=temp_similar_df[,-5],seg_percent~.,sum)
 
+  if (nrow(temp_similar_df) != 0 ) {
+    similar_df <- aggregate(data=temp_similar_df[,-5],seg_percent~.,sum)
+  } else {
+    similar_df <- temp_similar_df[,-5]
+  }
   similar_merge_df <- merge(similar_df,mean_fc_df,by="se_merge_name")
   rank_sim_df <- similar_merge_df[order(-similar_merge_df$seg_percent,abs(similar_merge_df$mean_FC)),]
-  rank_sim_df$rank <- seq(1:nrow(rank_sim_df))
+
+  if (nrow(rank_sim_df) != 0) {
+    rank_sim_df$rank <- seq(1:nrow(rank_sim_df))
+  } else {
+    rank_sim_df$rank <- rep("none",nrow(rank_str_df))
+  }
 
   # rank strength/weaken
   temp_strength_df <- se_seg_w_cat_df[which(se_seg_w_cat_df$category=="Strengthen/weaken"& se_seg_w_cat_df$seg_loc != "mid"),]
-  strength_df <- aggregate(data=temp_strength_df[,-5],seg_percent~.,sum)
 
+  if (nrow(temp_strength_df) != 0) {
+    strength_df <- aggregate(data=temp_strength_df[,-5],seg_percent~.,sum)
+  } else {
+    strength_df <- temp_strength_df[,-5]
+  }
   strength_merge_df <- merge(strength_df,mean_fc_df,by="se_merge_name")
   rank_str_df <- strength_merge_df[order(-strength_merge_df$seg_percent,-abs(strength_merge_df$mean_FC)),]
-  rank_str_df$rank <- seq(1:nrow(rank_str_df))
+
+  if (nrow(rank_str_df) != 0) {
+    rank_str_df$rank <- seq(1:nrow(rank_str_df))
+  } else {
+    rank_str_df$rank <- rep("none",nrow(rank_str_df))
+  }
 
   # rank shorten
   temp_short_df <- se_seg_w_cat_df[which(se_seg_w_cat_df$category=="Shorten"& se_seg_w_cat_df$seg_loc == "mid"),]
-  short_df <- aggregate(data=temp_short_df[,-5],seg_percent~.,sum)
 
+  if (nrow(temp_short_df) != 0) {
+    short_df <- aggregate(data=temp_short_df[,-5],seg_percent~.,sum)
+  } else {
+    short_df <- temp_short_df[,-5]
+  }
   short_merge_df <- merge(short_df,mean_fc_df,by="se_merge_name")
   rank_short_df <- short_merge_df[order(short_merge_df$seg_percent,-abs(short_merge_df$mean_FC)),]
-  rank_short_df$rank <- seq(1:nrow(rank_short_df))
+
+  if (nrow(rank_short_df) != 0) {
+    rank_short_df$rank <- seq(1:nrow(rank_short_df))
+  } else {
+    rank_short_df$rank <- rep("none",nrow(rank_short_df))
+  }
 
   # rank V-shape
   temp_v_df <- se_seg_w_cat_df[which(se_seg_w_cat_df$category=="V_shape"& se_seg_w_cat_df$seg_loc != "mid"),]
-  v_df <- aggregate(data=temp_v_df[,-5],seg_percent~.,sum)
 
+  if (nrow(temp_v_df) != 0) {
+    v_df <- aggregate(data=temp_v_df[,-5],seg_percent~.,sum)
+  } else {
+    v_df <- temp_v_df[,-5]
+  }
   v_merge_df <- merge(v_df,mean_fc_df,by="se_merge_name")
   rank_v_df <- v_merge_df[order(-v_merge_df$seg_percent,-abs(v_merge_df$mean_FC)),]
-  rank_v_df$rank <- seq(1:nrow(rank_v_df))
+
+  if (nrow(rank_v_df) != 0) {
+    rank_v_df$rank <- seq(1:nrow(rank_v_df))
+  } else {
+    rank_v_df$rank <- rep("none",nrow(rank_v_df))
+  }
 
   # rank Shifting
   temp_shift_df <- se_seg_w_cat_df[which(se_seg_w_cat_df$category=="Shifting"& se_seg_w_cat_df$seg_loc == "mid"),]
-
   shift_merge_df <- merge(temp_shift_df,mean_fc_df,by="se_merge_name")
   rank_shift_df <- shift_merge_df[order(shift_merge_df$seg_percent,-abs(shift_merge_df$mean_FC)),]
-  rank_shift_df$rank <- seq(1:nrow(rank_shift_df))
+
+  if (nrow(rank_shift_df) != 0 ) {
+    rank_shift_df$rank <- seq(1:nrow(rank_shift_df))
+  } else {
+    rank_shift_df$rank <- rep("none",nrow(rank_shift_df))
+  }
 
   # other no rank
-  other_shift_df <- se_seg_w_cat_df[which(se_seg_w_cat_df$category=="Other"),]
-
-  rank_other_df <- unique(other_shift_df[,-c(5:7)])
+  other_df <- se_seg_w_cat_df[which(se_seg_w_cat_df$category=="Other"),]
+  rank_other_df <- unique(other_df[,-c(5:7)])
   rank_other_df$rank <- rep("none",nrow(rank_other_df))
 
   # make output file
   se_cat_rank <- unique(rbind(rank_sim_df[,-c(5,8,9)],rank_str_df[,-c(5,8,9)],
-                       rank_sim_df[,-c(5,8,9)],rank_short_df[,-c(5,8,9)],
-                       rank_v_df[,-c(5,8,9)],rank_shift_df[,-c(5:7,10)],rank_other_df))
-
+                                rank_sim_df[,-c(5,8,9)],rank_short_df[,-c(5,8,9)],
+                                rank_v_df[,-c(5,8,9)],rank_shift_df[,-c(5:7,10)],
+                                rank_other_df))
   # create category boxplot
 
   box_plot <- ggplot(data=se_cat_rank, aes(x=category))+
