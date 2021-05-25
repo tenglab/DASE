@@ -26,12 +26,22 @@ SEcategory <- function(se_seg_df,e_fit) {
   se_seg_filter <- se_seg_df[which(se_seg_df$seg_percent > 0.05),]
   se_name <- unique(se_seg_df$se_merge_name)
 
+  # get average log2Foldchange of each SE for ranking
+  mean_fc_df <- data.frame()
+  for (se in c(1:length(se_name))) {
+    temp_se <- e_fit[which(e_fit$se_merge_name == se_name[se]),]
+    temp_se$mean_FC <- rep(mean(temp_se$log2FoldChange.1),nrow(temp_se))
+    temp_out <- unique(temp_se[,c(25,28)])
+    mean_fc_df <- rbind(mean_fc_df,temp_out)
+  }
+
   #---------------------------------------------------------------------------
   # get SE category
   #---------------------------------------------------------------------------
   se_seg_w_cat_df <- data.frame()
   for (se_index in c(1:length(se_name))) {
     temp_seg_df <- se_seg_filter[which(se_seg_filter$se_merge_name == se_name[se_index]),]
+    #temp_seg_df <- se_seg_filter[which(se_seg_filter$se_merge_name == "chr14_105474868_105501137"),]
     temp_seg_df <- temp_seg_df[order(temp_seg_df$seg_name),]
     n_row <- nrow(temp_seg_df)
 
@@ -165,32 +175,33 @@ SEcategory <- function(se_seg_df,e_fit) {
         } else {
           temp_cat_df$direction <- "l"
         }
+      }
 
       # check only have upper/mid or lower/mid and part_2 is mid
-      } else if ( length(unique(temp_cat_df$seg_loc)) == 2
+      else if ( length(unique(temp_cat_df$seg_loc)) == 2
                   & temp_p_2$seg_loc == "mid") {
-          if ( temp_p_2$seg_percent >= 0.95) {
-            temp_cat_df$category <- rep("Similar",nrow(temp_cat_df))
-          } else if (temp_p_2$seg_percent < 0.95 & temp_p_2$seg_percent >= 0.25) {
-              temp_cat_df$category <- rep("Shorten",nrow(temp_cat_df))
-              if (temp_p_1$seg_loc == "lower") {
-                temp_cat_df$direction <- "-"
-              } else {
-                temp_cat_df$direction <- "+"
-              }
-          } else {
-            temp_cat_df$category <- rep("Strengthen/weaken",nrow(temp_cat_df))
+        if ( temp_p_2$seg_percent >= 0.95) {
+          temp_cat_df$category <- rep("Similar",nrow(temp_cat_df))
+        } else if (temp_p_2$seg_percent < 0.95 & temp_p_2$seg_percent >= 0.25) {
+            temp_cat_df$category <- rep("Shorten",nrow(temp_cat_df))
             if (temp_p_1$seg_loc == "lower") {
               temp_cat_df$direction <- "-"
             } else {
               temp_cat_df$direction <- "+"
             }
+        } else {
+          temp_cat_df$category <- rep("Strengthen/weaken",nrow(temp_cat_df))
+          if (temp_p_1$seg_loc == "lower") {
+            temp_cat_df$direction <- "-"
+          } else {
+            temp_cat_df$direction <- "+"
           }
+        }
+      }
 
-      # check part_2 is lower or upper
-      } else if ( length(unique(temp_cat_df$seg_loc)) == 2 &
-                  (temp_p_2$seg_loc == "lower" |
-                   temp_p_2$seg_loc == "upper") ) {
+      # check only have mid/upper or mid/lower and part_2 is upper or lower
+      else if ( temp_p_1$seg_loc == "mid" &
+               (temp_p_2$seg_loc == "lower" | temp_p_2$seg_loc == "upper")) {
         if ( temp_p_2$seg_percent >= 0.5) {
           temp_cat_df$category <- rep("Strengthen/weaken",nrow(temp_cat_df))
           if (temp_p_2$seg_loc == "lower") {
@@ -228,6 +239,19 @@ SEcategory <- function(se_seg_df,e_fit) {
           temp_cat_df$direction <- "none"
         }
       }
+
+      # check segments is upper/lower/upper or lower/upper/lower
+      else if ((temp_p_1$seg_loc == "lower" & temp_p_2$seg_loc == "upper") |
+           (temp_p_1$seg_loc == "upper" & temp_p_2$seg_loc == "lower") ) {
+
+        temp_cat_df$category <- rep("V_shape",nrow(temp_cat_df))
+
+        if (temp_p_2$seg_loc == "lower") {
+          temp_cat_df$direction <- "-"
+        } else {
+          temp_cat_df$direction <- "+"
+        }
+      }
     }
 
     #------------------------------------------------------------------------------
@@ -238,115 +262,54 @@ SEcategory <- function(se_seg_df,e_fit) {
     }
 
     #------------------------------------------------------------------------------
+    # calculate percentage of none "mid" segments for ranking
+    #---------------------------------------------------------------------------
+    # calculate percentage of none "mid" segments
+    temp_per_for_rank <- sum(temp_cat_df[which(temp_cat_df$seg_loc!="mid"),7])
 
-    se_seg_w_cat_df <- rbind(se_seg_w_cat_df,temp_cat_df)
+    temp_cat_df$non_mid_percent <- rep(temp_per_for_rank,nrow(temp_cat_df))
+
+    temp_cat_w_meanfc <- merge(temp_cat_df,mean_fc_df,by="se_merge_name")
+
+    # combine to final file
+    se_seg_w_cat_df <- rbind(se_seg_w_cat_df,temp_cat_w_meanfc)
   }
 
   #---------------------------------------------------------------------------
   # rank SE within each category
   #---------------------------------------------------------------------------
-  # get average log2Foldchange for each SE
+  category_name <- unique(se_seg_w_cat_df$category)
 
-  mean_fc_df <- data.frame()
-  for (se in c(1:length(se_name))) {
-    temp_se <- e_fit[which(e_fit$se_merge_name == se_name[se]),]
-    temp_se$mean_FC <- rep(mean(temp_se$log2FoldChange.1),nrow(temp_se))
-    temp_out <- unique(temp_se[,c(25,28)])
-    mean_fc_df <- rbind(mean_fc_df,temp_out)
+  rank_cat_df <- data.frame()
+  for (cat_index in 1:length(category_name)) {
+    temp_rank_df <- unique(se_seg_w_cat_df[which(se_seg_w_cat_df$category == category_name[cat_index]),
+                                    -c(4:7)])
+    if (category_name[cat_index] != "Similar") {
+      temp_rank_df <- temp_rank_df[order(-temp_rank_df$non_mid_percent,
+                                         -abs(temp_rank_df$mean_FC)),]
+      if (nrow(temp_rank_df) != 0) {
+        temp_rank_df$rank <- seq(1:nrow(temp_rank_df))
+      } else {
+        temp_rank_df$rank <- rep("none",nrow(temp_rank_df))
+      }
+
+    } else {
+      temp_rank_df <- temp_rank_df[order(temp_rank_df$non_mid_percent,
+                                         abs(temp_rank_df$mean_FC)),]
+      if (nrow(temp_rank_df) != 0) {
+        temp_rank_df$rank <- seq(1:nrow(temp_rank_df))
+      } else {
+        temp_rank_df$rank <- rep("none",nrow(temp_rank_df))
+      }
+    }
+
+    # create final dataframe
+    rank_cat_df <- rbind(rank_cat_df,temp_rank_df)
   }
 
-  # rank similar
-  temp_similar_df <- se_seg_w_cat_df[which(se_seg_w_cat_df$category=="Similar" & se_seg_w_cat_df$seg_loc == "mid"),]
-
-  if (nrow(temp_similar_df) != 0 ) {
-    similar_df <- aggregate(data=temp_similar_df[,-5],seg_percent~.,sum)
-  } else {
-    similar_df <- temp_similar_df[,-5]
-  }
-  similar_merge_df <- merge(similar_df,mean_fc_df,by="se_merge_name")
-  rank_sim_df <- similar_merge_df[order(-similar_merge_df$seg_percent,abs(similar_merge_df$mean_FC)),]
-
-  if (nrow(rank_sim_df) != 0) {
-    rank_sim_df$rank <- seq(1:nrow(rank_sim_df))
-  } else {
-    rank_sim_df$rank <- rep("none",nrow(rank_str_df))
-  }
-
-  # rank strength/weaken
-  temp_strength_df <- se_seg_w_cat_df[which(se_seg_w_cat_df$category=="Strengthen/weaken"& se_seg_w_cat_df$seg_loc != "mid"),]
-
-  if (nrow(temp_strength_df) != 0) {
-    strength_df <- aggregate(data=temp_strength_df[,-5],seg_percent~.,sum)
-  } else {
-    strength_df <- temp_strength_df[,-5]
-  }
-  strength_merge_df <- merge(strength_df,mean_fc_df,by="se_merge_name")
-  rank_str_df <- strength_merge_df[order(-strength_merge_df$seg_percent,-abs(strength_merge_df$mean_FC)),]
-
-  if (nrow(rank_str_df) != 0) {
-    rank_str_df$rank <- seq(1:nrow(rank_str_df))
-  } else {
-    rank_str_df$rank <- rep("none",nrow(rank_str_df))
-  }
-
-  # rank shorten
-  temp_short_df <- se_seg_w_cat_df[which(se_seg_w_cat_df$category=="Shorten"& se_seg_w_cat_df$seg_loc == "mid"),]
-
-  if (nrow(temp_short_df) != 0) {
-    short_df <- aggregate(data=temp_short_df[,-5],seg_percent~.,sum)
-  } else {
-    short_df <- temp_short_df[,-5]
-  }
-  short_merge_df <- merge(short_df,mean_fc_df,by="se_merge_name")
-  rank_short_df <- short_merge_df[order(short_merge_df$seg_percent,-abs(short_merge_df$mean_FC)),]
-
-  if (nrow(rank_short_df) != 0) {
-    rank_short_df$rank <- seq(1:nrow(rank_short_df))
-  } else {
-    rank_short_df$rank <- rep("none",nrow(rank_short_df))
-  }
-
-  # rank V-shape
-  temp_v_df <- se_seg_w_cat_df[which(se_seg_w_cat_df$category=="V_shape"& se_seg_w_cat_df$seg_loc != "mid"),]
-
-  if (nrow(temp_v_df) != 0) {
-    v_df <- aggregate(data=temp_v_df[,-5],seg_percent~.,sum)
-  } else {
-    v_df <- temp_v_df[,-5]
-  }
-  v_merge_df <- merge(v_df,mean_fc_df,by="se_merge_name")
-  rank_v_df <- v_merge_df[order(-v_merge_df$seg_percent,-abs(v_merge_df$mean_FC)),]
-
-  if (nrow(rank_v_df) != 0) {
-    rank_v_df$rank <- seq(1:nrow(rank_v_df))
-  } else {
-    rank_v_df$rank <- rep("none",nrow(rank_v_df))
-  }
-
-  # rank Shifting
-  temp_shift_df <- se_seg_w_cat_df[which(se_seg_w_cat_df$category=="Shifting"& se_seg_w_cat_df$seg_loc == "mid"),]
-  shift_merge_df <- merge(temp_shift_df,mean_fc_df,by="se_merge_name")
-  rank_shift_df <- shift_merge_df[order(shift_merge_df$seg_percent,-abs(shift_merge_df$mean_FC)),]
-
-  if (nrow(rank_shift_df) != 0 ) {
-    rank_shift_df$rank <- seq(1:nrow(rank_shift_df))
-  } else {
-    rank_shift_df$rank <- rep("none",nrow(rank_shift_df))
-  }
-
-  # other no rank
-  other_df <- se_seg_w_cat_df[which(se_seg_w_cat_df$category=="Other"),]
-  rank_other_df <- unique(other_df[,-c(5:7)])
-  rank_other_df$rank <- rep("none",nrow(rank_other_df))
-
-  # make output file
-  se_cat_rank <- unique(rbind(rank_sim_df[,-c(5,8,9)],rank_str_df[,-c(5,8,9)],
-                                rank_sim_df[,-c(5,8,9)],rank_short_df[,-c(5,8,9)],
-                                rank_v_df[,-c(5,8,9)],rank_shift_df[,-c(5:7,10)],
-                                rank_other_df))
   # create category boxplot
 
-  box_plot <- ggplot(data=se_cat_rank, aes(x=category))+
+  box_plot <- ggplot(data=rank_cat_df, aes(x=category))+
     theme(axis.text.x = element_text(angle = 0,hjust = 1),
           plot.title = element_text(hjust = 0.5))+
     ggtitle("Super-enhancer category estimates")+
@@ -355,7 +318,7 @@ SEcategory <- function(se_seg_df,e_fit) {
 
   # make final output
   out <- list()
-  out$se_cat_rank <- se_cat_rank
+  out$se_cat_rank <- rank_cat_df
   out$cat_boxplot <- box_plot
   return(out)
 }
