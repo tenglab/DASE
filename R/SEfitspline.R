@@ -1,18 +1,18 @@
-#' Fit enhancer fold change
+#' Fit enhancer fold change and normal premut
 #'
 #' A function uses bs-spline weighted by basemean to fit the enhancer fold change
 #' within each SE.
 #'
 #' @details
 #' This function will fit the enhancer fold change within each SE by using bs-spline
-#' weighted by basemean. A permutation of counts of enhancers is used to decide the
-#' cutoff of significant log2FC. Cutoff was calculate by slope equal to range(y)/range(x).
+#' weighted by basemean. A normal permutation of counts of enhancers in SEs is used to decide the
+#' cutoff of significant log2FC (for samples are not too similar). Cutoff was calculate by slope equal to range(y)/range(x).
 #' The max value in range(-2,-1.5) and min value in range(1.5,2) are set to be lower and upper cutoff.
 #'
 #' @param e_deseq_out_df enhancer output file from enhancerFoldchange
 #' @param se_df merged SE metadata from SEfilter
 #' @param times permutation times (default=10)
-#' @param permut if you want permutation (default=FALSE)
+#' @param permut if you want permutation (default=TRUE)
 #'
 #' @return
 #' A list of 4 datasets: enhancer fitted dataset, permutation dataset, cutoff vector,
@@ -35,7 +35,7 @@
 #' # no permutation
 #' fit_list <- SEfitspline(enhancerFoldchange_out,se_meta,permut=FALSE)
 
-SEfitspline <- function(e_deseq_out_df,se_df,times=10,permut=FALSE){
+SEfitspline <- function(e_deseq_out_df,se_df,times=10,permut=T){
   #--------------------------------------------------------------
   # create original bs-spline fit
   fit_out <- data.frame()

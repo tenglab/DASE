@@ -13,7 +13,8 @@ SEprofile(
   s2_pair = FALSE,
   bw = F,
   custom_range = F,
-  permut = FALSE,
+  permut = TRUE,
+  permut_type = normal,
   times = 10,
   cutoff_v = c(-1.5, 1.5),
   s1_r1_bam,
@@ -31,9 +32,7 @@ Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,p
 
 \item{bl_file}{super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX) (default=FALSE)}
 
-\item{has_bl_file}{if there is a blacklist file (default=FALSE)
-#' @param custom_range a vector of extra customized blacklist to ignore.
-Format: c(chr:start-end, chr:start-end, ...) (default=FALSE).}
+\item{has_bl_file}{if there is a blacklist file (default=FALSE)}
 
 \item{s1_pair}{if sample 1 is paired-end (default=FALSE)}
 
@@ -41,7 +40,12 @@ Format: c(chr:start-end, chr:start-end, ...) (default=FALSE).}
 
 \item{bw}{quantitative file are bigwig files (default=FALSE)}
 
-\item{permut}{if you want permutation (default=FALSE)}
+\item{custom_range}{a vector of extra customized blacklist to ignore.
+Format: c(chr:start-end, chr:start-end, ...) (default=FALSE).}
+
+\item{permut}{if you want permutation (default=TRUE)}
+
+\item{permut_type}{normal or stringent (default=normal)}
 
 \item{times}{permutation times (default=10)}
 

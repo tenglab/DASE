@@ -12,7 +12,7 @@
 #' Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"
 #' @param bl_file super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX) (default=FALSE)
 #' @param has_bl_file if there is a blacklist file (default=FALSE)
-#' #' @param custom_range a vector of extra customized blacklist to ignore.
+#' @param custom_range a vector of extra customized blacklist to ignore.
 #' Format: c(chr:start-end, chr:start-end, ...) (default=FALSE).
 #'
 #' @param bw quantitative file are bigwig files (default=FALSE)
@@ -20,7 +20,8 @@
 #' @param s1_r2_bam path of sample 1 replicate 2 bam/bw file
 #' @param s2_r1_bam path of sample 2 replicate 1 bam/bw file
 #' @param s2_r2_bam path of sample 2 replicate 2 bam/bw file
-#' @param permut if you want permutation (default=FALSE)
+#' @param permut if you want permutation (default=TRUE)
+#' @param permut_type normal or stringent (default=normal)
 #' @param times permutation times (default=10)
 #' @param cutoff_v fold change lower and upper cutoff vector.
 #' if permutation is used, it will use the value calculated by permutation. (default=c(-1.5,1.5))
@@ -58,7 +59,7 @@
 
 SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
                       s1_pair=FALSE,s2_pair=FALSE, bw=F, custom_range=F,
-                      permut=FALSE, times=10,cutoff_v=c(-1.5,1.5),
+                      permut=TRUE, permut_type=normal,times=10,cutoff_v=c(-1.5,1.5),
                       s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
 
   # Step 1: filter super-enhancer with SEfilter.R with or without SE blacklist file
@@ -80,15 +81,35 @@ SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   # and use permutation to get fold change significant cutoff
   e_deseq_out <- step_2_out$enhancer_deseq_result
 
-  if (permut == TRUE){
-    step_3_out <- SEfitspline(e_deseq_out,merged_se_df,permut=T)
-    cutoff_vector <- step_3_out$cutoff
+  # chose different permut_type
+  if (permut_type == "normal") {
+    if (permut == TRUE){
+      step_3_out <- SEfitspline(e_deseq_out,merged_se_df)
+      cutoff_vector <- step_3_out$cutoff
+    } else {
+      step_3_out <- SEfitspline(e_deseq_out,merged_se_df,permut = F)
+      cutoff_vector <- cutoff_v
+    }
+
+    se_fit_df <- step_3_out$se_fit_df
   } else {
-    step_3_out <- SEfitspline(e_deseq_out,merged_se_df)
-    cutoff_vector <- cutoff_v
+
+    if (permut == TRUE){
+      step_3_out <- stringent_permut(e_df,e_deseq_out,merged_se_df,
+                                     s1_pair,s2_pair,
+                                     s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+      cutoff_vector <- step_3_out$cutoff
+    } else {
+      step_3_out <- stringent_permut(e_df,e_deseq_out,merged_se_df,permut=F,
+                                     s1_pair,s2_pair,
+                                     s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+      cutoff_vector <- cutoff_v
+    }
+
+    se_fit_df <- step_3_out$se_fit_df
+
   }
 
-  se_fit_df <- step_3_out$se_fit_df
 
   # Step 4: using cutoff to get the segment pattern of each SE
   step_4_out <- SEpattern(se_fit_df,cutoff_vector)
