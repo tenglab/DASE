@@ -9,16 +9,10 @@
 #' cutoff of significant log2FC (for samples are too similar). Cutoff was calculate by slope equal to range(y)/range(x).
 #' The max value in range(-2,-1.5) and min value in range(1.5,2) are set to be lower and upper cutoff.
 #'
-#' @param e_df pooled macs2 output file *_peaks.narrowPeak of all samples.
-#' Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"
+#' @param not_in_se_count_matrix enhancer count matrix not in SE range
+#' (header "e_merge_name","S1_r1","S1_r2","S2_r1","S2_r2","se_merge_name","chr","start","end")
 #' @param e_deseq_out_df enhancer output file from enhancerFoldchange
 #' @param se_df merged SE metadata from SEfilter
-#' @param s1_r1_bam path of sample 1 replicate 1 bam file
-#' @param s1_r2_bam path of sample 1 replicate 2 bam file
-#' @param s2_r1_bam path of sample 2 replicate 1 bam file
-#' @param s2_r2_bam path of sample 2 replicate 2 bam file
-#' @param s1_pair if sample 1 is paired-end (default=FALSE)
-#' @param s2_pair if sample 2 is paired-end (default=FALSE)
 #' @param times permutation times (default=10)
 #' @param permut if you want permutation (default=TRUE)
 #'
@@ -47,19 +41,16 @@
 #' s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
 #'
 
-stringent_permut <- function(e_df,e_deseq_out_df,se_df,permut=T,times=10,
-                            s1_pair=FALSE,s2_pair=FALSE,
-                            s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
+stringent_permut <- function(not_in_se_count_matrix,e_deseq_out_df,se_df,
+                             permut=T,times=10) {
 
   #--------------------------------------------------------------
   # create original bs-spline fit
   fit_out <- data.frame()
-
   merged_super_name <- se_df$se_merge_name
   for (i in c(1:length(merged_super_name))) {
     temp_pattern <- e_deseq_out_df[which(e_deseq_out_df$se_merge_name == merged_super_name[i]),]
     temp_pattern$width_mid <- (temp_pattern$start+temp_pattern$width/2)/1000
-
     # splines bs fit
     spline_bs_fit <- lm(formula = log2FoldChange.1 ~ bs(width_mid),data = temp_pattern,
                         weights = baseMean.1)
@@ -71,81 +62,12 @@ stringent_permut <- function(e_df,e_deseq_out_df,se_df,permut=T,times=10,
   }
 
   #--------------------------------------------------------------
-  # create enhancer names
-  e_df$e_merge_name <- apply(e_df[,c(1:3)],1, paste,collapse ="_" )
-  e_df$e_merge_name <- gsub(" ","",e_df$e_merge_name)
-
-  # extract enhancers within merged super-enhancer
-  in_se_df <- data.frame()
-  for (i in c(1:nrow(se_df))) {
-
-    in_se_temp <- e_df[which(e_df$chr==se_df$chr[i] &
-                               e_df$start>=se_df$start[i] &
-                               e_df$end<= se_df$end[i]),]
-    in_se_df <- rbind(in_se_df,in_se_temp)
-  }
-
-  # extract enhancers not in SE range
-  not_se_df <- subset(e_df, !(e_df$e_merge_name %in% in_se_df$e_merge_name))
-
-  # feature count of not in se_df
-  # create SAF format file
-  not_se_saf <- not_se_df[,c(11,1,2,3,6)]
-  colnames(not_se_saf) <- c("GeneID","Chr","Start","End","Strand")
-
-  # count each bam files
-  # check if sample 1 is  paired-end
-  if (s1_pair == F) {
-    s1_r1_fc <- featureCounts(files=s1_r1_bam,annot.ext=not_se_saf,
-                              isGTFAnnotationFile = "SAF")
-    s1_r2_fc <- featureCounts(files=s1_r2_bam,annot.ext=not_se_saf,
-                              isGTFAnnotationFile = "SAF")
-  } else {
-    s1_r1_fc <- featureCounts(files=s1_r1_bam,annot.ext=not_se_saf,
-                              isGTFAnnotationFile = "SAF",
-                              isPairedEnd=TRUE)
-    s1_r2_fc <- featureCounts(files=s1_r2_bam,annot.ext=not_se_saf,
-                              isGTFAnnotationFile = "SAF",
-                              isPairedEnd=TRUE)
-  }
-
-  # check if smaple 2 is paired-end
-  if (s2_pair == F) {
-    s2_r1_fc <- featureCounts(files=s2_r1_bam,annot.ext=not_se_saf,
-                              isGTFAnnotationFile = "SAF")
-    s2_r2_fc <- featureCounts(files=s2_r2_bam,annot.ext=not_se_saf,
-                              isGTFAnnotationFile = "SAF")
-  } else {
-    s2_r1_fc <- featureCounts(files=s2_r1_bam,annot.ext=not_se_saf,
-                              isGTFAnnotationFile = "SAF",
-                              isPairedEnd=TRUE)
-    s2_r2_fc <- featureCounts(files=s2_r2_bam,annot.ext=not_se_saf,
-                              isGTFAnnotationFile = "SAF",
-                              isPairedEnd=TRUE)
-  }
-
-  # make not in se count matrix
-  not_se_count_temp <- as.data.frame(cbind(s1_r1_fc$counts,s1_r2_fc$counts,
-                                           s2_r1_fc$counts,s2_r2_fc$counts))
-  colnames(not_se_count_temp) <- c("S1_r1","S1_r2","S2_r1","S2_r2")
-
-  # remove enhancers with 0 value for all sample
-  index_not_zero <- apply(not_se_count_temp, 1, function(row) all(row[1:4] !=0 ))
-  not_se_no_zero <- not_se_count_temp[index_not_zero,]
-
-  # set rowname to column
-  not_se_no_zero$e_merge_name <- rownames(not_se_no_zero)
-  not_se_no_zero$se_merge_name <- NA
-  not_se_count_2 <- unique(merge(not_se_no_zero,not_se_df[,c(1:3,11)],by="e_merge_name"))
-
-  not_se_count_matrix <- data.frame(not_se_count_2, row.names=not_se_count_2$e_merge_name)
-
   # make in se count matrix
   in_se_count_temp <- e_deseq_out_df[,c(1,6:9,25,2:4)]
   in_se_count_matrix <- data.frame(in_se_count_temp, row.names=in_se_count_temp$e_merge_name)
 
   # create total enhancer df
-  all_enhancer_count_matrix <- rbind(in_se_count_matrix,not_se_count_matrix)
+  all_enhancer_count_matrix <- rbind(in_se_count_matrix,not_in_se_count_matrix)
 
   #-----------------------------------------------------------------------------
   # shuffle counts of all enhancers n times (default 10), got new fold change within SEs,
@@ -208,6 +130,11 @@ stringent_permut <- function(e_df,e_deseq_out_df,se_df,permut=T,times=10,
 
       # fold change of permute all enhancers in se
       all_shuffle <- fold_change(all_se_temp_permut)
+
+      # remove 0 counts of all sample
+      not_zero_shuffle <- apply(all_shuffle[,c(2:5)], 1, function(row) sum(row) != 0)
+      all_shuffle <- all_shuffle[not_zero_shuffle,]
+
       all_permut_fit <- fit_permut(all_shuffle,merged_super_name)
 
       # creat output dataframe
@@ -218,7 +145,7 @@ stringent_permut <- function(e_df,e_deseq_out_df,se_df,permut=T,times=10,
 
     }
   } else {
-    permut_out <- NA
+    all_permut_out <- NA
   }
 
   #-----------------------------------------------------------------------------
@@ -296,7 +223,7 @@ stringent_permut <- function(e_df,e_deseq_out_df,se_df,permut=T,times=10,
   # creat final output list
   out <- list()
   out$se_fit_df <- fit_out
-  out$se_permutation_df <-permut_out
+  out$se_permutation_df <-all_permut_out
   out$cutoff <- final_cutoff
   out$density_plot <- density_p
   return(out)

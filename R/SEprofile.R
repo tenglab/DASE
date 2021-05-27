@@ -59,7 +59,7 @@
 
 SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
                       s1_pair=FALSE,s2_pair=FALSE, bw=F, custom_range=F,
-                      permut=TRUE, permut_type=normal,times=10,cutoff_v=c(-1.5,1.5),
+                      permut=TRUE, permut_type="normal",times=10,cutoff_v=c(-1.5,1.5),
                       s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
 
   # Step 1: filter super-enhancer with SEfilter.R with or without SE blacklist file
@@ -70,16 +70,33 @@ SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   merged_se_df <- step_1_out$se_merged
 
   if (bw == F) {
-    step_2_out <- enhancerFoldchange(e_df,merged_se_df,s1_pair,s2_pair,
-                                   s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+    if (permut_type == "normal") {
+      step_2_out <- enhancerFoldchange(e_df=e_df,se_df=merged_se_df,
+                                       s1_pair=s1_pair,s2_pair=s2_pair,
+                                       s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
+                                       s2_r1_bam=s2_r1_bam ,s2_r2_bam=s2_r2_bam)
+    } else {
+      step_2_out <- enhancerFoldchange(e_df=e_df,se_df=merged_se_df,
+                                       s1_pair=s1_pair,s2_pair=s2_pair,
+                                       permut_type = "stringent",
+                                       s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
+                                       s2_r1_bam=s2_r1_bam ,s2_r2_bam=s2_r2_bam)
+    }
   } else {
-    step_2_out <- enhancerFoldchange_bw(e_df,merged_se_df,
-                                        s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+    if (permut_type == "normal") {
+      step_2_out <- enhancerFoldchange_bw(e_df,merged_se_df,
+                                          s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+    } else {
+      step_2_out <- enhancerFoldchange_bw(e_df,merged_se_df,
+                                          permut_type = "stringent",
+                                          s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+    }
   }
 
   # Step 3: using weighted bs-spline to fit the fold change
   # and use permutation to get fold change significant cutoff
   e_deseq_out <- step_2_out$enhancer_deseq_result
+  not_in_se_count_matrix <- test_2_out$count_matrix_not_in_se
 
   # chose different permut_type
   if (permut_type == "normal") {
@@ -92,17 +109,13 @@ SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
     }
 
     se_fit_df <- step_3_out$se_fit_df
-  } else {
+  } else if (permut_type == "stringent") {
 
     if (permut == TRUE){
-      step_3_out <- stringent_permut(e_df,e_deseq_out,merged_se_df,
-                                     s1_pair,s2_pair,
-                                     s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+      step_3_out <- stringent_permut(not_in_se_count_matrix,e_deseq_out_df,merged_se_df)
       cutoff_vector <- step_3_out$cutoff
     } else {
-      step_3_out <- stringent_permut(e_df,e_deseq_out,merged_se_df,permut=F,
-                                     s1_pair,s2_pair,
-                                     s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+      step_3_out <- stringent_permut(not_in_se_count_matrix,e_deseq_out_df,merged_se_df,permut = F)
       cutoff_vector <- cutoff_v
     }
 

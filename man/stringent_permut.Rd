@@ -5,22 +5,16 @@
 \title{Fit enhancer fold change and stringent premut with all enhancers}
 \usage{
 stringent_permut(
-  e_df,
+  not_in_se_count_matrix,
   e_deseq_out_df,
   se_df,
   permut = T,
-  times = 10,
-  s1_pair = FALSE,
-  s2_pair = FALSE,
-  s1_r1_bam,
-  s1_r2_bam,
-  s2_r1_bam,
-  s2_r2_bam
+  times = 10
 )
 }
 \arguments{
-\item{e_df}{pooled macs2 output file *_peaks.narrowPeak of all samples.
-Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"}
+\item{not_in_se_count_matrix}{enhancer count matrix not in SE range
+(header "e_merge_name","S1_r1","S1_r2","S2_r1","S2_r2","se_merge_name","chr","start","end")}
 
 \item{e_deseq_out_df}{enhancer output file from enhancerFoldchange}
 
@@ -29,18 +23,6 @@ Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,p
 \item{permut}{if you want permutation (default=TRUE)}
 
 \item{times}{permutation times (default=10)}
-
-\item{s1_pair}{if sample 1 is paired-end (default=FALSE)}
-
-\item{s2_pair}{if sample 2 is paired-end (default=FALSE)}
-
-\item{s1_r1_bam}{path of sample 1 replicate 1 bam file}
-
-\item{s1_r2_bam}{path of sample 1 replicate 2 bam file}
-
-\item{s2_r1_bam}{path of sample 2 replicate 1 bam file}
-
-\item{s2_r2_bam}{path of sample 2 replicate 2 bam file}
 }
 \value{
 A list of 4 datasets: enhancer fitted dataset, permutation dataset, cutoff vector,

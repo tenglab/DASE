@@ -7,6 +7,7 @@
 enhancerFoldchange(
   e_df,
   se_df,
+  permut_type = "normal",
   s1_pair = FALSE,
   s2_pair = FALSE,
   s1_r1_bam,
@@ -20,6 +21,8 @@ enhancerFoldchange(
 Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"}
 
 \item{se_df}{merged SE metadata from SEfilter}
+
+\item{permut_type}{permutation type: stringent or normal (default=normal)}
 
 \item{s1_pair}{if sample 1 is paired-end (default=FALSE)}
 
