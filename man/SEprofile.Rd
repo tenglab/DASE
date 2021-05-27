@@ -14,7 +14,7 @@ SEprofile(
   bw = F,
   custom_range = F,
   permut = TRUE,
-  permut_type = normal,
+  permut_type = "normal",
   times = 10,
   cutoff_v = c(-1.5, 1.5),
   s1_r1_bam,

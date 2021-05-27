@@ -96,7 +96,7 @@ SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   # Step 3: using weighted bs-spline to fit the fold change
   # and use permutation to get fold change significant cutoff
   e_deseq_out <- step_2_out$enhancer_deseq_result
-  not_in_se_count_matrix <- test_2_out$count_matrix_not_in_se
+  not_in_se_count_matrix <- step_2_out$count_matrix_not_in_se
 
   # chose different permut_type
   if (permut_type == "normal") {
