@@ -11,7 +11,6 @@
 #' Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"
 #'
 #' @param se_df merged SE metadata from SEfilter
-#' @param permut_type permutation type: stringent or normal (default=normal)
 #' @param s1_r1_bam path of sample 1 replicate 1 bam file
 #' @param s1_r2_bam path of sample 1 replicate 2 bam file
 #' @param s2_r1_bam path of sample 2 replicate 1 bam file
@@ -32,7 +31,7 @@
 #' foldchange_list <- enhancerFoldchange(pool_enhancer_df,se_meta,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
 #'
 
-enhancerFoldchange <- function(e_df,se_df, permut_type="normal",
+enhancerFoldchange <- function(e_df,se_df,
                                s1_pair=FALSE,s2_pair=FALSE,
                                s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
   # create enhancer names
@@ -105,65 +104,59 @@ enhancerFoldchange <- function(e_df,se_df, permut_type="normal",
 
   # feature count enhancer not in SE if permut_type=stringent
   # create enhancer not in SE SAF format file
+  not_se_saf <- not_se_df[,c(11,1,2,3,6)]
+  colnames(not_se_saf) <- c("GeneID","Chr","Start","End","Strand")
 
-  if (permut_type == "stringent") {
-    not_se_saf <- not_se_df[,c(11,1,2,3,6)]
-    colnames(not_se_saf) <- c("GeneID","Chr","Start","End","Strand")
-
-    # count each bam files
-    # check if sample 1 is  paired-end
-    if (s1_pair == F) {
-      s1_r1_fc_not <- featureCounts(files=s1_r1_bam,annot.ext=not_se_saf,
-                                    isGTFAnnotationFile = "SAF")
-      s1_r2_fc_not <- featureCounts(files=s1_r2_bam,annot.ext=not_se_saf,
-                                    isGTFAnnotationFile = "SAF")
-    } else {
-      s1_r1_fc_not <- featureCounts(files=s1_r1_bam,annot.ext=not_se_saf,
-                                    isGTFAnnotationFile = "SAF",
-                                    isPairedEnd=TRUE)
-      s1_r2_fc_not <- featureCounts(files=s1_r2_bam,annot.ext=not_se_saf,
-                                    isGTFAnnotationFile = "SAF",
-                                    isPairedEnd=TRUE)
-    }
-
-    # check if smaple 2 is paired-end
-    if (s2_pair == F) {
-      s2_r1_fc_not <- featureCounts(files=s2_r1_bam,annot.ext=not_se_saf,
-                                    isGTFAnnotationFile = "SAF")
-      s2_r2_fc_not <- featureCounts(files=s2_r2_bam,annot.ext=not_se_saf,
-                                    isGTFAnnotationFile = "SAF")
-    } else {
-      s2_r1_fc_not <- featureCounts(files=s2_r1_bam,annot.ext=not_se_saf,
-                                    isGTFAnnotationFile = "SAF",
-                                    isPairedEnd=TRUE)
-      s2_r2_fc_not <- featureCounts(files=s2_r2_bam,annot.ext=not_se_saf,
-                                    isGTFAnnotationFile = "SAF",
-                                    isPairedEnd=TRUE)
-    }
-
-    # make not in SE count matrix
-    not_se_count_temp <- as.data.frame(cbind(s1_r1_fc_not$counts,s1_r2_fc_not$counts,
-                                             s2_r1_fc_not$counts,s2_r2_fc_not$counts))
-    colnames(not_se_count_temp) <- c("S1_r1","S1_r2","S2_r1","S2_r2")
-
-    # remove enhancers with 0 value for all sample
-    index_not_zero <- apply(not_se_count_temp, 1, function(row) sum(row) != 0)
-    not_se_no_zero <- not_se_count_temp[index_not_zero,]
-
-    # set rowname to column
-    not_se_no_zero$e_merge_name <- rownames(not_se_no_zero)
-    not_se_no_zero$se_merge_name <- NA
-    not_se_count_2 <- unique(merge(not_se_no_zero,not_se_df[,c(1:3,11)],by="e_merge_name"))
-
-    not_se_count_matrix <- data.frame(not_se_count_2, row.names=not_se_count_2$e_merge_name)
-
-
-  } else if (permut_type == "normal") {
-    not_se_count_matrix <- NA
+  # count each bam files
+  # check if sample 1 is  paired-end
+  if (s1_pair == F) {
+    s1_r1_fc_not <- featureCounts(files=s1_r1_bam,annot.ext=not_se_saf,
+                                  isGTFAnnotationFile = "SAF")
+    s1_r2_fc_not <- featureCounts(files=s1_r2_bam,annot.ext=not_se_saf,
+                                  isGTFAnnotationFile = "SAF")
+  } else {
+    s1_r1_fc_not <- featureCounts(files=s1_r1_bam,annot.ext=not_se_saf,
+                                  isGTFAnnotationFile = "SAF",
+                                  isPairedEnd=TRUE)
+    s1_r2_fc_not <- featureCounts(files=s1_r2_bam,annot.ext=not_se_saf,
+                                  isGTFAnnotationFile = "SAF",
+                                  isPairedEnd=TRUE)
   }
 
+  # check if smaple 2 is paired-end
+  if (s2_pair == F) {
+    s2_r1_fc_not <- featureCounts(files=s2_r1_bam,annot.ext=not_se_saf,
+                                  isGTFAnnotationFile = "SAF")
+    s2_r2_fc_not <- featureCounts(files=s2_r2_bam,annot.ext=not_se_saf,
+                                  isGTFAnnotationFile = "SAF")
+  } else {
+    s2_r1_fc_not <- featureCounts(files=s2_r1_bam,annot.ext=not_se_saf,
+                                  isGTFAnnotationFile = "SAF",
+                                  isPairedEnd=TRUE)
+    s2_r2_fc_not <- featureCounts(files=s2_r2_bam,annot.ext=not_se_saf,
+                                  isGTFAnnotationFile = "SAF",
+                                  isPairedEnd=TRUE)
+  }
 
-  # DESeq2 fold-change
+  # make not in SE count matrix
+  not_se_count_temp <- as.data.frame(cbind(s1_r1_fc_not$counts,s1_r2_fc_not$counts,
+                                            s2_r1_fc_not$counts,s2_r2_fc_not$counts))
+  colnames(not_se_count_temp) <- c("S1_r1","S1_r2","S2_r1","S2_r2")
+
+  # remove enhancers with 0 value for all sample
+  #index_not_zero <- apply(not_se_count_temp, 1, function(row) sum(row) != 0)
+  #not_se_no_zero <- not_se_count_temp[index_not_zero,]
+
+  not_se_no_zero <- not_se_count_temp
+
+  # set rowname to column
+  not_se_no_zero$e_merge_name <- rownames(not_se_no_zero)
+  not_se_no_zero$se_merge_name <- NA
+  not_se_count_2 <- unique(merge(not_se_no_zero,not_se_df[,c(1:3,11)],by="e_merge_name"))
+
+  not_se_count_matrix <- data.frame(not_se_count_2, row.names=not_se_count_2$e_merge_name)
+
+  # DESeq2 fold-change for enhancer in SE only
   # make count matrix
   count_matrix <- as.data.frame(cbind(s1_r1_fc_in$counts,s1_r2_fc_in$counts,
                                       s2_r1_fc_in$counts,s2_r2_fc_in$counts))
