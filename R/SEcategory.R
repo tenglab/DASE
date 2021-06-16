@@ -285,8 +285,14 @@ SEcategory <- function(se_seg_df,e_fit) {
     temp_rank_df <- unique(se_seg_w_cat_df[which(se_seg_w_cat_df$category == category_name[cat_index]),
                                     -c(4:7)])
     if (category_name[cat_index] != "Similar") {
-      temp_rank_df <- temp_rank_df[order(-temp_rank_df$non_mid_percent,
-                                         -abs(temp_rank_df$mean_FC)),]
+      if (category_name[cat_index] == "Shorten") {
+        temp_rank_df <- temp_rank_df[order(temp_rank_df$non_mid_percent,
+                                           -abs(temp_rank_df$mean_FC)),]
+      } else {
+        temp_rank_df <- temp_rank_df[order(-temp_rank_df$non_mid_percent,
+                                           -abs(temp_rank_df$mean_FC)),]
+      }
+
       if (nrow(temp_rank_df) != 0) {
         temp_rank_df$rank <- seq(1:nrow(temp_rank_df))
       } else {
