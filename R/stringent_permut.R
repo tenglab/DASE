@@ -67,7 +67,10 @@ stringent_permut <- function(not_in_se_count_matrix,e_deseq_out_df,se_df,
   in_se_count_matrix <- data.frame(in_se_count_temp, row.names=in_se_count_temp$e_merge_name)
 
   # create total enhancer df
-  all_enhancer_count_matrix <- rbind(in_se_count_matrix,not_in_se_count_matrix)
+  # remove enhancers with 0 value for all sample
+  index_not_zero <- apply(not_in_se_count_matrix, 1, function(row) sum(row) != 0)
+  not_se_no_zero <- not_in_se_count_matrix[index_not_zero,]
+  all_enhancer_count_matrix <- rbind(in_se_count_matrix,not_se_no_zero)
 
   #-----------------------------------------------------------------------------
   # shuffle counts of all enhancers n times (default 10), got new fold change within SEs,
