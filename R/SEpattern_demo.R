@@ -22,7 +22,7 @@
 #' seg_list <- SEpattern(SEfitspline_out,SEfitspline_cutoff)
 #'
 
-SEpattern <- function(se_fit_df,cutoff_vector) {
+SEpattern_demo <- function(se_fit_df,pattern_plot_df,cutoff_vector) {
 
   # inital output list
   plot_list <- list()
@@ -33,25 +33,33 @@ SEpattern <- function(se_fit_df,cutoff_vector) {
   l_cut <- min(cutoff_vector)
   u_cut <- max(cutoff_vector)
 
+  # set cutoff brand to filter cutoff boundary points
+  l_band <- c(l_cut*0.9,l_cut*1.1)
+  u_band <- c(u_cut*0.9,u_cut*1.1)
   # loop by super-enhancer names
   se_name <- unique(se_fit_df$se_merge_name)
   for (se_index in c(1:length(se_name))) {
+
+    # print step information
+    if(se_index %% 100==0) {
+      # Print on the screen some message
+      print(paste0("SE: ",se_index))
+    }
+
     #--------------------------------------------------------------
     # plot fit patterns for each SE
     #--------------------------------------------------------------
     # make plot dataframe
     temp_df <- se_fit_df[which(se_fit_df$se_merge_name==se_name[se_index]),]
-    temp_plot_df <- as.data.frame(cbind(temp_df$width_mid,
-                                        temp_df$log2FoldChange.1,
-                                        temp_df$spline_bs))
+    temp_plot_df <- pattern_plot_df[which(pattern_plot_df$se_merge_name==se_name[se_index]),]
 
-    colnames(temp_plot_df) <- c("width_mid","log2FC","spline_bs")
+    plot_title_name <- temp_plot_df$se_merge_name
 
-    plot_title_name <- paste(se_name[se_index],"pattern", sep = " ")
-
+    top_points <- temp_df[which(temp_df$cumsum <= 96),]
     # plot
-    pattern_plot <- ggplot(temp_plot_df, aes(x=width_mid, y=spline_bs)) +
-                          geom_point(data=temp_plot_df, aes(x=width_mid,y=log2FC))+
+    pattern_plot <- ggplot(temp_plot_df, aes(x=new_x, y=pred_y)) +
+                          geom_point(data=temp_df, aes(x=width_mid,y=log2FoldChange.1))+
+                          geom_point(data=top_points, aes(x=width_mid,y=log2FoldChange.1),col="red")+
                           geom_line()+
                           geom_hline(yintercept=l_cut,linetype = "dashed")+
                           geom_hline(yintercept=u_cut,linetype = "dashed")+
@@ -66,20 +74,20 @@ SEpattern <- function(se_fit_df,cutoff_vector) {
     plot_list[[se_index]]<- pattern_plot
 
     #--------------------------------------------------------------
-    # calculate porpotion of segments based on basemean
+    # calculate porpotion of segments based on max_mean
     #--------------------------------------------------------------
     # get intersection points
     temp_x <- temp_df$width_mid
     temp_y <- temp_df$spline_bs
-    x_cut_upper <- solveroot(temp_df$width_mid,temp_df$spline_bs,y0=u_cut)
-    x_cut_lower <- solveroot(temp_df$width_mid,temp_df$spline_bs,y0=l_cut)
+    x_cut_upper <- solveroot(temp_df$width_mid,temp_df$spline_bs,y0=u_band[1])
+    x_cut_lower <- solveroot(temp_df$width_mid,temp_df$spline_bs,y0=l_band[1])
     x_intersection <- sort(append(x_cut_lower,x_cut_upper))
     min_width_mid <- min(temp_df$width_mid)
     max_width_mid <- max(temp_df$width_mid)
     x_cut_all <- c(min_width_mid,x_intersection,max_width_mid)
 
     # total
-    total_width <- sum(temp_df$baseMean.1)
+    total_width <- sum(temp_df$max_mean)
 
     n <- length(x_cut_all)
 
@@ -98,17 +106,17 @@ SEpattern <- function(se_fit_df,cutoff_vector) {
     # check n == 2, means no interaction of fitted line and cutoff lines
     #
     if (n == 2) {
-      max_basemean <- temp_df[which.max(temp_df$baseMean.1),]
-      if (max_basemean$spline_bs < l_cut) {
+      max_basemean <- temp_df[which.max(temp_df$max_mean),]
+      if (max_basemean$spline_bs < l_band[1]) {
         temp_lower_width <- total_width/total_width
         part_res <- append(part_res,temp_lower_width)
         part_loc_res <- append(part_loc_res,"lower")
-      } else if( max_basemean$spline_bs >= l_cut &
-                 max_basemean$spline_bs <= u_cut ) {
+      } else if( max_basemean$spline_bs >= l_band[1] &
+                 max_basemean$spline_bs <= u_band[1] ) {
         temp_mid_width <- total_width/total_width
         part_res <- append(part_res,temp_mid_width)
         part_loc_res <- append(part_loc_res,"mid")
-      } else if ( max_basemean$spline_bs >= u_cut) {
+      } else if ( max_basemean$spline_bs >= u_band[1]) {
         temp_upper_width <- total_width/total_width
         part_res <- append(part_res,temp_upper_width,)
         part_loc_res <- append(part_loc_res,"upper")
@@ -121,14 +129,14 @@ SEpattern <- function(se_fit_df,cutoff_vector) {
 
         if (nrow(temp_seg) != 0) {
           # get segment percentage
-          seg_percent <- sum(temp_seg$baseMean.1)/total_width
+          seg_percent <- sum(temp_seg$max_mean)/total_width
 
           # using LFC of data point which has largest basemean to define segment location
-          max_basemean <- temp_seg[which.max(temp_seg$baseMean.1),]
-          if (max_basemean$spline_bs < l_cut) {
+          max_basemean <- temp_seg[which.max(temp_seg$max_mean),]
+          if (max_basemean$spline_bs < l_band[1]) {
             part_res <- append(part_res,seg_percent,)
             part_loc_res <- append(part_loc_res,"lower")
-          } else if (max_basemean$spline_bs >= l_cut & max_basemean$spline_bs <= u_cut) {
+          } else if (max_basemean$spline_bs >= l_band[1] & max_basemean$spline_bs <= u_band[1]) {
             part_res <- append(part_res,seg_percent,)
             part_loc_res <- append(part_loc_res,"mid")
           } else {
@@ -136,6 +144,7 @@ SEpattern <- function(se_fit_df,cutoff_vector) {
             part_loc_res <- append(part_loc_res,"upper")
           }
         } else {
+          # chose cloest point as representive
           seg_percent <- 0
           part_res <- append(part_res,seg_percent,)
           part_loc_res <- append(part_loc_res,"mid")

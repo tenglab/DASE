@@ -61,7 +61,7 @@ SEfitspline <- function(e_deseq_out_df,se_df,times=10,permut=T){
 
   permut_out <- data.frame()
   if (permut) {
-    for (shuffle_index in c(1:times)) {
+    for (shuffle_i in c(1:times)) {
       # shuffle counts
       temp_permut <- e_deseq_out_df[,c(1:9,25)]
       temp_permut$S1_r1 <- sample(e_deseq_out_df$S1_r1)
@@ -73,9 +73,12 @@ SEfitspline <- function(e_deseq_out_df,se_df,times=10,permut=T){
       # make count matrix
       count_matrix <- as.data.frame(temp_permut[,c(6:9)])
       rownames(count_matrix) <- temp_permut$e_merge_name
-      sample_data <- data.frame(row.names = colnames(count_matrix),
+
+      # remove row.sum = 0
+      no_zero_count_matrix <- count_matrix[rowSums(count_matrix)>0,]
+      sample_data <- data.frame(row.names = colnames(no_zero_count_matrix),
                                 condition = c("S1","S1","S2","S2"))
-      dds <- DESeqDataSetFromMatrix(countData = count_matrix,
+      dds <- DESeqDataSetFromMatrix(countData = no_zero_count_matrix,
                                     colData = sample_data,
                                     design = ~ condition)
 
@@ -99,7 +102,7 @@ SEfitspline <- function(e_deseq_out_df,se_df,times=10,permut=T){
 
         # splines bs fit
         spline_bs_fit <- lm(formula = log2FoldChange ~ bs(width_mid),data = shuffle_enhancer,
-                            weights = baseMean)
+                            weights = baseMean,na.action = na.exclude)
         shuffle_enhancer$permut_spline_bs <- spline_bs_fit$fitted.values
 
         # create output dataframe with fitted value
@@ -108,7 +111,7 @@ SEfitspline <- function(e_deseq_out_df,se_df,times=10,permut=T){
 
       # creat output dataframe
       temp_new_fit_df <- as.data.frame(permut_fit[,c(1,10,17)])
-      temp_new_fit_df$shuffle_index <- rep(shuffle_index,nrow(temp_new_fit_df))
+      temp_new_fit_df$shuffle_index <- rep(shuffle_i,nrow(temp_new_fit_df))
       permut_out <- rbind(permut_out,temp_new_fit_df)
     }
   } else {

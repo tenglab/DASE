@@ -57,16 +57,18 @@
 #' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 #'
 
-SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
+SEprofile_2 <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
                       s1_pair=FALSE,s2_pair=FALSE, bw=F, custom_range=F,
                       permut=TRUE, permut_type="normal",times=10,cutoff_v=c(-1.5,1.5),
                       s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
 
   # Step 1: filter super-enhancer with SEfilter.R with or without SE blacklist file
+  print("Step 1: merge and filter SE")
   step_1_out <- SEfilter(se_in,bl_file,has_bl_file,custom_range)
 
   # Step 2: get enhancer fold changes within each super-enhancer with enhancerFoldchange.R
   # Merged SE Output from step 1 as SE input for step 2
+  print("Step 2: calculate log2FC of constituent enhancer using Deseq2")
   merged_se_df <- step_1_out$se_merged
 
   if (bw == F) {
@@ -82,42 +84,53 @@ SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   }
 
   # Step 3: using weighted bs-spline to fit the fold change
-  # and use permutation to get fold change significant cutoff
-  e_deseq_out <- step_2_out$enhancer_deseq_result
-  not_in_se_count_matrix <- step_2_out$count_matrix_not_in_se
+  print("Step 3: bs-spline fit log2FC")
+  step_3_out <- SEfitspline_new(step_2_out$enhancer_deseq_result)
+
+  # Step 4: permutation to get cutoff (normal or stringent)
+  print("Step 4: permutation to get log2FC cutoff")
+  e_not_in_se <- step_2_out$count_matrix_not_in_se[,c("e_merge_name",
+                                                     "S1_r1","S1_r2","S2_r1","S2_r2",
+                                                     "se_merge_name")]
+  e_in_se <- step_2_out$enhancer_deseq_result[,c("e_merge_name",
+                             "S1_r1","S1_r2","S2_r1","S2_r2",
+                             "se_merge_name")]
+
 
   # chose different permut_type
   if (permut_type == "normal") {
     if (permut == TRUE){
-      step_3_out <- SEfitspline(e_deseq_out,merged_se_df)
-      cutoff_vector <- step_3_out$cutoff
+      sample_pool <- e_in_se
+      step_4_out <- permut_spline_new(step_3_out$se_fit_df,sample_pool)
+      cutoff_vector <- step_4_out$cutoff
     } else {
-      step_3_out <- SEfitspline(e_deseq_out,merged_se_df,permut = F)
+      step_4_out <- permut_spline_new(step_3_out$se_fit_df,sample_pool,permut=F)
       cutoff_vector <- cutoff_v
     }
 
-    se_fit_df <- step_3_out$se_fit_df
   } else if (permut_type == "stringent") {
 
     if (permut == TRUE){
-      step_3_out <- stringent_permut(not_in_se_count_matrix,e_deseq_out_df,merged_se_df)
-      cutoff_vector <- step_3_out$cutoff
+      sample_pool <- rbind(e_not_in_se,e_in_se)
+      step_4_out <- permut_spline_new(step_3_out$se_fit_df,sample_pool)
+      cutoff_vector <- step_4_out$cutoff
     } else {
-      step_3_out <- stringent_permut(not_in_se_count_matrix,e_deseq_out_df,merged_se_df,permut = F)
+      step_4_out <- permut_spline_new(step_3_out$se_fit_df,sample_pool,permut=F)
       cutoff_vector <- cutoff_v
     }
-
-    se_fit_df <- step_3_out$se_fit_df
-
   }
 
 
-  # Step 4: using cutoff to get the segment pattern of each SE
-  step_4_out <- SEpattern(se_fit_df,cutoff_vector)
-  se_seg_df <- step_4_out$se_segment_percent
+  # step_5: segment
+  print("Step 5: pattern segments process")
+  step_5_out <- SEpattern_demo(step_3_out$se_fit_df,step_3_out$spline_plot_df,
+                               step_4_out$cutoff)
 
-  # Step 5: get categories of each SE and ranking by category groups
-  step_5_out <- SEcategory(se_seg_df,se_fit_df)
+  # step_6: category
+  print("Step 6: final category estimate")
+  step_6_out <- SEcategory_demo_2(step_5_out$se_segment_percent,step_3_out$se_fit_df)
+  step_6_out_2 <- SEcategory_demo_3(step_5_out$se_segment_percent,step_3_out$se_fit_df)
+
 
   # make final output: final category and ranking file,
   # permutation density plots
@@ -126,16 +139,25 @@ SEprofile <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   # cutoff_vector,
   # and SE segments profile to output list
 
-  out <- list()
-  out$lfc_shrink <- step_2_out$lfc_shrink
-  out$se_meta <- step_1_out$se_merged
-  out$permut_plot <- step_3_out$density_plot
-  out$e_fit_fc <- step_3_out$se_fit_df
-  out$fc_cutoff <- cutoff_vector
-  out$pattern_plot <- step_4_out$plots
-  out$se_segments <- step_4_out$se_segment_percent
-  out$cate_rank <- step_5_out$se_cat_rank
-  out$box_plot <- step_5_out$cat_boxplot
-  out$e_count_not_in_se <- step_2_out$count_matrix_not_in_se
-  return(out)
+  output_list <- list(se_meta = step_1_out$se_merged_meta,
+                     se_deseq_out = step_2_out$enhancer_deseq_result,
+                     e_not_in_se = step_2_out$count_matrix_not_in_se[,c("e_merge_name",
+                                                                        "S1_r1","S1_r2","S2_r1","S2_r2",
+                                                                        "se_merge_name")],
+                     e_in_se = step_2_out$enhancer_deseq_result[,c("e_merge_name",
+                                                                   "S1_r1","S1_r2","S2_r1","S2_r2",
+                                                                   "se_merge_name")],
+                     lfc_shrink <- step_2_out$lfc_shrink,
+                     se_fit = step_3_out$se_fit_df,
+                     pattern_plot_df = step_3_out$spline_plot_df,
+                     cutoff = step_4_out$cutoff,
+                     density_plot = step_4_out$density_plot,
+                     pattern_list = step_5_out$plots,
+                     se_seg = step_5_out$se_segment_percent,
+                     se_category = step_6_out$se_cat_rank,
+                     se_category_sensitive = step_6_out_2$se_cat_rank,
+                     boxplot =step_6_out$cat_boxplot,
+                     boxplot_sensitive =step_6_out_2$cat_boxplot
+  )
+  return(output_list)
 }

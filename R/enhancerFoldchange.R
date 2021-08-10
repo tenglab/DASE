@@ -57,13 +57,12 @@ enhancerFoldchange <- function(e_df,se_df,
                 names = in_se_df$chr)
 
   e_merge_by_chr <- rbindlist(lapply(split(ir, names(ir)),
-                                   function(x) as.data.table(reduce(x,min.gapwidth = 500))),
+                                   function(x) as.data.table(reduce(x,min.gapwidth = 1))),
                             idcol = "chr")
 
   # create merged enhancer names
   e_merge_by_chr$e_merge_name <- apply(e_merge_by_chr[,c(1:3)],1, paste,collapse ="_" )
   e_merge_by_chr$e_merge_name <- gsub(" ","",e_merge_by_chr$e_merge_name)
-
 
   # feature count enhancer in SE
   # create enhancer in SE SAF format file

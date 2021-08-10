@@ -20,10 +20,10 @@
 #' catRank_list <- SEcategory(segment_percentage_df,enhancerFoldchange_out)
 #'
 
-SEcategory <- function(se_seg_df,e_fit) {
+SEcategory_demo_2 <- function(se_seg_df,e_fit) {
 
   # remove all segement whose percentage is less than 0.05
-  se_seg_filter <- se_seg_df[which(se_seg_df$seg_percent > 0),]
+  se_seg_filter <- se_seg_df[which(se_seg_df$seg_percent > 0.01),]
   se_name <- unique(se_seg_df$se_merge_name)
 
   # get average log2Foldchange of each SE for ranking
@@ -31,7 +31,7 @@ SEcategory <- function(se_seg_df,e_fit) {
   for (se in c(1:length(se_name))) {
     temp_se <- e_fit[which(e_fit$se_merge_name == se_name[se]),]
     temp_se$mean_FC <- rep(mean(temp_se$log2FoldChange.1),nrow(temp_se))
-    temp_out <- unique(temp_se[,c(25,28)])
+    temp_out <- unique(temp_se[,c("se_merge_name","mean_FC")])
     mean_fc_df <- rbind(mean_fc_df,temp_out)
   }
 
@@ -40,8 +40,15 @@ SEcategory <- function(se_seg_df,e_fit) {
   #---------------------------------------------------------------------------
   se_seg_w_cat_df <- data.frame()
   for (se_index in c(1:length(se_name))) {
+
+    # print step information
+    if(se_index %% 100==0) {
+      # Print on the screen some message
+      print(paste0("SE: ",se_index))
+    }
+
     temp_seg_df <- se_seg_filter[which(se_seg_filter$se_merge_name == se_name[se_index]),]
-    #temp_seg_df <- se_seg_filter[which(se_seg_filter$se_merge_name == "chr14_105474868_105501137"),]
+    #temp_seg_df <- se_seg_filter[which(se_seg_filter$se_merge_name == "chr1_995258_1025541"),]
     temp_seg_df <- temp_seg_df[order(temp_seg_df$seg_name),]
     n_row <- nrow(temp_seg_df)
 
@@ -96,6 +103,7 @@ SEcategory <- function(se_seg_df,e_fit) {
 
     # add new number of segments
     temp_cat_df$seg_number <- rep(nrow(temp_cat_df),nrow(temp_cat_df))
+
     #---------------------------------------------------------------------------
     # then get catogory
     #---------------------------------------------------------------------------
@@ -111,7 +119,7 @@ SEcategory <- function(se_seg_df,e_fit) {
         temp_cat_df$direction <- "none"
 
       } else {
-        temp_cat_df$category <- rep("Strengthen/weaken",nrow(temp_cat_df))
+        temp_cat_df$category <- rep("Overall",nrow(temp_cat_df))
         if (temp_cat_df$seg_loc == "lower") {
           temp_cat_df$direction <- "-"
         } else {
@@ -130,10 +138,10 @@ SEcategory <- function(se_seg_df,e_fit) {
 
       # cutoff from 0.98-0.25 to 0.98~0.25
       if (nrow(temp_mid) != 0 ) {
-        if (temp_mid$seg_percent >= 0.98) {
+        if (temp_mid$seg_percent >= 0.99) {
           temp_cat_df$category <- rep("Similar",nrow(temp_cat_df))
           temp_cat_df$direction <- "none"
-        } else if (temp_mid$seg_percent < 0.98 & temp_mid$seg_percent >= 0.25) {
+        } else if (temp_mid$seg_percent < 0.99 & temp_mid$seg_percent >= 0.1) {
           temp_cat_df$category <- rep("Shorten",nrow(temp_cat_df))
           if (temp_other$seg_loc == "lower") {
             temp_cat_df$direction <- "-"
@@ -141,7 +149,7 @@ SEcategory <- function(se_seg_df,e_fit) {
             temp_cat_df$direction <- "+"
           }
         } else {
-          temp_cat_df$category <- rep("Strengthen/weaken",nrow(temp_cat_df))
+          temp_cat_df$category <- rep("Overall",nrow(temp_cat_df))
           if (temp_other$seg_loc == "lower") {
             temp_cat_df$direction <- "-"
           } else {
@@ -160,8 +168,8 @@ SEcategory <- function(se_seg_df,e_fit) {
     }
 
     #------------------------------------------------------------------------------
-    # check 3 segment
-    if (unique(temp_cat_df$seg_number) == 3) {
+    # check 3 and 4 segment
+    if (unique(temp_cat_df$seg_number) %in% c(3,4)) {
 
       # extract each segments
       temp_p_1 <- temp_cat_df[1,]
@@ -182,9 +190,9 @@ SEcategory <- function(se_seg_df,e_fit) {
       # change cutoff from 0.98~0.25 to 0.98~0.25
       else if ( length(unique(temp_cat_df$seg_loc)) == 2
                   & temp_p_2$seg_loc == "mid") {
-        if ( temp_p_2$seg_percent >= 0.98) {
+        if ( temp_p_2$seg_percent >= 0.99) {
           temp_cat_df$category <- rep("Similar",nrow(temp_cat_df))
-        } else if (temp_p_2$seg_percent < 0.98 & temp_p_2$seg_percent >= 0.25) {
+        } else if (temp_p_2$seg_percent < 0.99 & temp_p_2$seg_percent >= 0.1) {
             temp_cat_df$category <- rep("Shorten",nrow(temp_cat_df))
             if (temp_p_1$seg_loc == "lower") {
               temp_cat_df$direction <- "-"
@@ -192,7 +200,7 @@ SEcategory <- function(se_seg_df,e_fit) {
               temp_cat_df$direction <- "+"
             }
         } else {
-          temp_cat_df$category <- rep("Strengthen/weaken",nrow(temp_cat_df))
+          temp_cat_df$category <- rep("Overall",nrow(temp_cat_df))
           if (temp_p_1$seg_loc == "lower") {
             temp_cat_df$direction <- "-"
           } else {
@@ -205,21 +213,21 @@ SEcategory <- function(se_seg_df,e_fit) {
       else if ( temp_p_1$seg_loc == "mid" &
                (temp_p_2$seg_loc == "lower" | temp_p_2$seg_loc == "upper")) {
         if ( temp_p_2$seg_percent >= 0.5) {
-          temp_cat_df$category <- rep("Strengthen/weaken",nrow(temp_cat_df))
+          temp_cat_df$category <- rep("Overall",nrow(temp_cat_df))
           if (temp_p_2$seg_loc == "lower") {
             temp_cat_df$direction <- "-"
           } else {
             temp_cat_df$direction <- "+"
           }
-        } else if (temp_p_2$seg_percent <= 0.05) {
+        } else if (temp_p_2$seg_percent <= 0.01) {
 
           temp_cat_df$category <- rep("Similar",nrow(temp_cat_df))
           temp_cat_df$direction <- "none"
 
         } else if (temp_p_2$seg_percent < 0.5 &
-                   temp_p_2$seg_percent > 0.1 &
+                   temp_p_2$seg_percent > 0.01 &
                    abs(temp_p_1$seg_percent - temp_p_3$seg_percent) < 0.2) {
-          temp_cat_df$category <- rep("V_shape",nrow(temp_cat_df))
+          temp_cat_df$category <- rep("Hollow",nrow(temp_cat_df))
           if (temp_p_2$seg_loc == "lower") {
             temp_cat_df$direction <- "-"
           } else {
@@ -246,7 +254,7 @@ SEcategory <- function(se_seg_df,e_fit) {
       else if ((temp_p_1$seg_loc == "lower" & temp_p_2$seg_loc == "upper") |
            (temp_p_1$seg_loc == "upper" & temp_p_2$seg_loc == "lower") ) {
 
-        temp_cat_df$category <- rep("V_shape",nrow(temp_cat_df))
+        temp_cat_df$category <- rep("Hollow",nrow(temp_cat_df))
 
         if (temp_p_2$seg_loc == "lower") {
           temp_cat_df$direction <- "-"
@@ -257,8 +265,8 @@ SEcategory <- function(se_seg_df,e_fit) {
     }
 
     #------------------------------------------------------------------------------
-    # more than 4 segments
-    if (unique(temp_cat_df$seg_number) >= 4) {
+    # more than 5 segments
+    if (unique(temp_cat_df$seg_number) >= 5) {
       temp_cat_df$category <- rep("Other",nrow(temp_cat_df))
       temp_cat_df$direction <- "none"
     }
@@ -267,7 +275,7 @@ SEcategory <- function(se_seg_df,e_fit) {
     # calculate percentage of none "mid" segments for ranking
     #---------------------------------------------------------------------------
     # calculate percentage of none "mid" segments
-    temp_per_for_rank <- sum(temp_cat_df[which(temp_cat_df$seg_loc!="mid"),7])
+    temp_per_for_rank <- sum(temp_cat_df[which(temp_cat_df$seg_loc!="mid"),"seg_percent"])
 
     temp_cat_df$non_mid_percent <- rep(temp_per_for_rank,nrow(temp_cat_df))
 
