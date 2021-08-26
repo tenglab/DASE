@@ -34,14 +34,14 @@ SEpattern_demo <- function(se_fit_df,pattern_plot_df,cutoff_vector) {
   u_cut <- max(cutoff_vector)
 
   # set cutoff brand to filter cutoff boundary points
-  l_band <- c(l_cut*0.9,l_cut*1.1)
-  u_band <- c(u_cut*0.9,u_cut*1.1)
+  l_band <- c(l_cut*1,l_cut*1)
+  u_band <- c(u_cut*1,u_cut*1)
   # loop by super-enhancer names
   se_name <- unique(se_fit_df$se_merge_name)
   for (se_index in c(1:length(se_name))) {
 
     # print step information
-    if(se_index %% 100==0) {
+    if(se_index %% 500==0) {
       # Print on the screen some message
       print(paste0("SE: ",se_index))
     }

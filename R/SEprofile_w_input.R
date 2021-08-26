@@ -20,6 +20,10 @@
 #' @param s1_r2_bam path of sample 1 replicate 2 bam/bw file
 #' @param s2_r1_bam path of sample 2 replicate 1 bam/bw file
 #' @param s2_r2_bam path of sample 2 replicate 2 bam/bw file
+#' @param s1_r1_in_bam path of sample 1 replicate 1 bam file
+#' @param s1_r2_in_bam path of sample 1 replicate 2 bam file
+#' @param s2_r1_in_bam path of sample 2 replicate 1 bam file
+#' @param s2_r2_in_bam path of sample 2 replicate 2 bam file
 #' @param permut if you want permutation (default=TRUE)
 #' @param permut_type normal or stringent (default=normal)
 #' @param times permutation times (default=10)
@@ -57,10 +61,11 @@
 #' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 #'
 
-SEprofile_2 <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
+SEprofile_w_input <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
                       s1_pair=FALSE,s2_pair=FALSE, bw=F, custom_range=F,
                       permut=TRUE, permut_type="normal",times=10,cutoff_v=c(-1,1),
-                      s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
+                      s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam,
+                      s1_r1_in_bam,s1_r2_in_bam,s2_r1_in_bam,s2_r2_in_bam) {
 
   # Step 1: filter super-enhancer with SEfilter.R with or without SE blacklist file
   print("Step 1: merge and filter SE")
@@ -73,10 +78,14 @@ SEprofile_2 <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   merged_se_df <- step_1_out$se_merged
   print(paste0("Processing total of ",nrow(merged_se_df)," SEs"))
   if (bw == F) {
-    step_2_out <- enhancerFoldchange(e_df=e_df,se_df=merged_se_df,
+    step_2_out <- enhancerFoldchange_w_input(e_df=e_df,se_df=merged_se_df,
                                        s1_pair=s1_pair,s2_pair=s2_pair,
                                        s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
-                                       s2_r1_bam=s2_r1_bam ,s2_r2_bam=s2_r2_bam)
+                                       s2_r1_bam=s2_r1_bam ,s2_r2_bam=s2_r2_bam,
+                                       s1_r1_in_bam = s1_r1_in_bam_path,
+                                       s1_r2_in_bam = s1_r2_in_bam_path,
+                                       s2_r1_in_bam = s2_r1_in_bam_path,
+                                       s2_r2_in_bam = s2_r2_in_bam_path)
   } else {
     step_2_out <- enhancerFoldchange_bw(e_df=e_df,se_df=merged_se_df,
                                         s1_pair=s1_pair,s2_pair=s2_pair,

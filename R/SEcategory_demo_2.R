@@ -42,7 +42,7 @@ SEcategory_demo_2 <- function(se_seg_df,e_fit) {
   for (se_index in c(1:length(se_name))) {
 
     # print step information
-    if(se_index %% 100==0) {
+    if(se_index %% 500==0) {
       # Print on the screen some message
       print(paste0("SE: ",se_index))
     }
@@ -168,8 +168,8 @@ SEcategory_demo_2 <- function(se_seg_df,e_fit) {
     }
 
     #------------------------------------------------------------------------------
-    # check 3 and 4 segment
-    if (unique(temp_cat_df$seg_number) %in% c(3,4)) {
+    # check 3 segment
+    if (unique(temp_cat_df$seg_number) == 3) {
 
       # extract each segments
       temp_p_1 <- temp_cat_df[1,]
@@ -226,7 +226,7 @@ SEcategory_demo_2 <- function(se_seg_df,e_fit) {
 
         } else if (temp_p_2$seg_percent < 0.5 &
                    temp_p_2$seg_percent > 0.01 &
-                   abs(temp_p_1$seg_percent - temp_p_3$seg_percent) < 0.2) {
+                   (temp_p_1$seg_percent >= 0.05 & temp_p_3$seg_percent >= 0.05)) {
           temp_cat_df$category <- rep("Hollow",nrow(temp_cat_df))
           if (temp_p_2$seg_loc == "lower") {
             temp_cat_df$direction <- "-"
@@ -235,8 +235,8 @@ SEcategory_demo_2 <- function(se_seg_df,e_fit) {
           }
 
         } else if (temp_p_2$seg_percent < 0.5 &
-                   temp_p_2$seg_percent > 0.1 &
-                   abs(temp_p_1$seg_percent - temp_p_3$seg_percent) > 0.2) {
+                   temp_p_2$seg_percent > 0.01 &
+                   (temp_p_1$seg_percent < 0.05 | temp_p_3$seg_percent < 0.05)) {
           temp_cat_df$category <- rep("Shorten",nrow(temp_cat_df))
           if (temp_p_2$seg_loc == "lower") {
             temp_cat_df$direction <- "-"
@@ -264,6 +264,27 @@ SEcategory_demo_2 <- function(se_seg_df,e_fit) {
       }
     }
 
+    #------------------------------------------------------------------------------
+    # check 4 segment
+    if (unique(temp_cat_df$seg_number) == 4) {
+
+      temp_seg_loc <- unique(temp_cat_df$seg_loc)
+
+      # Hollow
+      if ("upper" %in% temp_seg_loc & "lower" %in% temp_seg_loc) {
+        temp_cat_df$category <- rep("Hollow",nrow(temp_cat_df))
+        if (which(temp_seg_loc=="lower") > which(temp_seg_loc=="upper")) {
+          temp_cat_df$direction <- "-"
+        } else {
+          temp_cat_df$direction <- "+"
+        }
+
+      } else {
+        temp_cat_df$category <- rep("Other",nrow(temp_cat_df))
+        temp_cat_df$direction <- "none"
+      }
+
+    }
     #------------------------------------------------------------------------------
     # more than 5 segments
     if (unique(temp_cat_df$seg_number) >= 5) {

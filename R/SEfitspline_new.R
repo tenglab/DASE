@@ -48,7 +48,7 @@ SEfitspline_new <- function(e_deseq_out_df){
   for (i in c(1:length(merged_super_name))) {
 
     # print step information
-    if(i %% 100==0) {
+    if(i %% 500==0) {
       # Print on the screen some message
       print(paste0("SE: ",i))
     }

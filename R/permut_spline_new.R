@@ -55,10 +55,10 @@ permut_spline_new <- function(spline_fit_out,sample_pool,permut=T,times=10) {
       se_name <- unique(temp_shuffle_count_df$se_merge_name)
       for (k in c(1:length(se_name))) {
         # print step information
-        if(k %% 100==0) {
-          # Print on the screen some message
-          print(paste0("SE: ",k))
-        }
+        # if(k %% 100==0) {
+        #   # Print on the screen some message
+        #   print(paste0("SE: ",k))
+        # }
 
         shuffle_enhancer <- temp_shuffle_count_df[which(temp_shuffle_count_df$se_merge_name == se_name[k]),]
         shuffle_enhancer$percent <- shuffle_enhancer$max_mean/sum(shuffle_enhancer$max_mean)*100
@@ -86,6 +86,14 @@ permut_spline_new <- function(spline_fit_out,sample_pool,permut=T,times=10) {
                                                     Boundary.knots = c(min(width_mid)-5,max(width_mid)+5)),
                                 data = shuffle_enhancer,
                                 weights = max_mean)
+
+          } else if (n_top >= 6) {
+              # df=4
+              spline_bs_fit <- lm(log2FoldChange~bs(width_mid,
+                                                      degree=4,
+                                                      Boundary.knots = c(min(width_mid)-5,max(width_mid)+5)),
+                                  data = shuffle_enhancer,
+                                  weights = max_mean)
 
           } else {
             # df=3
@@ -124,7 +132,7 @@ permut_spline_new <- function(spline_fit_out,sample_pool,permut=T,times=10) {
     temp_density_plot_df <- data.frame(group = rep("original", nrow(plot_original)),
                                        w_bs_spline = plot_original$spline_bs)
 
-    temp_density_plot_df_2 <- data.frame(group = rep("Feature counts", nrow(plot_shuffle)),
+    temp_density_plot_df_2 <- data.frame(group = rep("permutation", nrow(plot_shuffle)),
                                          w_bs_spline = plot_shuffle$permut_spline_bs)
 
     density_plot_df <- rbind(temp_density_plot_df,temp_density_plot_df_2)
@@ -146,8 +154,8 @@ permut_spline_new <- function(spline_fit_out,sample_pool,permut=T,times=10) {
     root_point_2 <- solveroot(slope_df$log2FC,slope_df$slope,y0 = -r_xy)
 
     fc_cutoff <- append(root_point_1,root_point_2)
-    u_cut_v <- fc_cutoff[fc_cutoff > 1 & fc_cutoff < 2]
-    l_cut_v <- fc_cutoff[fc_cutoff > -2 & fc_cutoff < -1]
+    u_cut_v <- fc_cutoff[fc_cutoff > 0.5 & fc_cutoff < 2]
+    l_cut_v <- fc_cutoff[fc_cutoff > -2 & fc_cutoff < -0.5]
 
     # check if there are number
     if (length(u_cut_v) != 0) {
@@ -155,7 +163,7 @@ permut_spline_new <- function(spline_fit_out,sample_pool,permut=T,times=10) {
     } else if (length(l_cut_v) != 0) {
       u_cut <- -max(l_cut_v)
     } else {
-      u_cut <- 1
+      u_cut <- 1.5
     }
 
     if (length(l_cut_v) != 0) {
@@ -163,7 +171,7 @@ permut_spline_new <- function(spline_fit_out,sample_pool,permut=T,times=10) {
     } else if (length(u_cut_v) != 0) {
       l_cut <- -min(u_cut_v)
     } else {
-      l_cut <- -1
+      l_cut <- -1.5
     }
 
     final_cutoff <- c(l_cut,u_cut)
@@ -175,7 +183,7 @@ permut_spline_new <- function(spline_fit_out,sample_pool,permut=T,times=10) {
       geom_vline(xintercept=final_cutoff[2],linetype = "dashed")+
       theme_classic()+
       ggtitle("merged_enhancer Density")+
-      xlab("Weighted lowess fitted log2FC")+
+      xlab("Weighted b-spline fitted log2FC")+
       ylab("Density")+
       xlim(c(-5,5))+
 
@@ -191,6 +199,7 @@ permut_spline_new <- function(spline_fit_out,sample_pool,permut=T,times=10) {
   out <- list()
   out$se_permutation_df <-permut_out
   out$cutoff <- final_cutoff
+  out$cutoff_candidate <- fc_cutoff
   out$density_plot <- density_p
   return(out)
 }
