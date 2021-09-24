@@ -5,18 +5,12 @@
 #'
 #' @details
 #' This function will fit the enhancer fold change within each SE by using bs-spline
-#' weighted by basemean. A normal permutation of counts of enhancers in SEs is used to decide the
-#' cutoff of significant log2FC (for samples are not too similar). Cutoff was calculate by slope equal to range(y)/range(x).
-#' The max value in range(-2,-1.5) and min value in range(1.5,2) are set to be lower and upper cutoff.
-#'
+#' weighted by the max basemean of two samples.
 #' @param e_deseq_out_df enhancer output file from enhancerFoldchange
-#' @param se_df merged SE metadata from SEfilter
-#' @param times permutation times (default=10)
-#' @param permut if you want permutation (default=TRUE)
 #'
 #' @return
-#' A list of 4 datasets: enhancer fitted dataset, permutation dataset, cutoff vector,
-#' and a density plot of permutation and original fitted fold change.
+#' se_fit_df: enhancer fitted dataframe
+#' spline_plot_df_out: spline fitted line plot dataframe
 #'
 #' @import DESeq2
 #' @import Rsubread
@@ -26,175 +20,102 @@
 #'
 #' @export
 #' @examples
-#' # permutation 10 times
-#' fit_list <- SEfitspline(enhancerFoldchange_out,se_meta)
+#' fit_list <- SEfitspline(enhancerFoldchange_out)
 #'
-#' # permutation 5 times
-#' fit_list <- SEfitspline(enhancerFoldchange_out,se_meta,times=5)
-#'
-#' # no permutation
-#' fit_list <- SEfitspline(enhancerFoldchange_out,se_meta,permut=FALSE)
 
-SEfitspline <- function(e_deseq_out_df,se_df,times=10,permut=T){
+SEfitspline <- function(e_deseq_out_df){
   #--------------------------------------------------------------
+  e_deseq_out_df$s1_mean <- (e_deseq_out_df$S1_r1_norm+e_deseq_out_df$S1_r2_norm)/2
+  e_deseq_out_df$s2_mean <- (e_deseq_out_df$S2_r1_norm+e_deseq_out_df$S2_r2_norm)/2
+  e_deseq_out_df$max_mean <- apply(e_deseq_out_df[,c("s1_mean","s2_mean")],1,FUN=max)
+
   # create original bs-spline fit
   fit_out <- data.frame()
+  spline_plot_df_out <- data.frame()
 
-  merged_super_name <- se_df$se_merge_name
+  merged_super_name <- unique(e_deseq_out_df$se_merge_name)
   for (i in c(1:length(merged_super_name))) {
+
+    # print step information
+    if(i %% 500==0) {
+      # Print on the screen some message
+      print(paste0("SE: ",i))
+    }
+
     temp_pattern <- e_deseq_out_df[which(e_deseq_out_df$se_merge_name == merged_super_name[i]),]
     temp_pattern$width_mid <- (temp_pattern$start+temp_pattern$width/2)/1000
+    temp_pattern$percent <- temp_pattern$max_mean/sum(temp_pattern$max_mean)*100
+    temp_pattern <- temp_pattern[order(-temp_pattern$percent)]
+    temp_pattern$cumsum <- cumsum(temp_pattern$percent)
 
-    # splines bs fit
-    spline_bs_fit <- lm(formula = log2FoldChange.1 ~ bs(width_mid),data = temp_pattern,
-                        weights = baseMean.1)
+    # check if only 1 enhancer
+    if (nrow(temp_pattern) == 1) {
+      spline_bs_fit <- lm(log2FoldChange.1~bs(width_mid,
+                                              degree=2),
+                          data = temp_pattern,
+                          weights = max_mean)
 
-    temp_pattern$spline_bs <- spline_bs_fit$fitted.values
+      temp_pattern$spline_bs <- spline_bs_fit$fitted.values
 
-    # create output dataframe with fitted value
-    fit_out <- rbind(fit_out,temp_pattern)
-  }
+      # pattern plot
+      temp_plot_df <- data.frame(se_merge_name=temp_pattern$se_merge_name,
+                                 new_x=temp_pattern$width_mid,
+                                 pred_y=temp_pattern$log2FoldChange.1)
 
-  #-----------------------------------------------------------------------------
-  # shuffle counts of each enhancer n times (default 10), got new fold change,
-  # and get new bs-spline fit
+    } else {
+      # get df based on number of enhancer whose cumsum is > 95%
+      n_top <- min(which(temp_pattern$cumsum > 95))
 
-  permut_out <- data.frame()
-  if (permut) {
-    for (shuffle_i in c(1:times)) {
-      # shuffle counts
-      temp_permut <- e_deseq_out_df[,c(1:9,25)]
-      temp_permut$S1_r1 <- sample(e_deseq_out_df$S1_r1)
-      temp_permut$S1_r2 <- sample(e_deseq_out_df$S1_r2)
-      temp_permut$S2_r1 <- sample(e_deseq_out_df$S2_r1)
-      temp_permut$S2_r2 <- sample(e_deseq_out_df$S2_r2)
+      # create new_x
+      n<-20
+      new_x <- data.frame(width_mid=seq(min(temp_pattern$width_mid),
+                                        max(temp_pattern$width_mid),
+                                        length.out=n))
 
-      # DESeq2 fold-change
-      # make count matrix
-      count_matrix <- as.data.frame(temp_permut[,c(6:9)])
-      rownames(count_matrix) <- temp_permut$e_merge_name
+      # different df based on n_top
+      if (n_top <= 4) {
+        # df=2
+        spline_bs_fit <- lm(log2FoldChange.1~bs(width_mid,
+                                                degree=2,
+                                                Boundary.knots = c(min(width_mid)-5,max(width_mid)+5)),
+                            data = temp_pattern,
+                            weights = max_mean)
 
-      # remove row.sum = 0
-      no_zero_count_matrix <- count_matrix[rowSums(count_matrix)>0,]
-      sample_data <- data.frame(row.names = colnames(no_zero_count_matrix),
-                                condition = c("S1","S1","S2","S2"))
-      dds <- DESeqDataSetFromMatrix(countData = no_zero_count_matrix,
-                                    colData = sample_data,
-                                    design = ~ condition)
+      } else if (n_top >= 6) {
+        # df=4
+        spline_bs_fit <- lm(log2FoldChange.1~bs(width_mid,
+                                                degree=4,
+                                                Boundary.knots = c(min(width_mid)-5,max(width_mid)+5)),
+                            data = temp_pattern,
+                            weights = max_mean)
 
-      # calculate fold change
-      dds <- DESeq(dds)
-      res <- results(dds)
+      } else {
+        # df=3
+        spline_bs_fit <- lm(log2FoldChange.1~bs(width_mid,
+                                                degree=3,
+                                                Boundary.knots = c(min(width_mid)-5,max(width_mid)+5)),
+                            data = temp_pattern,
+                            weights = max_mean)
 
-      # lfc shrinking
-      resLFC <- lfcShrink(dds, coef="condition_S2_vs_S1", type="apeglm")
-      new_resLFC <-setDT(as.data.frame(resLFC), keep.rownames = "e_merge_name")[]
-
-      # make final output
-      temp_shuffle_count_df <- merge(temp_permut,new_resLFC,by="e_merge_name")
-
-      # get new fitted value
-      permut_fit <- data.frame()
-
-      for (k in c(1:length(merged_super_name))) {
-        shuffle_enhancer <- temp_shuffle_count_df[which(temp_shuffle_count_df$se_merge_name == merged_super_name[k]),]
-        shuffle_enhancer$width_mid <- (shuffle_enhancer$start+shuffle_enhancer$width/2)/1000
-
-        # splines bs fit
-        spline_bs_fit <- lm(formula = log2FoldChange ~ bs(width_mid),data = shuffle_enhancer,
-                            weights = baseMean,na.action = na.exclude)
-        shuffle_enhancer$permut_spline_bs <- spline_bs_fit$fitted.values
-
-        # create output dataframe with fitted value
-        permut_fit <- rbind(permut_fit,shuffle_enhancer)
       }
 
-      # creat output dataframe
-      temp_new_fit_df <- as.data.frame(permut_fit[,c(1,10,17)])
-      temp_new_fit_df$shuffle_index <- rep(shuffle_i,nrow(temp_new_fit_df))
-      permut_out <- rbind(permut_out,temp_new_fit_df)
+      # save fitted.values for permutation
+      temp_pattern$spline_bs <- spline_bs_fit$fitted.values
+
+      # pattern plot
+      temp_plot_df <- data.frame(se_merge_name=rep(unique(temp_pattern$se_merge_name),n),
+                                   new_x=new_x$width_mid,
+                                   pred_y=predict(spline_bs_fit,new_x))
+
     }
-  } else {
-    permut_out <- NA
-  }
-
-  #-----------------------------------------------------------------------------
-  # plot density of original bs fit and new bs fit
-  if (permut) {
-    plot_original <- fit_out[!is.na(fit_out$spline_bs),]
-    plot_shuffle <- permut_out[!is.na(permut_out$permut_spline_bs),]
-
-    temp_density_plot_df <- data.frame(group = rep("original", nrow(plot_original)),
-                                       w_bs_spline = plot_original$spline_bs)
-
-    temp_density_plot_df_2 <- data.frame(group = rep("Feature counts", nrow(plot_shuffle)),
-                                         w_bs_spline = plot_shuffle$permut_spline_bs)
-
-    density_plot_df <- rbind(temp_density_plot_df,temp_density_plot_df_2)
-
-    # get cutoff based on slope = 1
-    d <- density(plot_shuffle$permut_spline_bs)
-    slope_df <- data.frame(density = d$y[-1], log2FC = d$x[-1],
-                           slope = diff(d$y)/diff(d$x))
-
-    # remove small density values
-    new_df <- slope_df[which(slope_df$density > 0.01),]
-
-    # normalize x and y-axis
-    x_unit <- max(new_df$log2FC)-min(new_df$log2FC)
-    y_unit <- max(new_df$density)-min(new_df$density)
-    r_xy <- y_unit/x_unit
-
-    root_point_1 <- solveroot(slope_df$log2FC,slope_df$slope,y0 = r_xy)
-    root_point_2 <- solveroot(slope_df$log2FC,slope_df$slope,y0 = -r_xy)
-
-    fc_cutoff <- append(root_point_1,root_point_2)
-    u_cut_v <- fc_cutoff[fc_cutoff > 1 & fc_cutoff < 2]
-    l_cut_v <- fc_cutoff[fc_cutoff > -2 & fc_cutoff < -1]
-
-    # check if there are number
-    if (length(u_cut_v) != 0) {
-      u_cut <- min(u_cut_v)
-    } else if (length(l_cut_v) != 0) {
-      u_cut <- -max(l_cut_v)
-    } else {
-      u_cut <- 1.5
-    }
-
-    if (length(l_cut_v) != 0) {
-      l_cut <- max(l_cut_v)
-    } else if (length(u_cut_v) != 0) {
-      l_cut <- -min(u_cut_v)
-    } else {
-      l_cut <- -1.5
-    }
-
-    final_cutoff <- c(l_cut,u_cut)
-
-    # plot density with cutoff line
-    density_p <- ggplot(density_plot_df, aes(x = w_bs_spline,color = group))+
-      geom_density()+
-      geom_vline(xintercept=final_cutoff[1],linetype = "dashed")+
-      geom_vline(xintercept=final_cutoff[2],linetype = "dashed")+
-      theme_classic()+
-      ggtitle("merged_enhancer Density")+
-      xlab("Weighted lowess fitted log2FC")+
-      ylab("Density")+
-      xlim(c(-5,5))+
-
-      theme(axis.text.x = element_text(angle = 0,hjust = 1),
-            plot.title = element_text(hjust = 0.5))
-
-  } else {
-    density_p <- NA
-    final_cutoff <- NA
+    # create output dataframe with fitted value
+    fit_out <- rbind(fit_out,temp_pattern)
+    spline_plot_df_out <- rbind(spline_plot_df_out,temp_plot_df)
   }
 
   # creat final output list
   out <- list()
   out$se_fit_df <- fit_out
-  out$se_permutation_df <-permut_out
-  out$cutoff <- final_cutoff
-  out$density_plot <- density_p
+  out$spline_plot_df <- spline_plot_df_out
   return(out)
 }

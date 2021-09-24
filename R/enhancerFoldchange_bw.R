@@ -35,20 +35,10 @@
 enhancerFoldchange_bw <- function(e_df,se_df,
                                   s1_r1_bw,s1_r2_bw,s2_r1_bw,s2_r2_bw) {
 
-  # extract enhancers within merged super-enhancer
-  in_se_df <- data.frame()
-  for (i in c(1:nrow(se_df))) {
-
-    in_se_temp <- e_df[which(e_df$chr==se_df$chr[i] &
-                               e_df$start>=se_df$start[i] &
-                               e_df$end<= se_df$end[i]),]
-    in_se_df <- rbind(in_se_df,in_se_temp)
-  }
-
   # merge enhancers with gaps less than 500bps
-  ir <- IRanges(in_se_df$start,
-                in_se_df$end,
-                names = in_se_df$chr)
+  ir <- IRanges(e_df$start,
+                e_df$end,
+                names = e_df$chr)
 
   e_merge_by_chr <- rbindlist(lapply(split(ir, names(ir)),
                                      function(x) as.data.table(reduce(x,min.gapwidth = 500))),
@@ -57,8 +47,6 @@ enhancerFoldchange_bw <- function(e_df,se_df,
   # create merged enhancer names
   e_merge_by_chr$e_merge_name <- apply(e_merge_by_chr[,c(1:3)],1, paste,collapse ="_" )
   e_merge_by_chr$e_merge_name <- gsub(" ","",e_merge_by_chr$e_merge_name)
-
-  # get counts from bw file for one sample
 
   # function to count bw file
   count_bw <- function(bw_path,chr_list) {
@@ -140,10 +128,14 @@ enhancerFoldchange_bw <- function(e_df,se_df,
   # save size_factor
   size_factor <- sizeFactors(dds)
 
+  not_in_se_deseq <- temp_output[!(temp_output$e_merge_name %in% final_out_df$e_merge_name),]
+
   # make output list
   out <- list()
   out$lfc_shrink <- resLFC
   out$enhancer_deseq_result <- final_out_df
   out$size_factor <- size_factor
+  out$not_in_se_deseq <- not_in_se_deseq
   return(out)
 }
+

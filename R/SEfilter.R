@@ -15,8 +15,9 @@
 #' Format: c(chr:start-end, chr:start-end, ...) (default=FALSE).
 #'
 #' @return
-#' A list of 3 datasets: filtered SE datasets with merged SE names,
-#' SE datasets identified in the blacklist, and merged SE metadata
+#' se_filtered_no_bl: filtered SE datasets with merged SE names,
+#' se_filtered_in_bl: SE datasets identified in the blacklist
+#' se_merged_meta: merged SE metadata
 #'
 #' @import data.table
 #'
@@ -64,9 +65,6 @@ SEfilter <- function (se_in,bl_file=FALSE,has_bl_file=FALSE,custom_range = FALSE
     se_filter_df_no_bl <- se_filter_df
     se_filter_df_in_bl <- NA
   }
-
-  # remove SE which are in the blacklist
-
 
   # merge SEs from each sample to the longest representative SE
   ir <- IRanges(se_filter_df_no_bl$START,

@@ -4,17 +4,19 @@
 \alias{SEpattern}
 \title{Pattern of SE}
 \usage{
-SEpattern(se_fit_df, cutoff_vector)
+SEpattern(se_fit_df, pattern_plot_df, cutoff_vector)
 }
 \arguments{
 \item{se_fit_df}{fitted output file from SEfitspline}
+
+\item{pattern_plot_df}{spline fitted line data from SEfitspline}
 
 \item{cutoff_vector}{cutoff vector including lower and upper cutoff from SEfitspline
 (default is c(-1.5,1.5))}
 }
 \value{
-A list of 2 datasets: plot list contain plots' object of each SE and
-SE segment percentage dataset
+plots: list contain constitute enhancer fold change plot of each SE
+se_segment_percent: SE segment percentage dataset
 }
 \description{
 A function to get the pattern of SEs based on enhancer fitted line

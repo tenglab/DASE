@@ -4,20 +4,14 @@
 \alias{SEfitspline}
 \title{Fit enhancer fold change and normal premut}
 \usage{
-SEfitspline(e_deseq_out_df, se_df, times = 10, permut = T)
+SEfitspline(e_deseq_out_df)
 }
 \arguments{
 \item{e_deseq_out_df}{enhancer output file from enhancerFoldchange}
-
-\item{se_df}{merged SE metadata from SEfilter}
-
-\item{times}{permutation times (default=10)}
-
-\item{permut}{if you want permutation (default=TRUE)}
 }
 \value{
-A list of 4 datasets: enhancer fitted dataset, permutation dataset, cutoff vector,
-and a density plot of permutation and original fitted fold change.
+se_fit_df: enhancer fitted dataframe
+spline_plot_df_out: spline fitted line plot dataframe
 }
 \description{
 A function uses bs-spline weighted by basemean to fit the enhancer fold change
@@ -25,17 +19,9 @@ within each SE.
 }
 \details{
 This function will fit the enhancer fold change within each SE by using bs-spline
-weighted by basemean. A normal permutation of counts of enhancers in SEs is used to decide the
-cutoff of significant log2FC (for samples are not too similar). Cutoff was calculate by slope equal to range(y)/range(x).
-The max value in range(-2,-1.5) and min value in range(1.5,2) are set to be lower and upper cutoff.
+weighted by the max basemean of two samples.
 }
 \examples{
-# permutation 10 times
-fit_list <- SEfitspline(enhancerFoldchange_out,se_meta)
+fit_list <- SEfitspline(enhancerFoldchange_out)
 
-# permutation 5 times
-fit_list <- SEfitspline(enhancerFoldchange_out,se_meta,times=5)
-
-# no permutation
-fit_list <- SEfitspline(enhancerFoldchange_out,se_meta,permut=FALSE)
 }

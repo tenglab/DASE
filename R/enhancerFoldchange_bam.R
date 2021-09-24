@@ -28,10 +28,10 @@
 #'
 #' @export
 #' @examples
-#' foldchange_list <- enhancerFoldchange(pool_enhancer_df,se_meta,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+#' foldchange_list <- enhancerFoldchange_bam(pool_enhancer_df,se_meta,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
 #'
 
-enhancerFoldchange_all <- function(e_df,se_df,
+enhancerFoldchange_bam <- function(e_df,se_df,
                                s1_pair=FALSE,s2_pair=FALSE,
                                s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
 

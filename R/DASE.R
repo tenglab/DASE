@@ -1,4 +1,4 @@
-#' Get SE category by one step
+#' Main function to get SE category
 #'
 #' A function to get the category and ranking of SEs in one step
 #'
@@ -15,7 +15,7 @@
 #' @param custom_range a vector of extra customized blacklist to ignore.
 #' Format: c(chr:start-end, chr:start-end, ...) (default=FALSE).
 #'
-#' @param bw quantitative file are bigwig files (default=FALSE)
+#' @param data_type quantitative file format "bam" or "bw" (default=bam)
 #' @param s1_r1_bam path of sample 1 replicate 1 bam/bw file
 #' @param s1_r2_bam path of sample 1 replicate 2 bam/bw file
 #' @param s2_r1_bam path of sample 2 replicate 1 bam/bw file
@@ -57,8 +57,8 @@
 #' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 #'
 
-SEprofile_2 <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
-                      s1_pair=FALSE,s2_pair=FALSE, bw=F, custom_range=F,
+DASE <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
+                      s1_pair=FALSE,s2_pair=FALSE, data_type="bam", custom_range=F,
                       permut=TRUE, permut_type="normal",times=10,cutoff_v=c(-1,1),
                       s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
 
@@ -71,9 +71,8 @@ SEprofile_2 <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   print("Step 2: calculate log2FC of constituent enhancer using Deseq2")
 
   merged_se_df <- step_1_out$se_merged
-  print(paste0("Processing total of ",nrow(merged_se_df)," SEs"))
   if (bw == F) {
-    step_2_out <- enhancerFoldchange(e_df=e_df,se_df=merged_se_df,
+    step_2_out <- enhancerFoldchange_bam(e_df=e_df,se_df=merged_se_df,
                                        s1_pair=s1_pair,s2_pair=s2_pair,
                                        s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
                                        s2_r1_bam=s2_r1_bam ,s2_r2_bam=s2_r2_bam)
@@ -86,7 +85,8 @@ SEprofile_2 <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
 
   # Step 3: using weighted bs-spline to fit the fold change
   print("Step 3: bs-spline fit log2FC")
-  step_3_out <- SEfitspline_new(step_2_out$enhancer_deseq_result)
+  print(paste0("Processing total of ",length(unique(step_2_out$enhancer_deseq_result$se_merge_name))," SEs"))
+  step_3_out <- SEfitspline(step_2_out$enhancer_deseq_result)
   # Step 4: permutation to get cutoff (normal or stringent)
   print("Step 4: permutation to get log2FC cutoff")
   e_not_in_se <- step_2_out$count_matrix_not_in_se[,c("e_merge_name",
@@ -101,10 +101,10 @@ SEprofile_2 <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   if (permut_type == "normal") {
     if (permut){
       sample_pool <- e_in_se
-      step_4_out <- permut_spline_new(step_3_out$se_fit_df,sample_pool,times=times)
+      step_4_out <- SEpermut(step_3_out$se_fit_df,sample_pool,times=times)
       cutoff_vector <- step_4_out$cutoff
     } else {
-      step_4_out <- permut_spline_new(step_3_out$se_fit_df,sample_pool,permut=F)
+      step_4_out <- SEpermut(step_3_out$se_fit_df,sample_pool,permut=F)
       cutoff_vector <- cutoff_v
     }
 
@@ -112,10 +112,10 @@ SEprofile_2 <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
 
     if (permut){
       sample_pool <- rbind(e_not_in_se,e_in_se)
-      step_4_out <- permut_spline_new(step_3_out$se_fit_df,sample_pool,times=times)
+      step_4_out <- SEpermut(step_3_out$se_fit_df,sample_pool,times=times)
       cutoff_vector <- step_4_out$cutoff
     } else {
-      step_4_out <- permut_spline_new(step_3_out$se_fit_df,sample_pool,permut=F)
+      step_4_out <- SEpermut(step_3_out$se_fit_df,sample_pool,permut=F)
       cutoff_vector <- cutoff_v
     }
   }
@@ -123,12 +123,12 @@ SEprofile_2 <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
 
   # step_5: segment
   print("Step 5: pattern segments process")
-  step_5_out <- SEpattern_demo(step_3_out$se_fit_df,step_3_out$spline_plot_df,
+  step_5_out <- SEpattern(step_3_out$se_fit_df,step_3_out$spline_plot_df,
                                cutoff_vector)
 
   # step_6: category
   print("Step 6: final category estimate")
-  step_6_out <- SEcategory_demo_2(step_5_out$se_segment_percent,step_3_out$se_fit_df)
+  step_6_out <- SEcategory(step_5_out$se_segment_percent,step_3_out$se_fit_df)
 
 
   # make final output: final category and ranking file,
@@ -138,11 +138,10 @@ SEprofile_2 <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   # cutoff_vector,
   # and SE segments profile to output list
 
-  output_list <- list(se_meta = step_1_out$se_merged_meta,
+  output_list <- list(se_meta = step_1_out$se_merged_meta[which(step_1_out$se_merged_meta$se_merge_name %in%
+                                                                  step_2_out$enhancer_deseq_result$se_merge_name),],
                      se_deseq_out = step_2_out$enhancer_deseq_result,
-                     e_not_in_se = step_2_out$count_matrix_not_in_se[,c("e_merge_name",
-                                                                        "S1_r1","S1_r2","S2_r1","S2_r2",
-                                                                        "se_merge_name")],
+                     e_not_in_se = step_2_out$not_in_se_deseq,
                      e_in_se = step_2_out$enhancer_deseq_result[,c("e_merge_name",
                                                                    "S1_r1","S1_r2","S2_r1","S2_r2",
                                                                    "se_merge_name")],

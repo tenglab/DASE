@@ -18,8 +18,9 @@ Header needs to be "CHROM,START,STOP,REGION_ID,Signal,STRAND"}
 Format: c(chr:start-end, chr:start-end, ...) (default=FALSE).}
 }
 \value{
-A list of 3 datasets: filtered SE datasets with merged SE names,
-SE datasets identified in the blacklist, and merged SE metadata
+se_filtered_no_bl: filtered SE datasets with merged SE names,
+se_filtered_in_bl: SE datasets identified in the blacklist
+se_merged_meta: merged SE metadata
 }
 \description{
 A function to filter super-enhancers (SEs)

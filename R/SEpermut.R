@@ -1,6 +1,40 @@
-# shuffle counts of each enhancer n times (default 10), got new fold change,
+#' Significance estimation with permutation
+#'
+#' A function to estimate the significance cutoff with permutation
+#'
+#' @details
+#' A permutation of counts of enhancers in SEs is used to decide the
+#' cutoff of significant log2FC with shuffling pool. Cutoff was calculate by slope equal to range(y)/range(x).
+#' The max value in range(-2,-1) and min value in range(1,2) are set to be lower and upper cutoff.
+#'
+#' @param spline_fit_out enhancer output file from SEfitspline
+#' @param sample_pool enhancer counts shuffling pool
+#' (header must be "e_merge_name","S1_r1","S1_r2","S2_r1","S2_r2", "se_merge_name"))
+#' @param times permutation times (default=10)
+#' @param permut if you want permutation (default=TRUE)
+#'
+#' @return
+#' se_permutation_df: permutation data frame
+#' cutoff: final cutoff
+#' cutoff_candidate: all cutoff candidates
+#' density_plot: density plot of permuted and original log2 fold change
+#'
+#' @import DESeq2
+#' @import Rsubread
+#' @import apeglm
+#'
+#' @export
+#' @examples
+#' # default permutation 10 times
+#' permut_out <- SEpermut(fit_spline_out_df,sample_pool)
+#'
+#' # permutation 5 times
+#' permut_out <- SEpermut(fit_spline_out_df,sample_pool,times=5)
+#'
+#' # no permutation
+#' permut_out <- SEpermut(fit_spline_out_df,sample_pool,permut=F)
 
-permut_spline_new <- function(spline_fit_out,sample_pool,permut=T,times=10) {
+SEpermut <- function(spline_fit_out,sample_pool,permut=T,times=10) {
 
   permut_out <- data.frame()
   if (permut) {
@@ -193,6 +227,7 @@ permut_spline_new <- function(spline_fit_out,sample_pool,permut=T,times=10) {
   } else {
     density_p <- NA
     final_cutoff <- NA
+    fc_cutoff <- NA
   }
 
   # creat final output list
