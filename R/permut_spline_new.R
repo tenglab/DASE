@@ -143,7 +143,7 @@ permut_spline_new <- function(spline_fit_out,sample_pool,permut=T,times=10) {
                            slope = diff(d$y)/diff(d$x))
 
     # remove small density values
-    new_df <- slope_df[which(slope_df$density > 0.01),]
+    new_df <- slope_df[which(slope_df$density > 0.02),]
 
     # normalize x and y-axis
     x_unit <- max(new_df$log2FC)-min(new_df$log2FC)

@@ -20,10 +20,6 @@
 #' @param s1_r2_bam path of sample 1 replicate 2 bam/bw file
 #' @param s2_r1_bam path of sample 2 replicate 1 bam/bw file
 #' @param s2_r2_bam path of sample 2 replicate 2 bam/bw file
-#' @param s1_r1_in_bam path of sample 1 replicate 1 bam file
-#' @param s1_r2_in_bam path of sample 1 replicate 2 bam file
-#' @param s2_r1_in_bam path of sample 2 replicate 1 bam file
-#' @param s2_r2_in_bam path of sample 2 replicate 2 bam file
 #' @param permut if you want permutation (default=TRUE)
 #' @param permut_type normal or stringent (default=normal)
 #' @param times permutation times (default=10)
@@ -61,11 +57,10 @@
 #' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 #'
 
-SEprofile_w_input <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
+SEprofile_3 <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
                       s1_pair=FALSE,s2_pair=FALSE, bw=F, custom_range=F,
                       permut=TRUE, permut_type="normal",times=10,cutoff_v=c(-1,1),
-                      s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam,
-                      s1_r1_in_bam,s1_r2_in_bam,s2_r1_in_bam,s2_r2_in_bam) {
+                      s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
 
   # Step 1: filter super-enhancer with SEfilter.R with or without SE blacklist file
   print("Step 1: merge and filter SE")
@@ -76,16 +71,11 @@ SEprofile_w_input <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   print("Step 2: calculate log2FC of constituent enhancer using Deseq2")
 
   merged_se_df <- step_1_out$se_merged
-  print(paste0("Processing total of ",nrow(merged_se_df)," SEs"))
   if (bw == F) {
-    step_2_out <- enhancerFoldchange_w_input(e_df=e_df,se_df=merged_se_df,
+    step_2_out <- enhancerFoldchange_all(e_df=e_df,se_df=merged_se_df,
                                        s1_pair=s1_pair,s2_pair=s2_pair,
                                        s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
-                                       s2_r1_bam=s2_r1_bam ,s2_r2_bam=s2_r2_bam,
-                                       s1_r1_in_bam = s1_r1_in_bam_path,
-                                       s1_r2_in_bam = s1_r2_in_bam_path,
-                                       s2_r1_in_bam = s2_r1_in_bam_path,
-                                       s2_r2_in_bam = s2_r2_in_bam_path)
+                                       s2_r1_bam=s2_r1_bam ,s2_r2_bam=s2_r2_bam)
   } else {
     step_2_out <- enhancerFoldchange_bw(e_df=e_df,se_df=merged_se_df,
                                         s1_pair=s1_pair,s2_pair=s2_pair,
@@ -95,6 +85,7 @@ SEprofile_w_input <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
 
   # Step 3: using weighted bs-spline to fit the fold change
   print("Step 3: bs-spline fit log2FC")
+  print(paste0("Processing total of ",length(unique(step_2_out$enhancer_deseq_result$se_merge_name))," SEs"))
   step_3_out <- SEfitspline_new(step_2_out$enhancer_deseq_result)
   # Step 4: permutation to get cutoff (normal or stringent)
   print("Step 4: permutation to get log2FC cutoff")
@@ -147,11 +138,10 @@ SEprofile_w_input <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   # cutoff_vector,
   # and SE segments profile to output list
 
-  output_list <- list(se_meta = step_1_out$se_merged_meta,
+  output_list <- list(se_meta = step_1_out$se_merged_meta[which(step_1_out$se_merged_meta$se_merge_name %in%
+                                                                  step_2_out$enhancer_deseq_result$se_merge_name),],
                      se_deseq_out = step_2_out$enhancer_deseq_result,
-                     e_not_in_se = step_2_out$count_matrix_not_in_se[,c("e_merge_name",
-                                                                        "S1_r1","S1_r2","S2_r1","S2_r2",
-                                                                        "se_merge_name")],
+                     e_not_in_se = step_2_out$not_in_se_deseq,
                      e_in_se = step_2_out$enhancer_deseq_result[,c("e_merge_name",
                                                                    "S1_r1","S1_r2","S2_r1","S2_r2",
                                                                    "se_merge_name")],

@@ -31,34 +31,18 @@
 #' foldchange_list <- enhancerFoldchange(pool_enhancer_df,se_meta,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
 #'
 
-enhancerFoldchange <- function(e_df,se_df,
+enhancerFoldchange_all <- function(e_df,se_df,
                                s1_pair=FALSE,s2_pair=FALSE,
                                s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
-  # create enhancer names
-  e_df$e_merge_name <- apply(e_df[,c(1:3)],1, paste,collapse ="_" )
-  e_df$e_merge_name <- gsub(" ","",e_df$e_merge_name)
-
-  # extract enhancers within merged super-enhancer
-  in_se_df <- data.frame()
-  for (i in c(1:nrow(se_df))) {
-
-    in_se_temp <- e_df[which(e_df$chr==se_df$chr[i] &
-                               e_df$start>=se_df$start[i] &
-                               e_df$end<= se_df$end[i]),]
-    in_se_df <- rbind(in_se_df,in_se_temp)
-  }
-
-  # extract enhancers not in SE range
-  not_se_df <- subset(e_df, !(e_df$e_merge_name %in% in_se_df$e_merge_name))
 
   # merge enhancers with gaps less than 500bps
-  ir <- IRanges(in_se_df$start,
-                in_se_df$end,
-                names = in_se_df$chr)
+  ir <- IRanges(e_df$start,
+                e_df$end,
+                names = e_df$chr)
 
   e_merge_by_chr <- rbindlist(lapply(split(ir, names(ir)),
-                                   function(x) as.data.table(reduce(x,min.gapwidth = 1))),
-                            idcol = "chr")
+                                     function(x) as.data.table(reduce(x,min.gapwidth = 0))),
+                              idcol = "chr")
 
   # create merged enhancer names
   e_merge_by_chr$e_merge_name <- apply(e_merge_by_chr[,c(1:3)],1, paste,collapse ="_" )
@@ -74,86 +58,34 @@ enhancerFoldchange <- function(e_df,se_df,
   # check if sample 1 is  paired-end
   if (s1_pair == F) {
     s1_r1_fc_in <- featureCounts(files=s1_r1_bam,annot.ext=fc_saf_in,
-                              isGTFAnnotationFile = "SAF")
+                                 isGTFAnnotationFile = "SAF")
     s1_r2_fc_in <- featureCounts(files=s1_r2_bam,annot.ext=fc_saf_in,
-                              isGTFAnnotationFile = "SAF")
+                                 isGTFAnnotationFile = "SAF")
   } else {
     s1_r1_fc_in <- featureCounts(files=s1_r1_bam,annot.ext=fc_saf_in,
-                              isGTFAnnotationFile = "SAF",
-                              isPairedEnd=TRUE)
+                                 isGTFAnnotationFile = "SAF",
+                                 isPairedEnd=TRUE)
     s1_r2_fc_in <- featureCounts(files=s1_r2_bam,annot.ext=fc_saf_in,
-                              isGTFAnnotationFile = "SAF",
-                              isPairedEnd=TRUE)
+                                 isGTFAnnotationFile = "SAF",
+                                 isPairedEnd=TRUE)
   }
 
   # check if smaple 2 is paired-end
   if (s2_pair == F) {
     s2_r1_fc_in <- featureCounts(files=s2_r1_bam,annot.ext=fc_saf_in,
-                              isGTFAnnotationFile = "SAF")
+                                 isGTFAnnotationFile = "SAF")
     s2_r2_fc_in <- featureCounts(files=s2_r2_bam,annot.ext=fc_saf_in,
-                              isGTFAnnotationFile = "SAF")
+                                 isGTFAnnotationFile = "SAF")
   } else {
     s2_r1_fc_in <- featureCounts(files=s2_r1_bam,annot.ext=fc_saf_in,
-                              isGTFAnnotationFile = "SAF",
-                              isPairedEnd=TRUE)
+                                 isGTFAnnotationFile = "SAF",
+                                 isPairedEnd=TRUE)
     s2_r2_fc_in <- featureCounts(files=s2_r2_bam,annot.ext=fc_saf_in,
-                              isGTFAnnotationFile = "SAF",
-                              isPairedEnd=TRUE)
+                                 isGTFAnnotationFile = "SAF",
+                                 isPairedEnd=TRUE)
   }
 
-  # feature count enhancer not in SE if permut_type=stringent
-  # create enhancer not in SE SAF format file
-  not_se_saf <- not_se_df[,c(11,1,2,3,6)]
-  colnames(not_se_saf) <- c("GeneID","Chr","Start","End","Strand")
 
-  # count each bam files
-  # check if sample 1 is  paired-end
-  if (s1_pair == F) {
-    s1_r1_fc_not <- featureCounts(files=s1_r1_bam,annot.ext=not_se_saf,
-                                  isGTFAnnotationFile = "SAF")
-    s1_r2_fc_not <- featureCounts(files=s1_r2_bam,annot.ext=not_se_saf,
-                                  isGTFAnnotationFile = "SAF")
-  } else {
-    s1_r1_fc_not <- featureCounts(files=s1_r1_bam,annot.ext=not_se_saf,
-                                  isGTFAnnotationFile = "SAF",
-                                  isPairedEnd=TRUE)
-    s1_r2_fc_not <- featureCounts(files=s1_r2_bam,annot.ext=not_se_saf,
-                                  isGTFAnnotationFile = "SAF",
-                                  isPairedEnd=TRUE)
-  }
-
-  # check if smaple 2 is paired-end
-  if (s2_pair == F) {
-    s2_r1_fc_not <- featureCounts(files=s2_r1_bam,annot.ext=not_se_saf,
-                                  isGTFAnnotationFile = "SAF")
-    s2_r2_fc_not <- featureCounts(files=s2_r2_bam,annot.ext=not_se_saf,
-                                  isGTFAnnotationFile = "SAF")
-  } else {
-    s2_r1_fc_not <- featureCounts(files=s2_r1_bam,annot.ext=not_se_saf,
-                                  isGTFAnnotationFile = "SAF",
-                                  isPairedEnd=TRUE)
-    s2_r2_fc_not <- featureCounts(files=s2_r2_bam,annot.ext=not_se_saf,
-                                  isGTFAnnotationFile = "SAF",
-                                  isPairedEnd=TRUE)
-  }
-
-  # make not in SE count matrix
-  not_se_count_temp <- as.data.frame(cbind(s1_r1_fc_not$counts,s1_r2_fc_not$counts,
-                                            s2_r1_fc_not$counts,s2_r2_fc_not$counts))
-  colnames(not_se_count_temp) <- c("S1_r1","S1_r2","S2_r1","S2_r2")
-
-  # remove enhancers with 0 value for all sample
-  #index_not_zero <- apply(not_se_count_temp, 1, function(row) sum(row) != 0)
-  #not_se_no_zero <- not_se_count_temp[index_not_zero,]
-
-  not_se_no_zero <- not_se_count_temp
-
-  # set rowname to column
-  not_se_no_zero$e_merge_name <- rownames(not_se_no_zero)
-  not_se_no_zero$se_merge_name <- NA
-  not_se_count_2 <- unique(merge(not_se_no_zero,not_se_df[,c(1:3,11)],by="e_merge_name"))
-
-  not_se_count_matrix <- data.frame(not_se_count_2, row.names=not_se_count_2$e_merge_name)
 
   # DESeq2 fold-change for enhancer in SE only
   # make count matrix
@@ -208,11 +140,13 @@ enhancerFoldchange <- function(e_df,se_df,
   # save size_factor
   size_factor <- sizeFactors(dds)
 
+  not_in_se_deseq <- temp_output[!(temp_output$e_merge_name %in% final_out_df$e_merge_name),]
+
   # make output list
   out <- list()
   out$lfc_shrink <- resLFC
   out$enhancer_deseq_result <- final_out_df
   out$size_factor <- size_factor
-  out$count_matrix_not_in_se <- not_se_count_matrix
+  out$not_in_se_deseq <- not_in_se_deseq
   return(out)
 }

@@ -219,13 +219,13 @@ SEcategory_demo_2 <- function(se_seg_df,e_fit) {
           } else {
             temp_cat_df$direction <- "+"
           }
-        } else if (temp_p_2$seg_percent <= 0.01) {
+        } else if (temp_p_2$seg_percent <= 0.05) {
 
           temp_cat_df$category <- rep("Similar",nrow(temp_cat_df))
           temp_cat_df$direction <- "none"
 
         } else if (temp_p_2$seg_percent < 0.5 &
-                   temp_p_2$seg_percent > 0.01 &
+                   temp_p_2$seg_percent > 0.05 &
                    (temp_p_1$seg_percent >= 0.05 & temp_p_3$seg_percent >= 0.05)) {
           temp_cat_df$category <- rep("Hollow",nrow(temp_cat_df))
           if (temp_p_2$seg_loc == "lower") {
@@ -235,7 +235,7 @@ SEcategory_demo_2 <- function(se_seg_df,e_fit) {
           }
 
         } else if (temp_p_2$seg_percent < 0.5 &
-                   temp_p_2$seg_percent > 0.01 &
+                   temp_p_2$seg_percent > 0.05 &
                    (temp_p_1$seg_percent < 0.05 | temp_p_3$seg_percent < 0.05)) {
           temp_cat_df$category <- rep("Shorten",nrow(temp_cat_df))
           if (temp_p_2$seg_loc == "lower") {
