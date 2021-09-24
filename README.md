@@ -12,10 +12,10 @@ DESeq2, GenomicRanges, Rsubread, apeglm, data.table, ggplot2, splines
 ## Install
 ```R
 # Public package
-devtools::install_github("https://github.com/tenglab/SEprofiler.git")
+devtools::install_github("https://github.com/tenglab/DASE.git")
 
 # Private with token
-devtools::install_github("https://github.com/tenglab/SEprofiler.git",auth_toke="abc")
+devtools::install_github("https://github.com/tenglab/DASE.git",auth_toke="your token")
 
 # load package
 library(SEprofiler)
