@@ -21,8 +21,8 @@ devtools::install_github("https://github.com/tenglab/DASE.git",auth_toke="your t
 library(DASE)
 ```
 
-# Usage Examples
-## Inputs                                                                                                 
+# Usage
+## Inputs
  1. SE peaks of all samples and replicates: test_data/se_peaks.bed
  
  Header of the first 6 columns must be the same as follow
@@ -45,7 +45,7 @@ library(DASE)
  4. path of bam files: s1_r1_bam_path, s1_r2_bam_path, s2_r1_bam_path, s2_r2_bam_path
  5. SE blacklist (optional): test_data/ENCFF356LFX_blacklist.bed                                                                                  
                                              
-
+## Examples
 ```R
 # default: no blacklist file, permutation 10 times, both samples are single end
 se_test_out <- DASE(se_in = se_peaks.bed, e_df = enhancer_peaks.bed, 
