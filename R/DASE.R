@@ -71,7 +71,7 @@ DASE <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   print("Step 2: calculate log2FC of constituent enhancer using Deseq2")
 
   merged_se_df <- step_1_out$se_merged
-  if (bw == F) {
+  if (data_type == "bam") {
     step_2_out <- enhancerFoldchange_bam(e_df=e_df,se_df=merged_se_df,
                                        s1_pair=s1_pair,s2_pair=s2_pair,
                                        s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
