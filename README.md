@@ -45,13 +45,13 @@ se_test_out <- DASE(se_in = se_peaks.bed, e_df = enhancer_peaks.bed,
                     s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
 
 # with blacklist and customize blacklist range
-se_test_out <- DASE(se_in = pool_se_df, e_df = pool_enhancer_df, 
+se_test_out <- DASE(se_in = se_peaks.bed, e_df = enhancer_peaks.bed, 
                          bl_file = blacklist_df, has_bl_file = TRUE, custom_range = c("chr1:123-12345","chr12:12345-1234567"),
                          s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path,
                          s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
                            
 # coverage is bw instead of bam
-se_test_out <- DASE(se_in = pool_se_df, e_df = pool_enhancer_df, 
+se_test_out <- DASE(se_in = se_peaks.bed, e_df = enhancer_peaks.bed, 
                          bl_file = blacklist_df, has_bl_file = T, permut = T, data_type="bw"
                          s1_r1_bam = s1_r1_bw_path, s1_r2_bam = s1_r2_bw_path,
                          s2_r1_bam = s2_r1_bw_path, s2_r2_bam = s2_r2_bw_path)
