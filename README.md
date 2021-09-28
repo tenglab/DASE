@@ -25,7 +25,7 @@ library(DASE)
 ## Input file                                                                                                 
  1. SE peaks of all samples and replicates: test_data/se_peaks.bed
  
-Header must be the same as follow
+ Header must be the same as follow
 | CHROM | START     | STOP      | REGION_ID                  | Signal | STRAND |
 | ----- |-----------| --------  | -------------------------- | ------ | ------ |
 | chr14 | 34355128  | 34380484  | 5_Peak_2778_lociStitched   | 496    | .      |
@@ -33,9 +33,17 @@ Header must be the same as follow
 | chr3  | 149297239 | 149317229 | 4_Peak_182_lociStitched    | 340    | .      |
 
 
- 2. enhancer peaks of all samples and replicates: test_data/enhancer_peaks.bed  
- 3. path of bam files: s1_r1_bam_path, s1_r2_bam_path, s2_r1_bam_path, s2_r2_bam_path
- 4. SE blacklist (optional): test_data/ENCFF356LFX_blacklist.bed                                                                                  
+ 2. enhancer peaks of all samples and replicates: test_data/enhancer_peaks.bed
+ Header must be the same as follow
+ 
+| chr   | start     | end      | name       | score | strand |
+| ----- |---------- | -------- | ---------- | ----- | ------ |
+| chr18 | 63365927  | 63368565 | Peak_13186 | 1000  | .      |
+| chr2  | 3604982   | 3605258  | Peak_41195 | 175   | .      |
+| chr17 | 49408309  | 49408778 | Peak_75396 | 61    | .      |
+
+ 4. path of bam files: s1_r1_bam_path, s1_r2_bam_path, s2_r1_bam_path, s2_r2_bam_path
+ 5. SE blacklist (optional): test_data/ENCFF356LFX_blacklist.bed                                                                                  
                                              
 
 ```R
