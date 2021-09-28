@@ -1,5 +1,9 @@
 Package: DASE
+<<<<<<< HEAD
 Title: Tools to identify super-enhancer (SE) internal dynamics 
+=======
+Title: Tools to identify super-enhancer (SE) subtle differences 
+>>>>>>> 8c4fdfc00c035554ca7b050faa3b9001c7c72e53
 Version: 0.1.0
 Authors@R: 
     person(given = "Xiang",
@@ -10,7 +14,7 @@ Authors@R:
 Description: This package will categorize and rank super-enhancer subtle differences of two conditions given sample's ROSE SE calling output, macs2 peak output and bam files.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
-URL: https://github.com/tenglab/SEprofiler
+URL: https://github.com/tenglab/DASE
 Depends:
 	R (>= 3.1.0),
 	GenomicRanges (>= 1.42.0)
