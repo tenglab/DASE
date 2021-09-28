@@ -18,52 +18,13 @@ devtools::install_github("https://github.com/tenglab/DASE.git")
 devtools::install_github("https://github.com/tenglab/DASE.git",auth_toke="your token")
 
 # load package
-library(SEprofiler)
+library(DASE)
 ```
 
 ## Files need to pre-process before using package                                                               
 1. merge ROSE *_peaks_Gateway_SuperEnhancers.bed output file                                                 
 2. merge macs2 *_peaks.narrowPeak output output file                                                         
 3. path to sorted bam files or bigwig files of each sample and replicates                                                                     
-
-## Pre-process
-### 1. ROSE SE output bed file
-```R
-se_sample_1_r1 <- read.table("input/BC1_1_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
-se_sample_1_r2 <- read.table("input/BC1_2_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
-se_sample_2_r1 <- read.table("input/BC3_1_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
-se_sample_2_r2 <- read.table("input/BC3_2_peaks_Gateway_SuperEnhancers.bed",sep='\t', header =F)
-
-# merge sample and change the column name exact as follow
-pool_se_df <- rbind(se_sample_1_r1,se_sample_2_r1,se_sample_1_r2,se_sample_2_r2)
-colnames(pool_se_df) <- c("CHROM","START","STOP","REGION_ID","Signal","STRAND")
-```
-
-### 2. macs2 output peak file
-```R
-enhancer_s1_r1 <- read.table("input/BC1_1_peaks.narrowPeak",sep='\t')
-enhancer_s1_r2 <- read.table("input/BC1_2_peaks.narrowPeak",sep='\t')
-enhancer_s2_r1 <- read.table("input/BC3_1_peaks.narrowPeak",sep='\t')
-enhancer_s2_r2 <- read.table("input/BC3_2_peaks.narrowPeak",sep='\t')
-
-# merge sample and change the column name exact as follow
-pool_enhancer_df <- rbind(enhancer_s1_r1,enhancer_s1_r2,enhancer_s2_r1,enhancer_s2_r2)
-colnames(pool_enhancer_df) <- c("chr", "start","end","name","score","strand", "signalValue","pValue","qValue","peak")
-```
-
-### 3. path to bam/bigwig file
-```R
-s1_r1_bam_path <- "input/BC1_1_rmdup_sort.bam/bw"
-s1_r2_bam_path <- "input/BC1_2_rmdup_sort.bam/bw"
-s2_r1_bam_path <- "input/BC3_1_rmdup_sort.bam/bw"
-s2_r2_bam_path <- "input/BC3_2_rmdup_sort.bam/bw"
-```
-
-### 4. super-enhancer blacklist file or customize blacklist range list (optional)
-```R
-blacklist_df <- read.table("input/ENCFF356LFX_blacklist.bed",sep = '\t')
-custom_range <- c("chr1:123-12345","chr12:12345-1234567")
-```
 
 
 # Usage
