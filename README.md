@@ -22,10 +22,10 @@ library(DASE)
 ```
 
 # Usage Examples
-## Input file                                                                                                 
+## Inputs                                                                                                 
  1. SE peaks of all samples and replicates: test_data/se_peaks.bed
  
- Header must be the same as follow
+ Header of the first 6 columns must be the same as follow
 | CHROM | START     | STOP      | REGION_ID                  | Signal | STRAND |
 | ----- |-----------| --------  | -------------------------- | ------ | ------ |
 | chr14 | 34355128  | 34380484  | 5_Peak_2778_lociStitched   | 496    | .      |
@@ -34,8 +34,8 @@ library(DASE)
 
 
  2. enhancer peaks of all samples and replicates: test_data/enhancer_peaks.bed
- Header must be the same as follow
  
+ Header of the first 6 columns must be the same as follow
 | chr   | start     | end      | name       | score | strand |
 | ----- |---------- | -------- | ---------- | ----- | ------ |
 | chr18 | 63365927  | 63368565 | Peak_13186 | 1000  | .      |
