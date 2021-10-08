@@ -1,5 +1,5 @@
 # DASE
-R package used to categorize and rank super-enhancer (SE) subtle differences in two conditions.
+R package used to categorize and rank super-enhancer (SE) internal differences in two conditions.
 
 DASE R package:
 
