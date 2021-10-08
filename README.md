@@ -1,5 +1,5 @@
 # DASE
-R package used to categorize and rank super-enhancer (SE) subtle differences in two conditions.
+R package used to categorize and rank super-enhancer (SE) internal differences in two conditions.
 
 DASE R package:
 
@@ -21,55 +21,51 @@ devtools::install_github("https://github.com/tenglab/DASE.git",auth_toke="your t
 library(DASE)
 ```
 
-## Files need to pre-process before using package                                                               
-1. merge ROSE *_peaks_Gateway_SuperEnhancers.bed output file                                                 
-2. merge macs2 *_peaks.narrowPeak output output file                                                         
-3. path to sorted bam files or bigwig files of each sample and replicates                                                                     
-
-
 # Usage
-## Input file                                                                                                 
- 1. pool_se_df                                                                                                     
- 2. pool_enhancer_df                                                                                          
- 3. s1_r1_bam_path, s1_r2_bam_path, s2_r1_bam_path, s2_r2_bam_path                                             
+## Inputs
+ 1. SE peaks of all samples and replicates: test_data/se_peaks.bed
+ 
+ Header of the first 6 columns must be the same as follow
+| CHROM | START     | STOP      | REGION_ID                  | Signal | STRAND |
+| ----- |-----------| --------  | -------------------------- | ------ | ------ |
+| chr14 | 34355128  | 34380484  | 5_Peak_2778_lociStitched   | 496    | .      |
+| chr6  | 151869032 | 151917419 | 13_Peak_66874_lociStitched | 675    | .      |
+| chr3  | 149297239 | 149317229 | 4_Peak_182_lociStitched    | 340    | .      |
 
+
+ 2. enhancer peaks of all samples and replicates: test_data/enhancer_peaks.bed
+ 
+ Header of the first 6 columns must be the same as follow
+| chr   | start     | end      | name       | score | strand |
+| ----- |---------- | -------- | ---------- | ----- | ------ |
+| chr18 | 63365927  | 63368565 | Peak_13186 | 1000  | .      |
+| chr2  | 3604982   | 3605258  | Peak_41195 | 175   | .      |
+| chr17 | 49408309  | 49408778 | Peak_75396 | 61    | .      |
+
+ 4. path of bam files: s1_r1_bam_path, s1_r2_bam_path, s2_r1_bam_path, s2_r2_bam_path
+ 5. SE blacklist (optional): test_data/ENCFF356LFX_blacklist.bed                                                                                  
+                                             
 ## Examples
 ```R
-# default: no blacklist file, no permutation, default cutoff=c(-1.5,1.5), both samples are single end
-se_test_out <- DASE(se_in = pool_se_df, e_df = pool_enhancer_df, 
-                         s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path, 
-                         s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
+# default: no blacklist file, permutation 10 times, both samples are single end
+se_test_out <- DASE(se_in = se_peaks.bed, e_df = enhancer_peaks.bed, 
+                    s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path, 
+                    s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
 
-# with blacklist and customize blacklist range, no permutation, personal defined cutoff, both samples are paired-end
-se_test_out <- DASE(se_in = pool_se_df, e_df = pool_enhancer_df, 
-                         bl_file = blacklist_df, has_bl_file = TRUE, custom_range = c("chr1:123-12345","chr12:12345-1234567"),
-                         cutoff_v = c(-1.7,1.7),
-                         s1_pair = T, s2_pair = T,
+# with blacklist and customize blacklist range
+se_test_out <- DASE(se_in = se_peaks.bed, e_df = enhancer_peaks.bed, 
+                         bl_file = ENCFF356LFX_blacklist.bed, has_bl_file = TRUE,
+                         custom_range = c("chr1:123-12345","chr12:12345-1234567"),
                          s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path,
                          s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
                            
-# with blacklist, with permutation (cutoff will defined by permutation),and bw coverage
-se_test_out <- DASE(se_in = pool_se_df, e_df = pool_enhancer_df, 
-                         bl_file = blacklist_df, has_bl_file = T, permut = T, data_type="bw"
+# coverage is bw instead of bam
+se_test_out <- DASE(se_in = se_peaks.bed, e_df = enhancer_peaks.bed, 
+                         bl_file = ENCFF356LFX_blacklist.bed, has_bl_file = T,
+                         permut = T, data_type="bw",
                          s1_r1_bam = s1_r1_bw_path, s1_r2_bam = s1_r2_bw_path,
                          s2_r1_bam = s2_r1_bw_path, s2_r2_bam = s2_r2_bw_path)
                          
-# save pattern plots to pdf
-dir.create("output/patterns")
-pattern_list <- se_test_out$pattern_list
-
-for (i in c(1:length(pattern_list))) {
-  # create out plot name
-  cat_dir <- se_profile_out$se_category$category[which(se_test_out$se_category$se_merge_name==
-                                                         pattern_list[[i]]$labels$title)]
-  pdf_name <- paste(gsub(" pattern", "",pattern_list[[i]]$labels$title),".pdf",sep="")
-  pdf_full_path <- paste0("output_new/patterns/",cat_dir,"/",pdf_name)
-
-  # save to pdf
-  pdf(file = pdf_full_path,width = 8, height = 4)
-  print(pattern_list[[i]])
-  dev.off()
-}
 
 ```
 ## Output list
