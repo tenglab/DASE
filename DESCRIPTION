@@ -7,7 +7,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "Xiang.Liu@moffitt.org",
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: This package will categorize and rank super-enhancer subtle differences of two conditions given sample's ROSE SE calling output, macs2 peak output and bam files.
+Description: This package will categorize and rank super-enhancer internal differences of two conditions given sample's ROSE SE calling output, macs2 peak output and bam files.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 URL: https://github.com/tenglab/DASE
