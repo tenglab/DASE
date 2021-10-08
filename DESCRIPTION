@@ -1,9 +1,5 @@
 Package: DASE
-<<<<<<< HEAD
 Title: Tools to identify super-enhancer (SE) internal dynamics 
-=======
-Title: Tools to identify super-enhancer (SE) subtle differences 
->>>>>>> 8c4fdfc00c035554ca7b050faa3b9001c7c72e53
 Version: 0.1.0
 Authors@R: 
     person(given = "Xiang",
