@@ -317,7 +317,7 @@ SEcategory <- function(se_seg_df,e_fit) {
                                     -c(4:7)])
     if (category_name[cat_index] != "Similar") {
       if (category_name[cat_index] == "Shorten") {
-        temp_rank_df <- temp_rank_df[order(temp_rank_df$non_mid_percent,
+        temp_rank_df <- temp_rank_df[order(-temp_rank_df$non_mid_percent,
                                            -abs(temp_rank_df$mean_FC)),]
       } else {
         temp_rank_df <- temp_rank_df[order(-temp_rank_df$non_mid_percent,
