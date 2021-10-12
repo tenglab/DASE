@@ -9,10 +9,12 @@ DASE(
   e_df,
   bl_file = FALSE,
   has_bl_file = FALSE,
+  custom_range = F,
+  has_enhancer_count = F,
+  enhancer_count_table,
+  data_type = "bam",
   s1_pair = FALSE,
   s2_pair = FALSE,
-  data_type = "bam",
-  custom_range = F,
   permut = TRUE,
   permut_type = "normal",
   times = 10,
@@ -34,14 +36,18 @@ Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,p
 
 \item{has_bl_file}{if there is a blacklist file (default=FALSE)}
 
-\item{s1_pair}{if sample 1 is paired-end (default=FALSE)}
+\item{custom_range}{a vector of extra customized blacklist to ignore.
+Format: c(chr:start-end, chr:start-end, ...) (default=FALSE).}
 
-\item{s2_pair}{if sample 2 is paired-end (default=FALSE)}
+\item{has_enhancer_count}{if there is a raw count file of pooled enhancers (default=F)}
+
+\item{enhancer_count_table}{raw count file of pooled enhancers}
 
 \item{data_type}{quantitative file format "bam" or "bw" (default=bam)}
 
-\item{custom_range}{a vector of extra customized blacklist to ignore.
-Format: c(chr:start-end, chr:start-end, ...) (default=FALSE).}
+\item{s1_pair}{if sample 1 is paired-end (default=FALSE)}
+
+\item{s2_pair}{if sample 2 is paired-end (default=FALSE)}
 
 \item{permut}{if you want permutation (default=TRUE)}
 

@@ -16,6 +16,8 @@
 #' Format: c(chr:start-end, chr:start-end, ...) (default=FALSE).
 #'
 #' @param data_type quantitative file format "bam" or "bw" (default=bam)
+#' @param has_enhancer_count if there is a raw count file of pooled enhancers (default=F)
+#' @param enhancer_count_table raw count file of pooled enhancers
 #' @param s1_r1_bam path of sample 1 replicate 1 bam/bw file
 #' @param s1_r2_bam path of sample 1 replicate 2 bam/bw file
 #' @param s2_r1_bam path of sample 2 replicate 1 bam/bw file
@@ -57,10 +59,10 @@
 #' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 #'
 
-DASE <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
-                      s1_pair=FALSE,s2_pair=FALSE, data_type="bam", custom_range=F,
-                      permut=TRUE, permut_type="normal",times=10,cutoff_v=c(-1,1),
-                      s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
+DASE <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,custom_range=F,has_enhancer_count=F,
+                 enhancer_count_table,data_type="bam",s1_pair=FALSE,s2_pair=FALSE,
+                 permut=TRUE, permut_type="normal",times=10,cutoff_v=c(-1,1),
+                 s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
 
   # Step 1: filter super-enhancer with SEfilter.R with or without SE blacklist file
   print("Step 1: merge and filter SE")
@@ -71,16 +73,19 @@ DASE <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,
   print("Step 2: calculate log2FC of constituent enhancer using Deseq2")
 
   merged_se_df <- step_1_out$se_merged
-  if (data_type == "bam") {
+  if (data_type == "bam" & has_enhancer_count==F) {
     step_2_out <- enhancerFoldchange_bam(e_df=e_df,se_df=merged_se_df,
                                        s1_pair=s1_pair,s2_pair=s2_pair,
                                        s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
                                        s2_r1_bam=s2_r1_bam ,s2_r2_bam=s2_r2_bam)
-  } else {
+  } else if (data_type=="bw" & has_enhancer_count==F){
     step_2_out <- enhancerFoldchange_bw(e_df=e_df,se_df=merged_se_df,
                                         s1_pair=s1_pair,s2_pair=s2_pair,
                                         s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
                                         s2_r1_bam=s2_r1_bam ,s2_r2_bam=s2_r2_bam)
+  } else if (has_enhancer_count==T) {
+    step_2_out <- enhancerFoldchange_count(e_df=e_df,se_df=merged_se_df,
+                                           raw_count=enhancer_count_table)
   }
 
   # Step 3: using weighted bs-spline to fit the fold change
