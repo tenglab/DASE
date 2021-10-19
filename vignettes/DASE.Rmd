@@ -7,8 +7,8 @@ author: |
   | Research Institute, Tampa, FL, USA
 date: "`r Sys.Date()`"  
 output: 
-  #rmarkdown::html_vignette:
-  pdf_document: 
+  rmarkdown::html_vignette:
+  #pdf_document: 
     toc: true
 graphics: yes
 vignette: >
