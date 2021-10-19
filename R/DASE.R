@@ -139,20 +139,15 @@ DASE <- function(se_in,e_in,bl_file,custom_range,
   # cutoff_vector,
   # and SE segments profile to output list
 
-  output_list <- list(se_meta = step_1_out$se_merged_meta[which(step_1_out$se_merged_meta$se_merge_name %in%
-                                                                  step_2_out$enhancer_deseq_result$se_merge_name),],
-                     se_deseq_out = step_2_out$enhancer_deseq_result,
-                     e_not_in_se = step_2_out$not_in_se_deseq,
-                     e_in_se = step_2_out$enhancer_deseq_result[,c("e_merge_name",
+  output_list <- list(e_not_in_se = step_2_out$not_in_se_deseq,
+                      e_in_se = step_2_out$enhancer_deseq_result[,c("e_merge_name",
                                                                    "S1_r1","S1_r2","S2_r1","S2_r2",
                                                                    "se_merge_name")],
                      lfc_shrink = step_2_out$lfc_shrink,
                      se_fit = step_3_out$se_fit_df,
-                     pattern_plot_df = step_3_out$spline_plot_df,
                      cutoff = cutoff_vector,
                      density_plot = step_4_out$density_plot,
                      pattern_list = step_5_out$plots,
-                     se_seg = step_5_out$se_segment_percent,
                      se_category = step_6_out$se_cat_rank,
                      boxplot =step_6_out$cat_boxplot
   )

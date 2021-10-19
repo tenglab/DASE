@@ -7,7 +7,7 @@ author: |
   | Research Institute, Tampa, FL, USA
 date: "`r Sys.Date()`"  
 output: 
-  BiocStyle::html_document:
+  rmarkdown::html_vignette:
     toc: true
 vignette: >
   %\VignetteIndexEntry{DASE user's guide}
@@ -16,16 +16,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
-library(DASE)
-```
-
 ```{r, echo=FALSE, include=FALSE}
 BiocStyle::markdown()
 knitr::opts_chunk$set(
   collapse = TRUE,
-  error = TRUE,
-  warning = TRUE, 
+  error = FALSE,
+  warning = FALSE, 
   message = FALSE,
   cache = FALSE,
   comment = "#>"
@@ -63,7 +59,8 @@ The enhancer file can be any format of bed files, just make sure the first 6 col
 
 ```{r enhancer_data}
 # load enhancer bed file
-enhancer_region <- read.table("inst/extdata/enhancer.bed",sep="\t",header=F)
+enhancer_path <- system.file("extdata","enhancer.bed",package="DASE")
+enhancer_region <- read.table(enhancer_path,sep="\t",header=F)
 head(enhancer_region)
 ```
 
@@ -73,7 +70,8 @@ The SE file can be any format of bed files, just make sure the first 6 columns c
 
 ```{r SE_data}
 # load SE bed file
-se_region <- read.table("inst/extdata/SE.bed",sep="\t",header=F)
+se_path <- system.file("extdata","SE.bed",package="DASE")
+se_region <- read.table(se_path,sep="\t",header=F)
 head(se_region)
 ```
 
@@ -83,10 +81,10 @@ In this section, we use DASE to find differential SEs with internal dynamics by 
 
 ## *Running DASE with BAM or BigWig coverage files*
 
-This section shows you how to use DASE with BAM or BigWig coverage files. The BAM or BigWig files are for the reads count of enhancers in different samples. DASE use *featureCounts* to count the enhancer abundance within each sample. The first step is to get the path of BAM or BigWig file for each samples. Then with the imported enhancer and SE region files, we can run DASE as follow.
+This section shows you how to use DASE with BAM or BigWig coverage files. The BAM or BigWig files are for the reads count of enhancers in different samples. DASE uses *featureCounts* to get the enhancer abundance of each sample with BAM file and *rtracklayer* with BigWig file. The first step is to get the path of BAM or BigWig file for each samples. Then with the imported enhancer and SE region files, we can run DASE as follow.
 
 ```{r DASE1}
-# Path of BAM file for each condition
+# path of BAM file for each condition
 s1_r1_bam <- system.file("extdata","K562_1_chr21.bam",package="DASE")
 s1_r2_bam <- system.file("extdata","K562_2_chr21.bam",package="DASE")
 s2_r1_bam <- system.file("extdata","MCF7_1_chr21.bam",package="DASE")
@@ -95,20 +93,24 @@ s2_r2_bam <- system.file("extdata","MCF7_2_chr21.bam",package="DASE")
 # running DASE with BAM files
 se_region$V2
 test_1 <- SEfilter(se_in = se_region)
-DASE_out_bam <- DASE(se_region,enhancer_region,
-                     s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
-                     s2_r1_bam=s2_r1_bam,s2_r2_bam=s2_r2_bam)
+DASE_out <- DASE(se_region,enhancer_region,
+                 s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
+                 s2_r1_bam=s2_r1_bam,s2_r2_bam=s2_r2_bam)
+```
 
-# Path of BigWig file for each condition
+Running DASE with BigWig files.
+
+```{r DASE2}
+# path of BigWig file for each condition
 s1_r1_bw <- system.file("extdata","K562_1_chr21.bw",package="DASE")
 s1_r2_bw <- system.file("extdata","K562_2_chr21.bw",package="DASE")
 s2_r1_bw <- system.file("extdata","MCF7_1_chr21.bw",package="DASE")
 s2_r2_bw <- system.file("extdata","MCF7_2_chr21.bw",package="DASE")
 
 # running DASE with BigWig files
-DASE_out_bw <- DASE(se_in=se_region,e_in=enhancer_region,data_type = "bw",
-                                   s1_r1_bam=s1_r1_bw,s1_r2_bam=s1_r2_bw,
-                                   s2_r1_bam=s2_r1_bw,s2_r2_bam=s2_r2_bw)
+DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,data_type = "bw",
+                 s1_r1_bam=s1_r1_bw,s1_r2_bam=s1_r2_bw,
+                 s2_r1_bam=s2_r1_bw,s2_r2_bam=s2_r2_bw)
 
 ```
 
@@ -118,21 +120,48 @@ This section shows you how to use DASE with enhancer raw count table. The format
 
 ```{r DASE2}
 # read enhancer count table
-enhancer_count_path <- "inst/extdata/chr21_enhancer_count.txt"
+enhancer_count_path <- system.file("extdata","chr21_enhancer_count.txt",package="DASE")
 enhancer_count <- read.table(enhancer_count_path,sep="\t",header=T)
 head(enhancer_count)
 
 # run DASE
-DASE_out_count <- DASE(se_in=se_region,e_in=enhancer_region,
-                       enhancer_count_table=enhancer_count)
+DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,
+                 enhancer_count_table=enhancer_count)
 
 ```
 
-
-
 # Interpretation of DASE output files
+The output of DASE is a list with multiple data types. Major outputs are:
 
-## Sigthrethold 
+  1. se_category: a data frame contains final SE categories
+  
+  ```{r se_cat_out}
+  head(DASE_out$se_category)
+  ```
+  
+  1. pattern_list: a list contains figures of each SE's pattern
+  
+  ```{r se_pattern_example}
+  # total number of final SEs
+  length(DASE_out$pattern_list)
+    
+  # an example of one sample
+  DASE_out$pattern_list[[1]]
+  ```
+  
+  1. se_fit: a data frame contains DESeq2 output and spline-fitted log2 fold change of all constitute enhancers
+
+  ```{r se_pattern_example}
+  # example of se_fit
+  head(DASE_out$se_fit)
+  
+  # total number of constitute enhancers
+  length(DASE_out$se_fit)
+  ```
+  
+## Significant threthold
+We use permutation of spline fitted log2 fold change to decide the significant threshold of   
+
 ## Super-enhancer internal dynamic categories
 
 
