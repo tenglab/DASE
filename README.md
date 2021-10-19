@@ -11,11 +11,17 @@ their constitute enhancers. However, the state-of-art binary strategy in calling
 
 DASE is a R package, it can be installed with source code documented in [GitHub](https://github.com/tenglab/DASE).
 
-To install DASE from GitHub, using the following command. It should also install all the dependencies DASE required. A complete list of dependencies can be found in the DESCRIPTION file.
+To install DASE from GitHub, using the following command. Because this command will not build vignettes and suggested packages. Please pre-install all the suggested dependencies in the DESCRIPTION file.
 
 ```R
-# Public package
+# install DASE
 devtools::install_github("https://github.com/tenglab/DASE.git")
+```
+
+To install DASE with all suggested dependencies and vignettes, using:
+```R
+# install DASE with vignettes and dependencies
+devtools::install_github("https://github.com/tenglab/DASE.git",build_vignettes = TRUE)
 ```
 
 ## Using DASE
