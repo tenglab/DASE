@@ -1,0 +1,815 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+  \usepackage{amssymb}
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={DASE user's guide},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{DASE user's guide}
+\author{Xiang Liu
+\href{mailto:xiang.liu@moffitt.org}{\nolinkurl{xiang.liu@moffitt.org}}\\
+Mingxiang Teng
+\href{mailto:mingxiang.teng@moffitt.org}{\nolinkurl{mingxiang.teng@moffitt.org}}\\
+Department of Biostatistics and Bioinformatics, H. Lee Moffit Cancer
+Center \&\\
+Research Institute, Tampa, FL, USA}
+\date{2021-10-19}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+Super enhancers (SEs) were proposed as broad regulatory domains on
+genome, usually spanning a minimum of thousands of base pairs and
+consisting of multiple constitute enhancers. The constitute enhancers
+work together as a unit, instead of separately, to facilitate high
+enhancer activity. Aberrant SE activities, which are critical to
+understand disease mechanisms, could be raised by the alterations of one
+or more of their constitute enhancers. However, the state-of-art binary
+strategy in calling differential SEs only relies on overall activity
+changes, neglecting the local dynamics of constitute enhancers within
+SEs. DASE uses a weighted spline model to identify differential SEs from
+two conditions by accounting for the combinatorial effects of constitute
+enhancers weighted with their activities and locations (internal
+dynamics). In addition to overall changes, our medthod finds four novel
+types (\emph{Shortened/lengthened}, \emph{shifted}, \emph{hollowed} and
+\emph{other complex scenarios}) of differential SEs pointing to the
+structural differences within SEs.
+
+\hypertarget{getting-started}{%
+\section{Getting Started}\label{getting-started}}
+
+Load the package in R
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(DASE)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{preparing-inputs}{%
+\section{Preparing Inputs}\label{preparing-inputs}}
+
+DASE requires the following input files:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  enhancer bed file: a merged enhancer bed file includes the enhancer
+  peaks of all samples.
+\item
+  SE bed file: a merged SE bed file includes the SE regions of all
+  samples.
+\item
+  Coverage files: can either be the path of bam/bw files for each
+  condition and replicate, or just an enhancer count table of all
+  conditions and replicates.
+\end{enumerate}
+
+Following are the examples of enhancer and SE bed files
+
+\hypertarget{enhancer-bed-file}{%
+\subsection{\texorpdfstring{\emph{Enhancer bed
+file}}{Enhancer bed file}}\label{enhancer-bed-file}}
+
+The enhancer file can be any format of bed files, just make sure the
+first 6 columns contains the information of
+``chr'',``start'',``end'',``name'',``score'',and ``strand''. Here is an
+example of bed files with only 6 columns.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# load enhancer bed file}
+\NormalTok{enhancer\_path }\OtherTok{\textless{}{-}} \FunctionTok{system.file}\NormalTok{(}\StringTok{"extdata"}\NormalTok{,}\StringTok{"enhancer.bed"}\NormalTok{,}\AttributeTok{package=}\StringTok{"DASE"}\NormalTok{)}
+\NormalTok{enhancer\_region }\OtherTok{\textless{}{-}} \FunctionTok{read.table}\NormalTok{(enhancer\_path,}\AttributeTok{sep=}\StringTok{"}\SpecialCharTok{\textbackslash{}t}\StringTok{"}\NormalTok{,}\AttributeTok{header=}\NormalTok{F)}
+\FunctionTok{head}\NormalTok{(enhancer\_region)}
+\CommentTok{\#\textgreater{}      V1       V2       V3         V4   V5 V6}
+\CommentTok{\#\textgreater{} 1 chr21 10119622 10119934 Peak\_59320   58  .}
+\CommentTok{\#\textgreater{} 2 chr21 10413373 10414538  Peak\_2651 1000  .}
+\CommentTok{\#\textgreater{} 3 chr21 13973708 13974647 Peak\_51112   67  .}
+\CommentTok{\#\textgreater{} 4 chr21 14027434 14027662 Peak\_40070   88  .}
+\CommentTok{\#\textgreater{} 5 chr21 14381282 14381485 Peak\_44344   77  .}
+\CommentTok{\#\textgreater{} 6 chr21 14382640 14384785  Peak\_2461 1000  .}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{se-bed-file}{%
+\subsection{\texorpdfstring{\emph{SE bed
+file}}{SE bed file}}\label{se-bed-file}}
+
+The SE file can be any format of bed files, just make sure the first 6
+columns contains the information of
+``chr'',``start'',``end'',``name'',``score'',and ``strand''. Here is an
+example of bed files with only 6 columns.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# load SE bed file}
+\NormalTok{se\_path }\OtherTok{\textless{}{-}} \FunctionTok{system.file}\NormalTok{(}\StringTok{"extdata"}\NormalTok{,}\StringTok{"SE.bed"}\NormalTok{,}\AttributeTok{package=}\StringTok{"DASE"}\NormalTok{)}
+\NormalTok{se\_region }\OtherTok{\textless{}{-}} \FunctionTok{read.table}\NormalTok{(se\_path,}\AttributeTok{sep=}\StringTok{"}\SpecialCharTok{\textbackslash{}t}\StringTok{"}\NormalTok{,}\AttributeTok{header=}\NormalTok{F)}
+\FunctionTok{head}\NormalTok{(se\_region)}
+\CommentTok{\#\textgreater{}      V1       V2       V3                         V4   V5 V6}
+\CommentTok{\#\textgreater{} 1 chr21 21145883 21202220 17\_Peak\_26941\_lociStitched  664  .}
+\CommentTok{\#\textgreater{} 2 chr21 43767083 43811262 10\_Peak\_18475\_lociStitched 1080  .}
+\CommentTok{\#\textgreater{} 3 chr21 39347640 39389180 11\_Peak\_22013\_lociStitched  887  .}
+\CommentTok{\#\textgreater{} 4 chr21 14737140 14764803  12\_Peak\_1337\_lociStitched  847  .}
+\CommentTok{\#\textgreater{} 5 chr21 29634547 29660543 14\_Peak\_44019\_lociStitched   81  .}
+\CommentTok{\#\textgreater{} 6 chr21 43880647 43903183  5\_Peak\_41657\_lociStitched  949  .}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{basic-usage-of-dase}{%
+\section{Basic usage of DASE}\label{basic-usage-of-dase}}
+
+In this section, we use DASE to find differential SEs with internal
+dynamics by comparing human chromosome 21 of two cancer cell lines (K562
+and MCF7). Here, we focus on the basic usage of running DASE with
+different coverage input files (BAM, BigWig, and enhancer raw count
+table). This default setting will not include enhancer blacklist which
+indicates regions that don't have enhancers. In addition, under default
+setting, DASE will run permutation 10 times to get a significant
+threshold to identify SE categories. More additional features can be
+found later in the ``Additional options'' section.
+
+\hypertarget{run-dase-with-bam-or-bigwig-coverage-files}{%
+\subsection{\texorpdfstring{\emph{Run DASE with BAM or BigWig coverage
+files}}{Run DASE with BAM or BigWig coverage files}}\label{run-dase-with-bam-or-bigwig-coverage-files}}
+
+This section shows you how to use DASE with BAM or BigWig coverage
+files. The BAM or BigWig files are for the reads count of enhancers in
+different samples. DASE uses \emph{featureCounts} to get the enhancer
+abundance of each sample with BAM file and \emph{rtracklayer} with
+BigWig file. The first step is to get the path of BAM or BigWig file for
+each samples. Then with the imported enhancer and SE region files, we
+can run DASE as follow.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# path of BAM file for each condition}
+\NormalTok{s1\_r1\_bam }\OtherTok{\textless{}{-}} \FunctionTok{system.file}\NormalTok{(}\StringTok{"extdata"}\NormalTok{,}\StringTok{"K562\_1\_chr21.bam"}\NormalTok{,}\AttributeTok{package=}\StringTok{"DASE"}\NormalTok{)}
+\NormalTok{s1\_r2\_bam }\OtherTok{\textless{}{-}} \FunctionTok{system.file}\NormalTok{(}\StringTok{"extdata"}\NormalTok{,}\StringTok{"K562\_2\_chr21.bam"}\NormalTok{,}\AttributeTok{package=}\StringTok{"DASE"}\NormalTok{)}
+\NormalTok{s2\_r1\_bam }\OtherTok{\textless{}{-}} \FunctionTok{system.file}\NormalTok{(}\StringTok{"extdata"}\NormalTok{,}\StringTok{"MCF7\_1\_chr21.bam"}\NormalTok{,}\AttributeTok{package=}\StringTok{"DASE"}\NormalTok{)}
+\NormalTok{s2\_r2\_bam }\OtherTok{\textless{}{-}} \FunctionTok{system.file}\NormalTok{(}\StringTok{"extdata"}\NormalTok{,}\StringTok{"MCF7\_2\_chr21.bam"}\NormalTok{,}\AttributeTok{package=}\StringTok{"DASE"}\NormalTok{)}
+
+\CommentTok{\# running DASE with BAM files}
+\NormalTok{se\_region}\SpecialCharTok{$}\NormalTok{V2}
+\CommentTok{\#\textgreater{}  [1] 21145883 43767083 39347640 14737140 29634547 43880647 37356716 29298197}
+\CommentTok{\#\textgreater{}  [9] 44011688 33540092 46313423 35190255 45402658 38784287 26106273 32339254}
+\CommentTok{\#\textgreater{} [17] 36112381 40301259 41750932 42359892 43709697 15191816 34863697 36186546}
+\CommentTok{\#\textgreater{} [25] 40366721 38129413 38903295 37256034 43331067 42513154 39311788 41677251}
+\CommentTok{\#\textgreater{} [33] 21145608 39347063 14735763 29634779 37356756 29298879 44011626 38111785}
+\CommentTok{\#\textgreater{} [41] 29017628 33539902 35198100 38784730 43710703 40312662 32338971 34863760}
+\CommentTok{\#\textgreater{} [49] 40366752 38129873 41677601}
+\NormalTok{test\_1 }\OtherTok{\textless{}{-}} \FunctionTok{SEfilter}\NormalTok{(}\AttributeTok{se\_in =}\NormalTok{ se\_region)}
+\NormalTok{DASE\_out }\OtherTok{\textless{}{-}} \FunctionTok{DASE}\NormalTok{(se\_region,enhancer\_region,}
+                 \AttributeTok{s1\_r1\_bam=}\NormalTok{s1\_r1\_bam,}\AttributeTok{s1\_r2\_bam=}\NormalTok{s1\_r2\_bam,}
+                 \AttributeTok{s2\_r1\_bam=}\NormalTok{s2\_r1\_bam,}\AttributeTok{s2\_r2\_bam=}\NormalTok{s2\_r2\_bam)}
+\CommentTok{\#\textgreater{} [1] "Step 1: merge and filter SE"}
+\CommentTok{\#\textgreater{} [1] "Step 2: calculate log2FC of constituent enhancer using Deseq2"}
+\CommentTok{\#\textgreater{} }
+\CommentTok{\#\textgreater{}         ==========     \_\_\_\_\_ \_    \_ \_\_\_\_  \_\_\_\_\_  \_\_\_\_\_\_          \_\_\_\_\_  }
+\CommentTok{\#\textgreater{}         =====         / \_\_\_\_| |  | |  \_ \textbackslash{}|  \_\_ \textbackslash{}|  \_\_\_\_|   /\textbackslash{}   |  \_\_ \textbackslash{} }
+\CommentTok{\#\textgreater{}           =====      | (\_\_\_ | |  | | |\_) | |\_\_) | |\_\_     /  \textbackslash{}  | |  | |}
+\CommentTok{\#\textgreater{}             ====      \textbackslash{}\_\_\_ \textbackslash{}| |  | |  \_ \textless{}|  \_  /|  \_\_|   / /\textbackslash{} \textbackslash{} | |  | |}
+\CommentTok{\#\textgreater{}               ====    \_\_\_\_) | |\_\_| | |\_) | | \textbackslash{} \textbackslash{}| |\_\_\_\_ / \_\_\_\_ \textbackslash{}| |\_\_| |}
+\CommentTok{\#\textgreater{}         ==========   |\_\_\_\_\_/ \textbackslash{}\_\_\_\_/|\_\_\_\_/|\_|  \textbackslash{}\_\textbackslash{}\_\_\_\_\_\_/\_/    \textbackslash{}\_\textbackslash{}\_\_\_\_\_/}
+\CommentTok{\#\textgreater{}        Rsubread 2.4.3}
+\CommentTok{\#\textgreater{} }
+\CommentTok{\#\textgreater{} //========================== featureCounts setting ===========================\textbackslash{}\textbackslash{}}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} ||             Input files : 1 BAM file                                       ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} ||                           K562\_1\_chr21.bam                                 ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} ||              Paired{-}end : no                                               ||}
+\CommentTok{\#\textgreater{} ||        Count read pairs : no                                               ||}
+\CommentTok{\#\textgreater{} ||              Annotation : R data.frame                                     ||}
+\CommentTok{\#\textgreater{} ||      Dir for temp files : .                                                ||}
+\CommentTok{\#\textgreater{} ||                 Threads : 1                                                ||}
+\CommentTok{\#\textgreater{} ||                   Level : meta{-}feature level                               ||}
+\CommentTok{\#\textgreater{} ||      Multimapping reads : counted                                          ||}
+\CommentTok{\#\textgreater{} || Multi{-}overlapping reads : not counted                                      ||}
+\CommentTok{\#\textgreater{} ||   Min overlapping bases : 1                                                ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} \textbackslash{}\textbackslash{}============================================================================//}
+\CommentTok{\#\textgreater{} }
+\CommentTok{\#\textgreater{} //================================= Running ==================================\textbackslash{}\textbackslash{}}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} || Load annotation file .Rsubread\_UserProvidedAnnotation\_pid26922 ...         ||}
+\CommentTok{\#\textgreater{} ||    Features : 1353                                                         ||}
+\CommentTok{\#\textgreater{} ||    Meta{-}features : 1353                                                    ||}
+\CommentTok{\#\textgreater{} ||    Chromosomes/contigs : 1                                                 ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} || Process BAM file K562\_1\_chr21.bam...                                       ||}
+\CommentTok{\#\textgreater{} ||    Single{-}end reads are included.                                          ||}
+\CommentTok{\#\textgreater{} ||    Total alignments : 138349                                               ||}
+\CommentTok{\#\textgreater{} ||    Successfully assigned alignments : 59009 (42.7\%)                        ||}
+\CommentTok{\#\textgreater{} ||    Running time : 0.00 minutes                                             ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} || Write the final count table.                                               ||}
+\CommentTok{\#\textgreater{} || Write the read assignment summary.                                         ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} \textbackslash{}\textbackslash{}============================================================================//}
+\CommentTok{\#\textgreater{} }
+\CommentTok{\#\textgreater{} }
+\CommentTok{\#\textgreater{}         ==========     \_\_\_\_\_ \_    \_ \_\_\_\_  \_\_\_\_\_  \_\_\_\_\_\_          \_\_\_\_\_  }
+\CommentTok{\#\textgreater{}         =====         / \_\_\_\_| |  | |  \_ \textbackslash{}|  \_\_ \textbackslash{}|  \_\_\_\_|   /\textbackslash{}   |  \_\_ \textbackslash{} }
+\CommentTok{\#\textgreater{}           =====      | (\_\_\_ | |  | | |\_) | |\_\_) | |\_\_     /  \textbackslash{}  | |  | |}
+\CommentTok{\#\textgreater{}             ====      \textbackslash{}\_\_\_ \textbackslash{}| |  | |  \_ \textless{}|  \_  /|  \_\_|   / /\textbackslash{} \textbackslash{} | |  | |}
+\CommentTok{\#\textgreater{}               ====    \_\_\_\_) | |\_\_| | |\_) | | \textbackslash{} \textbackslash{}| |\_\_\_\_ / \_\_\_\_ \textbackslash{}| |\_\_| |}
+\CommentTok{\#\textgreater{}         ==========   |\_\_\_\_\_/ \textbackslash{}\_\_\_\_/|\_\_\_\_/|\_|  \textbackslash{}\_\textbackslash{}\_\_\_\_\_\_/\_/    \textbackslash{}\_\textbackslash{}\_\_\_\_\_/}
+\CommentTok{\#\textgreater{}        Rsubread 2.4.3}
+\CommentTok{\#\textgreater{} }
+\CommentTok{\#\textgreater{} //========================== featureCounts setting ===========================\textbackslash{}\textbackslash{}}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} ||             Input files : 1 BAM file                                       ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} ||                           K562\_2\_chr21.bam                                 ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} ||              Paired{-}end : no                                               ||}
+\CommentTok{\#\textgreater{} ||        Count read pairs : no                                               ||}
+\CommentTok{\#\textgreater{} ||              Annotation : R data.frame                                     ||}
+\CommentTok{\#\textgreater{} ||      Dir for temp files : .                                                ||}
+\CommentTok{\#\textgreater{} ||                 Threads : 1                                                ||}
+\CommentTok{\#\textgreater{} ||                   Level : meta{-}feature level                               ||}
+\CommentTok{\#\textgreater{} ||      Multimapping reads : counted                                          ||}
+\CommentTok{\#\textgreater{} || Multi{-}overlapping reads : not counted                                      ||}
+\CommentTok{\#\textgreater{} ||   Min overlapping bases : 1                                                ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} \textbackslash{}\textbackslash{}============================================================================//}
+\CommentTok{\#\textgreater{} }
+\CommentTok{\#\textgreater{} //================================= Running ==================================\textbackslash{}\textbackslash{}}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} || Load annotation file .Rsubread\_UserProvidedAnnotation\_pid26922 ...         ||}
+\CommentTok{\#\textgreater{} ||    Features : 1353                                                         ||}
+\CommentTok{\#\textgreater{} ||    Meta{-}features : 1353                                                    ||}
+\CommentTok{\#\textgreater{} ||    Chromosomes/contigs : 1                                                 ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} || Process BAM file K562\_2\_chr21.bam...                                       ||}
+\CommentTok{\#\textgreater{} ||    Single{-}end reads are included.                                          ||}
+\CommentTok{\#\textgreater{} ||    Total alignments : 64594                                                ||}
+\CommentTok{\#\textgreater{} ||    Successfully assigned alignments : 30193 (46.7\%)                        ||}
+\CommentTok{\#\textgreater{} ||    Running time : 0.00 minutes                                             ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} || Write the final count table.                                               ||}
+\CommentTok{\#\textgreater{} || Write the read assignment summary.                                         ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} \textbackslash{}\textbackslash{}============================================================================//}
+\CommentTok{\#\textgreater{} }
+\CommentTok{\#\textgreater{} }
+\CommentTok{\#\textgreater{}         ==========     \_\_\_\_\_ \_    \_ \_\_\_\_  \_\_\_\_\_  \_\_\_\_\_\_          \_\_\_\_\_  }
+\CommentTok{\#\textgreater{}         =====         / \_\_\_\_| |  | |  \_ \textbackslash{}|  \_\_ \textbackslash{}|  \_\_\_\_|   /\textbackslash{}   |  \_\_ \textbackslash{} }
+\CommentTok{\#\textgreater{}           =====      | (\_\_\_ | |  | | |\_) | |\_\_) | |\_\_     /  \textbackslash{}  | |  | |}
+\CommentTok{\#\textgreater{}             ====      \textbackslash{}\_\_\_ \textbackslash{}| |  | |  \_ \textless{}|  \_  /|  \_\_|   / /\textbackslash{} \textbackslash{} | |  | |}
+\CommentTok{\#\textgreater{}               ====    \_\_\_\_) | |\_\_| | |\_) | | \textbackslash{} \textbackslash{}| |\_\_\_\_ / \_\_\_\_ \textbackslash{}| |\_\_| |}
+\CommentTok{\#\textgreater{}         ==========   |\_\_\_\_\_/ \textbackslash{}\_\_\_\_/|\_\_\_\_/|\_|  \textbackslash{}\_\textbackslash{}\_\_\_\_\_\_/\_/    \textbackslash{}\_\textbackslash{}\_\_\_\_\_/}
+\CommentTok{\#\textgreater{}        Rsubread 2.4.3}
+\CommentTok{\#\textgreater{} }
+\CommentTok{\#\textgreater{} //========================== featureCounts setting ===========================\textbackslash{}\textbackslash{}}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} ||             Input files : 1 BAM file                                       ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} ||                           MCF7\_1\_chr21.bam                                 ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} ||              Paired{-}end : no                                               ||}
+\CommentTok{\#\textgreater{} ||        Count read pairs : no                                               ||}
+\CommentTok{\#\textgreater{} ||              Annotation : R data.frame                                     ||}
+\CommentTok{\#\textgreater{} ||      Dir for temp files : .                                                ||}
+\CommentTok{\#\textgreater{} ||                 Threads : 1                                                ||}
+\CommentTok{\#\textgreater{} ||                   Level : meta{-}feature level                               ||}
+\CommentTok{\#\textgreater{} ||      Multimapping reads : counted                                          ||}
+\CommentTok{\#\textgreater{} || Multi{-}overlapping reads : not counted                                      ||}
+\CommentTok{\#\textgreater{} ||   Min overlapping bases : 1                                                ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} \textbackslash{}\textbackslash{}============================================================================//}
+\CommentTok{\#\textgreater{} }
+\CommentTok{\#\textgreater{} //================================= Running ==================================\textbackslash{}\textbackslash{}}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} || Load annotation file .Rsubread\_UserProvidedAnnotation\_pid26922 ...         ||}
+\CommentTok{\#\textgreater{} ||    Features : 1353                                                         ||}
+\CommentTok{\#\textgreater{} ||    Meta{-}features : 1353                                                    ||}
+\CommentTok{\#\textgreater{} ||    Chromosomes/contigs : 1                                                 ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} || Process BAM file MCF7\_1\_chr21.bam...                                       ||}
+\CommentTok{\#\textgreater{} ||    Single{-}end reads are included.                                          ||}
+\CommentTok{\#\textgreater{} ||    Total alignments : 891326                                               ||}
+\CommentTok{\#\textgreater{} ||    Successfully assigned alignments : 415772 (46.6\%)                       ||}
+\CommentTok{\#\textgreater{} ||    Running time : 0.01 minutes                                             ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} || Write the final count table.                                               ||}
+\CommentTok{\#\textgreater{} || Write the read assignment summary.                                         ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} \textbackslash{}\textbackslash{}============================================================================//}
+\CommentTok{\#\textgreater{} }
+\CommentTok{\#\textgreater{} }
+\CommentTok{\#\textgreater{}         ==========     \_\_\_\_\_ \_    \_ \_\_\_\_  \_\_\_\_\_  \_\_\_\_\_\_          \_\_\_\_\_  }
+\CommentTok{\#\textgreater{}         =====         / \_\_\_\_| |  | |  \_ \textbackslash{}|  \_\_ \textbackslash{}|  \_\_\_\_|   /\textbackslash{}   |  \_\_ \textbackslash{} }
+\CommentTok{\#\textgreater{}           =====      | (\_\_\_ | |  | | |\_) | |\_\_) | |\_\_     /  \textbackslash{}  | |  | |}
+\CommentTok{\#\textgreater{}             ====      \textbackslash{}\_\_\_ \textbackslash{}| |  | |  \_ \textless{}|  \_  /|  \_\_|   / /\textbackslash{} \textbackslash{} | |  | |}
+\CommentTok{\#\textgreater{}               ====    \_\_\_\_) | |\_\_| | |\_) | | \textbackslash{} \textbackslash{}| |\_\_\_\_ / \_\_\_\_ \textbackslash{}| |\_\_| |}
+\CommentTok{\#\textgreater{}         ==========   |\_\_\_\_\_/ \textbackslash{}\_\_\_\_/|\_\_\_\_/|\_|  \textbackslash{}\_\textbackslash{}\_\_\_\_\_\_/\_/    \textbackslash{}\_\textbackslash{}\_\_\_\_\_/}
+\CommentTok{\#\textgreater{}        Rsubread 2.4.3}
+\CommentTok{\#\textgreater{} }
+\CommentTok{\#\textgreater{} //========================== featureCounts setting ===========================\textbackslash{}\textbackslash{}}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} ||             Input files : 1 BAM file                                       ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} ||                           MCF7\_2\_chr21.bam                                 ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} ||              Paired{-}end : no                                               ||}
+\CommentTok{\#\textgreater{} ||        Count read pairs : no                                               ||}
+\CommentTok{\#\textgreater{} ||              Annotation : R data.frame                                     ||}
+\CommentTok{\#\textgreater{} ||      Dir for temp files : .                                                ||}
+\CommentTok{\#\textgreater{} ||                 Threads : 1                                                ||}
+\CommentTok{\#\textgreater{} ||                   Level : meta{-}feature level                               ||}
+\CommentTok{\#\textgreater{} ||      Multimapping reads : counted                                          ||}
+\CommentTok{\#\textgreater{} || Multi{-}overlapping reads : not counted                                      ||}
+\CommentTok{\#\textgreater{} ||   Min overlapping bases : 1                                                ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} \textbackslash{}\textbackslash{}============================================================================//}
+\CommentTok{\#\textgreater{} }
+\CommentTok{\#\textgreater{} //================================= Running ==================================\textbackslash{}\textbackslash{}}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} || Load annotation file .Rsubread\_UserProvidedAnnotation\_pid26922 ...         ||}
+\CommentTok{\#\textgreater{} ||    Features : 1353                                                         ||}
+\CommentTok{\#\textgreater{} ||    Meta{-}features : 1353                                                    ||}
+\CommentTok{\#\textgreater{} ||    Chromosomes/contigs : 1                                                 ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} || Process BAM file MCF7\_2\_chr21.bam...                                       ||}
+\CommentTok{\#\textgreater{} ||    Single{-}end reads are included.                                          ||}
+\CommentTok{\#\textgreater{} ||    Total alignments : 273346                                               ||}
+\CommentTok{\#\textgreater{} ||    Successfully assigned alignments : 105155 (38.5\%)                       ||}
+\CommentTok{\#\textgreater{} ||    Running time : 0.00 minutes                                             ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} || Write the final count table.                                               ||}
+\CommentTok{\#\textgreater{} || Write the read assignment summary.                                         ||}
+\CommentTok{\#\textgreater{} ||                                                                            ||}
+\CommentTok{\#\textgreater{} \textbackslash{}\textbackslash{}============================================================================//}
+\CommentTok{\#\textgreater{} }
+\CommentTok{\#\textgreater{} [1] "Step 3: bs{-}spline fit log2FC"}
+\CommentTok{\#\textgreater{} [1] "Processing total of 34 SEs"}
+\CommentTok{\#\textgreater{} [1] "Step 4: permutation to get log2FC cutoff"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 1"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 2"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 3"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 4"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 5"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 6"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 7"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 8"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 9"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 10"}
+\CommentTok{\#\textgreater{} [1] "Step 5: pattern segments process"}
+\CommentTok{\#\textgreater{} [1] "Step 6: final category estimate"}
+\end{Highlighting}
+\end{Shaded}
+
+Run DASE with BigWig files.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# path of BigWig file for each condition}
+\NormalTok{s1\_r1\_bw }\OtherTok{\textless{}{-}} \FunctionTok{system.file}\NormalTok{(}\StringTok{"extdata"}\NormalTok{,}\StringTok{"K562\_1\_chr21.bw"}\NormalTok{,}\AttributeTok{package=}\StringTok{"DASE"}\NormalTok{)}
+\NormalTok{s1\_r2\_bw }\OtherTok{\textless{}{-}} \FunctionTok{system.file}\NormalTok{(}\StringTok{"extdata"}\NormalTok{,}\StringTok{"K562\_2\_chr21.bw"}\NormalTok{,}\AttributeTok{package=}\StringTok{"DASE"}\NormalTok{)}
+\NormalTok{s2\_r1\_bw }\OtherTok{\textless{}{-}} \FunctionTok{system.file}\NormalTok{(}\StringTok{"extdata"}\NormalTok{,}\StringTok{"MCF7\_1\_chr21.bw"}\NormalTok{,}\AttributeTok{package=}\StringTok{"DASE"}\NormalTok{)}
+\NormalTok{s2\_r2\_bw }\OtherTok{\textless{}{-}} \FunctionTok{system.file}\NormalTok{(}\StringTok{"extdata"}\NormalTok{,}\StringTok{"MCF7\_2\_chr21.bw"}\NormalTok{,}\AttributeTok{package=}\StringTok{"DASE"}\NormalTok{)}
+
+\CommentTok{\# running DASE with BigWig files}
+\NormalTok{DASE\_out }\OtherTok{\textless{}{-}} \FunctionTok{DASE}\NormalTok{(}\AttributeTok{se\_in=}\NormalTok{se\_region,}\AttributeTok{e\_in=}\NormalTok{enhancer\_region,}\AttributeTok{data\_type =} \StringTok{"bw"}\NormalTok{,}
+                 \AttributeTok{s1\_r1\_bam=}\NormalTok{s1\_r1\_bw,}\AttributeTok{s1\_r2\_bam=}\NormalTok{s1\_r2\_bw,}
+                 \AttributeTok{s2\_r1\_bam=}\NormalTok{s2\_r1\_bw,}\AttributeTok{s2\_r2\_bam=}\NormalTok{s2\_r2\_bw)}
+\CommentTok{\#\textgreater{} [1] "Step 1: merge and filter SE"}
+\CommentTok{\#\textgreater{} [1] "Step 2: calculate log2FC of constituent enhancer using Deseq2"}
+\CommentTok{\#\textgreater{} [1] "Step 3: bs{-}spline fit log2FC"}
+\CommentTok{\#\textgreater{} [1] "Processing total of 34 SEs"}
+\CommentTok{\#\textgreater{} [1] "Step 4: permutation to get log2FC cutoff"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 1"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 2"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 3"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 4"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 5"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 6"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 7"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 8"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 9"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 10"}
+\CommentTok{\#\textgreater{} [1] "Step 5: pattern segments process"}
+\CommentTok{\#\textgreater{} [1] "Step 6: final category estimate"}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{run-dase-with-enhancer-raw-count-table}{%
+\subsection{\texorpdfstring{\emph{Run DASE with enhancer raw count
+table}}{Run DASE with enhancer raw count table}}\label{run-dase-with-enhancer-raw-count-table}}
+
+This section shows you how to use DASE with enhancer raw count table.
+The format of count table is shown bellow. Here we don't need BAM or
+BigWig files, because we already have the enhancer counts for each
+sample. We can run DASE as follow. This step will skip
+\emph{featureCount}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# read enhancer count table}
+\NormalTok{enhancer\_count\_path }\OtherTok{\textless{}{-}} \FunctionTok{system.file}\NormalTok{(}\StringTok{"extdata"}\NormalTok{,}\StringTok{"chr21\_enhancer\_count.txt"}\NormalTok{,}\AttributeTok{package=}\StringTok{"DASE"}\NormalTok{)}
+\NormalTok{enhancer\_count }\OtherTok{\textless{}{-}} \FunctionTok{read.table}\NormalTok{(enhancer\_count\_path,}\AttributeTok{sep=}\StringTok{"}\SpecialCharTok{\textbackslash{}t}\StringTok{"}\NormalTok{,}\AttributeTok{header=}\NormalTok{T)}
+\FunctionTok{head}\NormalTok{(enhancer\_count)}
+\CommentTok{\#\textgreater{}                enhancer S1\_r1 S1\_r2 S2\_r1 S2\_r2}
+\CommentTok{\#\textgreater{} 1 chr21\_5128185\_5128529    12     2    21     5}
+\CommentTok{\#\textgreater{} 2 chr21\_5240507\_5241144    29    20    15     1}
+\CommentTok{\#\textgreater{} 3 chr21\_5241953\_5242568    33    29    11     2}
+\CommentTok{\#\textgreater{} 4 chr21\_5242733\_5243984   160    68    12     7}
+\CommentTok{\#\textgreater{} 5 chr21\_5244027\_5244554    52    29    13     4}
+\CommentTok{\#\textgreater{} 6 chr21\_5244634\_5245418    59    19    13     1}
+
+\CommentTok{\# run DASE}
+\NormalTok{DASE\_out\_count }\OtherTok{\textless{}{-}} \FunctionTok{DASE}\NormalTok{(}\AttributeTok{se\_in=}\NormalTok{se\_region,}\AttributeTok{e\_in=}\NormalTok{enhancer\_region,}
+                 \AttributeTok{enhancer\_count\_table=}\NormalTok{enhancer\_count)}
+\CommentTok{\#\textgreater{} [1] "Step 1: merge and filter SE"}
+\CommentTok{\#\textgreater{} [1] "Step 2: calculate log2FC of constituent enhancer using Deseq2"}
+\CommentTok{\#\textgreater{} [1] "Step 3: bs{-}spline fit log2FC"}
+\CommentTok{\#\textgreater{} [1] "Processing total of 34 SEs"}
+\CommentTok{\#\textgreater{} [1] "Step 4: permutation to get log2FC cutoff"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 1"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 2"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 3"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 4"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 5"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 6"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 7"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 8"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 9"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 10"}
+\CommentTok{\#\textgreater{} [1] "Step 5: pattern segments process"}
+\CommentTok{\#\textgreater{} [1] "Step 6: final category estimate"}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{interpretation-of-dase-output-files}{%
+\section{Interpretation of DASE output
+files}\label{interpretation-of-dase-output-files}}
+
+The output of DASE is a list with multiple data types including:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  lfc\_shrink: a shrinking lfc object from DESeq2, it can be used to get
+  a MA plot
+\item
+  cutoff: significant threshold of fitted log2 fold change.
+\item
+  density\_plot: a density plot of permutation and original fitted log2
+  fold change, if \emph{permut=T}.
+\item
+  boxplot: a boxplot of final SE categories
+\item
+  se\_category: a data frame contains final SE categories
+\item
+  pattern\_list: a list contains figures of each SE's pattern
+\item
+  se\_fit: a data frame contains DESeq2 output and spline-fitted log2
+  fold change of all constitute enhancers
+\end{enumerate}
+
+\hypertarget{significant-threshold}{%
+\subsection{Significant threshold}\label{significant-threshold}}
+
+We use permutation of spline fitted log2 fold change to decide the
+significant threshold. Under default settings, DASE will run permutation
+10 times with \emph{SEpermut} function. If don't use permutation, the
+default significant threshold is -1 and 1. You can use your own
+threshold with \emph{cutoff\_v} parameter. Please refer to function
+manual or \emph{Additional options} section.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Significant threshold}
+\NormalTok{DASE\_out\_count}\SpecialCharTok{$}\NormalTok{cutoff}
+\CommentTok{\#\textgreater{} [1] {-}1.354250  1.838521}
+
+\CommentTok{\# Permutation density plot}
+\NormalTok{DASE\_out\_count}\SpecialCharTok{$}\NormalTok{density\_plot}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{DASE_files/figure-latex/threshold-1} \end{center}
+
+Black lines indicates the threshold which is obtained by the inflection
+point.
+
+\hypertarget{super-enhancer-internal-dynamic-categories}{%
+\subsection{Super-enhancer internal dynamic
+categories}\label{super-enhancer-internal-dynamic-categories}}
+
+\emph{SE\_category, pattern\_list, se\_fit} are the output related to SE
+internal dynamics.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# se\_categories}
+\FunctionTok{head}\NormalTok{(DASE\_out\_count}\SpecialCharTok{$}\NormalTok{se\_category)}
+\CommentTok{\#\textgreater{}              se\_merge\_name total\_width number\_enhancer category direction}
+\CommentTok{\#\textgreater{} 1  chr21\_14735763\_14773781    2415.972              21    Other      none}
+\CommentTok{\#\textgreater{} 57 chr21\_45402658\_45478681    1756.618              18    Other      none}
+\CommentTok{\#\textgreater{} 29 chr21\_38784287\_38854382    2417.733              21    Other      none}
+\CommentTok{\#\textgreater{} 50 chr21\_43767083\_43811262     816.333              13    Other      none}
+\CommentTok{\#\textgreater{} 39 chr21\_40366721\_40390218    6696.416               5  Overall         +}
+\CommentTok{\#\textgreater{} 10 chr21\_29634547\_29660543    4321.917              11  Overall         {-}}
+\CommentTok{\#\textgreater{}    non\_mid\_percent    mean\_FC rank}
+\CommentTok{\#\textgreater{} 1        0.9668342 {-}2.5822940    1}
+\CommentTok{\#\textgreater{} 57       0.6850000  0.9187119    2}
+\CommentTok{\#\textgreater{} 29       0.5100000  1.1477844    3}
+\CommentTok{\#\textgreater{} 50       0.3360000  0.2621700    4}
+\CommentTok{\#\textgreater{} 39       1.0000000  5.1182229    1}
+\CommentTok{\#\textgreater{} 10       1.0000000 {-}4.8675004    2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# an example of one sample}
+\NormalTok{DASE\_out\_count}\SpecialCharTok{$}\NormalTok{pattern\_list[[}\DecValTok{1}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{DASE_files/figure-latex/se_pattern_example-1} \end{center}
+
+This figure shows the constitute enhancer patterns within SE
+``chr21\_34863697\_34890719'' which identified as \emph{Shortened}.
+Black line is the fitted log2 fold change curve, dots indicate
+constitute enhancers. Red dots indicate the constitute enhancers with
+large weights.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# example of se\_fit}
+\FunctionTok{head}\NormalTok{(DASE\_out\_count}\SpecialCharTok{$}\NormalTok{se\_fit)}
+\CommentTok{\#\textgreater{}               e\_merge\_name   chr    start      end width S1\_r1 S1\_r2 S2\_r1}
+\CommentTok{\#\textgreater{} 1: chr21\_14751738\_14756723 chr21 14751738 14756723  4986   463   471    48}
+\CommentTok{\#\textgreater{} 2: chr21\_14760734\_14764325 chr21 14760734 14764325  3592   254   303    91}
+\CommentTok{\#\textgreater{} 3: chr21\_14750604\_14751557 chr21 14750604 14751557   954    61    49    14}
+\CommentTok{\#\textgreater{} 4: chr21\_14749603\_14750540 chr21 14749603 14750540   938    52    46    14}
+\CommentTok{\#\textgreater{} 5: chr21\_14757516\_14758773 chr21 14757516 14758773  1258    63    33    11}
+\CommentTok{\#\textgreater{} 6: chr21\_14737131\_14737833 chr21 14737131 14737833   703    35    31    13}
+\CommentTok{\#\textgreater{}    S2\_r2 S1\_r1\_norm S1\_r2\_norm S2\_r1\_norm S2\_r2\_norm  baseMean log2FoldChange}
+\CommentTok{\#\textgreater{} 1:    13  600.60927 1445.38402  11.401371  14.391655 517.94658      {-}6.333719}
+\CommentTok{\#\textgreater{} 2:    30  329.49191  929.83303  21.615100  33.211512 328.53789      {-}4.540646}
+\CommentTok{\#\textgreater{} 3:     9   79.12995  150.36904   3.325400   9.963453  60.69696      {-}4.262678}
+\CommentTok{\#\textgreater{} 4:     8   67.45504  141.16277   3.325400   8.856403  55.19990      {-}4.238023}
+\CommentTok{\#\textgreater{} 5:     7   81.72437  101.26894   2.612814   7.749353  48.33887      {-}4.337614}
+\CommentTok{\#\textgreater{} 6:     6   45.40243   95.13143   3.087871   6.642302  37.56601      {-}3.965940}
+\CommentTok{\#\textgreater{}        lfcSE       stat       pvalue         padj baseMean.1 log2FoldChange.1}
+\CommentTok{\#\textgreater{} 1: 0.6199495 {-}10.216508 1.672580e{-}24 2.263000e{-}22  517.94658        {-}6.211757}
+\CommentTok{\#\textgreater{} 2: 0.6328657  {-}7.174738 7.244567e{-}13 1.849415e{-}11  328.53789        {-}4.370066}
+\CommentTok{\#\textgreater{} 3: 0.7638403  {-}5.580588 2.397068e{-}08 2.206281e{-}07   60.69696        {-}3.986558}
+\CommentTok{\#\textgreater{} 4: 0.7751509  {-}5.467353 4.568069e{-}08 4.039606e{-}07   55.19990        {-}3.952824}
+\CommentTok{\#\textgreater{} 5: 0.7788941  {-}5.568940 2.562936e{-}08 2.327284e{-}07   48.33887        {-}4.053649}
+\CommentTok{\#\textgreater{} 6: 0.8182816  {-}4.846669 1.255515e{-}06 8.368035e{-}06   37.56601        {-}3.630087}
+\CommentTok{\#\textgreater{}      lfcSE.1     pvalue.1       padj.1           se\_merge\_name    s1\_mean}
+\CommentTok{\#\textgreater{} 1: 0.6280041 1.672580e{-}24 2.263000e{-}22 chr21\_14735763\_14773781 1022.99665}
+\CommentTok{\#\textgreater{} 2: 0.6463209 7.244567e{-}13 1.849415e{-}11 chr21\_14735763\_14773781  629.66247}
+\CommentTok{\#\textgreater{} 3: 0.8052662 2.397068e{-}08 2.206281e{-}07 chr21\_14735763\_14773781  114.74949}
+\CommentTok{\#\textgreater{} 4: 0.8168441 4.568069e{-}08 4.039606e{-}07 chr21\_14735763\_14773781  104.30890}
+\CommentTok{\#\textgreater{} 5: 0.8223654 2.562936e{-}08 2.327284e{-}07 chr21\_14735763\_14773781   91.49666}
+\CommentTok{\#\textgreater{} 6: 0.8652202 1.255515e{-}06 8.368035e{-}06 chr21\_14735763\_14773781   70.26693}
+\CommentTok{\#\textgreater{}      s2\_mean   max\_mean width\_mid   percent   cumsum spline\_bs}
+\CommentTok{\#\textgreater{} 1: 12.896513 1022.99665  14754.23 42.343075 42.34308 {-}5.795081}
+\CommentTok{\#\textgreater{} 2: 27.413306  629.66247  14762.53 26.062496 68.40557 {-}4.140977}
+\CommentTok{\#\textgreater{} 3:  6.644427  114.74949  14751.08  4.749621 73.15519 {-}4.923321}
+\CommentTok{\#\textgreater{} 4:  6.090902  104.30890  14750.07  4.317472 77.47266 {-}4.501228}
+\CommentTok{\#\textgreater{} 5:  5.181083   91.49666  14758.15  3.787158 81.25982 {-}5.704292}
+\CommentTok{\#\textgreater{} 6:  4.865087   70.26693  14737.48  2.908434 84.16826 {-}2.311289}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{additional-options}{%
+\section{Additional options}\label{additional-options}}
+
+In addition of default parameters, DASE can take an blacklist file which
+contains the regions cannot be identified as enhancers. DASE also can
+take a customized blacklist region with \emph{custom\_range} parameter.
+We have included a blacklist file from ENCODE (accession ID:
+ENCFF356LFX) in our package.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# blacklist file}
+\NormalTok{blacklist\_path }\OtherTok{\textless{}{-}} \FunctionTok{system.file}\NormalTok{(}\StringTok{"extdata"}\NormalTok{,}\StringTok{"region\_blacklist.bed"}\NormalTok{,}\AttributeTok{package=}\StringTok{"DASE"}\NormalTok{)}
+\NormalTok{blacklist\_region }\OtherTok{\textless{}{-}} \FunctionTok{read.table}\NormalTok{(blacklist\_path,}\AttributeTok{sep=}\StringTok{"}\SpecialCharTok{\textbackslash{}t}\StringTok{"}\NormalTok{,}\AttributeTok{header=}\NormalTok{F)}
+\FunctionTok{head}\NormalTok{(blacklist\_region)}
+\CommentTok{\#\textgreater{}     V1       V2       V3}
+\CommentTok{\#\textgreater{} 1 chr1   628903   635104}
+\CommentTok{\#\textgreater{} 2 chr1  5850087  5850571}
+\CommentTok{\#\textgreater{} 3 chr1  8909610  8910014}
+\CommentTok{\#\textgreater{} 4 chr1  9574580  9574997}
+\CommentTok{\#\textgreater{} 5 chr1 32043823 32044203}
+\CommentTok{\#\textgreater{} 6 chr1 33818964 33819344}
+\end{Highlighting}
+\end{Shaded}
+
+There is also an option whether to choice permutation or not. The
+default setting of DASE will run permutation 10 times. You can turn it
+off with \emph{permut=F}. When there is no permutation, the default
+threshold is -1 and 1. You can chose any threshold you like with
+\emph{cutoff\_v} parameter. However, defining customized threshold is
+only available under \emph{permut=F}.
+
+\hypertarget{dase-with-enhancer-blacklist-region}{%
+\subsection{\texorpdfstring{\emph{DASE with enhancer blacklist
+region}}{DASE with enhancer blacklist region}}\label{dase-with-enhancer-blacklist-region}}
+
+Example of using blacklist options. Here, we focus on using DASE with
+enhancer count table.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# run DASE with blacklist file and customized region}
+\NormalTok{DASE\_out\_bl }\OtherTok{\textless{}{-}} \FunctionTok{DASE}\NormalTok{(}\AttributeTok{se\_in=}\NormalTok{se\_region,}\AttributeTok{e\_in=}\NormalTok{enhancer\_region,}\AttributeTok{bl\_file =}\NormalTok{ blacklist\_region,}
+                 \AttributeTok{custom\_range =} \FunctionTok{c}\NormalTok{(}\StringTok{"chr21:14735763{-}29634779"}\NormalTok{,}\StringTok{"chr21:33539902{-}43710703"}\NormalTok{),}
+                 \AttributeTok{enhancer\_count\_table=}\NormalTok{enhancer\_count)}
+\CommentTok{\#\textgreater{} [1] "Step 1: merge and filter SE"}
+\CommentTok{\#\textgreater{} [1] "Step 2: calculate log2FC of constituent enhancer using Deseq2"}
+\CommentTok{\#\textgreater{} [1] "Step 3: bs{-}spline fit log2FC"}
+\CommentTok{\#\textgreater{} [1] "Processing total of 8 SEs"}
+\CommentTok{\#\textgreater{} [1] "Step 4: permutation to get log2FC cutoff"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 1"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 2"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 3"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 4"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 5"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 6"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 7"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 8"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 9"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 10"}
+\CommentTok{\#\textgreater{} [1] "Step 5: pattern segments process"}
+\CommentTok{\#\textgreater{} [1] "Step 6: final category estimate"}
+\end{Highlighting}
+\end{Shaded}
+
+You can find that the number of SEs (8) in ``DASE\_out\_bl'' is less
+than ``DASE\_out\_count'' which is without blacklist region (34).
+
+\hypertarget{dase-with-no-permutation}{%
+\subsection{\texorpdfstring{\emph{DASE with no
+permutation}}{DASE with no permutation}}\label{dase-with-no-permutation}}
+
+Some examples of using permutation options. Here, we focus on using DASE
+with enhancer count table.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# run DASE with permutation 3 times}
+\NormalTok{DASE\_out }\OtherTok{\textless{}{-}} \FunctionTok{DASE}\NormalTok{(}\AttributeTok{se\_in=}\NormalTok{se\_region,}\AttributeTok{e\_in=}\NormalTok{enhancer\_region,}\AttributeTok{times=}\DecValTok{3}\NormalTok{,}
+                 \AttributeTok{cutoff\_v =} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{),}\AttributeTok{enhancer\_count\_table=}\NormalTok{enhancer\_count)}
+\CommentTok{\#\textgreater{} [1] "Step 1: merge and filter SE"}
+\CommentTok{\#\textgreater{} [1] "Step 2: calculate log2FC of constituent enhancer using Deseq2"}
+\CommentTok{\#\textgreater{} [1] "Step 3: bs{-}spline fit log2FC"}
+\CommentTok{\#\textgreater{} [1] "Processing total of 34 SEs"}
+\CommentTok{\#\textgreater{} [1] "Step 4: permutation to get log2FC cutoff"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 1"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 2"}
+\CommentTok{\#\textgreater{} [1] "Permutation: 3"}
+\CommentTok{\#\textgreater{} [1] "Step 5: pattern segments process"}
+\CommentTok{\#\textgreater{} [1] "Step 6: final category estimate"}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# run DASE with no permutation and customized threshold}
+\NormalTok{DASE\_out\_p }\OtherTok{\textless{}{-}} \FunctionTok{DASE}\NormalTok{(}\AttributeTok{se\_in=}\NormalTok{se\_region,}\AttributeTok{e\_in=}\NormalTok{enhancer\_region,}\AttributeTok{permut =}\NormalTok{ F,}
+                 \AttributeTok{cutoff\_v =} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{),}\AttributeTok{enhancer\_count\_table=}\NormalTok{enhancer\_count)}
+\CommentTok{\#\textgreater{} [1] "Step 1: merge and filter SE"}
+\CommentTok{\#\textgreater{} [1] "Step 2: calculate log2FC of constituent enhancer using Deseq2"}
+\CommentTok{\#\textgreater{} [1] "Step 3: bs{-}spline fit log2FC"}
+\CommentTok{\#\textgreater{} [1] "Processing total of 34 SEs"}
+\CommentTok{\#\textgreater{} [1] "Step 4: permutation to get log2FC cutoff"}
+\CommentTok{\#\textgreater{} [1] "Step 5: pattern segments process"}
+\CommentTok{\#\textgreater{} [1] "Step 6: final category estimate"}
+
+\CommentTok{\# boxplots of different threshold}
+\NormalTok{DASE\_out\_count}\SpecialCharTok{$}\NormalTok{boxplot}
+\NormalTok{DASE\_out\_p}\SpecialCharTok{$}\NormalTok{boxplot}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{DASE_files/figure-latex/no_permut-1} \includegraphics{DASE_files/figure-latex/no_permut-2} \end{center}
+
+Because we have a larger threshold (bottom plot), more SEs are
+identified as \emph{similar} category than before (top plot).
+
+\hypertarget{citation}{%
+\section{Citation}\label{citation}}
+
+If you used DASE, please cite our paper:
+{[}\url{https://www.biorxiv.org/content/10.1101/2021.09.25.461810v1}{]}
+
+\end{document}
