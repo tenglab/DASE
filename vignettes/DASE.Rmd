@@ -9,6 +9,7 @@ date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
     toc: true
+graphics: yes
 vignette: >
   %\VignetteIndexEntry{DASE user's guide}
   %\VignetteEngine{knitr::rmarkdown}
@@ -17,7 +18,6 @@ vignette: >
 ---
 
 ```{r, echo=FALSE, include=FALSE}
-BiocStyle::markdown()
 knitr::opts_chunk$set(
   collapse = TRUE,
   error = FALSE,
@@ -27,8 +27,8 @@ knitr::opts_chunk$set(
   comment = "#>",
   dev="png",
   fig.show = "hold",
-  fig.width=8,
-  fig.height=4.5,
+  fig.width=4,
+  fig.height=4,
   fig.align="center"
 )
 ```
@@ -84,7 +84,7 @@ head(se_region)
 
 In this section, we use DASE to find differential SEs with internal dynamics by comparing human chromosome 21 of two cancer cell lines (K562 and MCF7). Here, we focus on the basic usage of running DASE with different coverage input files (BAM, BigWig, and enhancer raw count table). This default setting will not include enhancer blacklist which indicates regions that don't have enhancers. In addition, under default setting, DASE will run permutation 10 times to get a significant threshold to identify SE categories. More additional features can be found later in the "Additional options" section.
 
-## *Running DASE with BAM or BigWig coverage files*
+## *Run DASE with BAM or BigWig coverage files*
 
 This section shows you how to use DASE with BAM or BigWig coverage files. The BAM or BigWig files are for the reads count of enhancers in different samples. DASE uses *featureCounts* to get the enhancer abundance of each sample with BAM file and *rtracklayer* with BigWig file. The first step is to get the path of BAM or BigWig file for each samples. Then with the imported enhancer and SE region files, we can run DASE as follow.
 
@@ -103,7 +103,7 @@ DASE_out <- DASE(se_region,enhancer_region,
                  s2_r1_bam=s2_r1_bam,s2_r2_bam=s2_r2_bam)
 ```
 
-Running DASE with BigWig files.
+Run DASE with BigWig files.
 
 ```{r DASE2}
 # path of BigWig file for each condition
@@ -119,7 +119,7 @@ DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,data_type = "bw",
 
 ```
 
-## *Running DASE with enhancer raw count table*
+## *Run DASE with enhancer raw count table*
 
 This section shows you how to use DASE with enhancer raw count table. The format of count table is shown bellow. Here we don't need BAM or BigWig files, because we already have the enhancer counts for each sample. We can run DASE as follow. This step will skip *featureCount*.
 
@@ -130,7 +130,7 @@ enhancer_count <- read.table(enhancer_count_path,sep="\t",header=T)
 head(enhancer_count)
 
 # run DASE
-DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,
+DASE_out_count <- DASE(se_in=se_region,e_in=enhancer_region,
                  enhancer_count_table=enhancer_count)
 
 ```
@@ -153,32 +153,33 @@ We use permutation of spline fitted log2 fold change to decide the significant t
 
 ```{r threshold}
 # Significant threshold
-DASE_out$cutoff
+DASE_out_count$cutoff
 
 # Permutation density plot
-DASE_out$density_plot
+DASE_out_count$density_plot
 ```
 
 Black lines indicates the threshold which is obtained by the inflection point.
 
 ## Super-enhancer internal dynamic categories
 
-*SE_category, pattern_list, se_fit* are the output regarding to SE internal dynamics.
+*SE_category, pattern_list, se_fit* are the output related to SE internal dynamics.
 
 ```{r se_cat_out}
 # se_categories
-head(DASE_out$se_category)
+head(DASE_out_count$se_category)
 ```
   
 ```{r se_pattern_example}
 # an example of one sample
-DASE_out$pattern_list[[10]]
+DASE_out_count$pattern_list[[1]]
 ```
+
 This figure shows the constitute enhancer patterns within SE "chr21_34863697_34890719" which identified as *Shortened*. Black line is the fitted log2 fold change curve, dots indicate constitute enhancers. Red dots indicate the constitute enhancers with large weights.
   
 ```{r se_fit}
 # example of se_fit
-head(DASE_out$se_fit)
+head(DASE_out_count$se_fit)
 ```
   
 # Additional options
@@ -193,40 +194,38 @@ head(blacklist_region)
 
 There is also an option whether to choice permutation or not. The default setting of DASE will run permutation 10 times. You can turn it off with *permut=F*. When there is no permutation, the default threshold is -1 and 1. You can chose any threshold you like with *cutoff_v* parameter. However, defining customized threshold is only available under *permut=F*. 
 
-You can also chose the permutation type with *permut_type* parameter. This parameter takes string *normal* or *stringent*. *Stringent* is used for comparing two similar conditions, like before and after drug treatment of a same cell.
-
 ## *DASE with enhancer blacklist region*
 Example of using blacklist options. Here, we focus on using DASE with enhancer count table.
 ```{r blacklist_run}
 # run DASE with blacklist file and customized region
-DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,bl_file = blacklist_region,
-                 custom_range = c("chr21:1000-100000","chr21:123456-250000"),
+DASE_out_bl <- DASE(se_in=se_region,e_in=enhancer_region,bl_file = blacklist_region,
+                 custom_range = c("chr21:14735763-29634779","chr21:33539902-43710703"),
                  enhancer_count_table=enhancer_count)
 
 ```
 
-You can find that the number of SEs is less than without blacklist region (<).
+You can find that the number of SEs (8) in "DASE_out_bl" is less than "DASE_out_count" which is without blacklist region (34).
 
 ## *DASE with no permutation*
 Some examples of using permutation options. Here, we focus on using DASE with enhancer count table.
-```{r permut_s}
-# run DASE with stringent permutation
-DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,permut = T,times = 1,
-                 permut_type = "stringent",
-                 enhancer_count_table=enhancer_count)
-DASE_out$density_plot
-```
 
-You can see the permuted density plot is just a vertical line with 0. This setting can only be used for the comparison of similar conditions. Because our demo dataset is two different cell line (K562 vs. MCF7), *permut_type='stringent'* will not work.
+```{r permut_1}
+# run DASE with permutation 3 times
+DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,times=3,
+                 cutoff_v = c(-2,2),enhancer_count_table=enhancer_count)
+```
 
 ```{r no_permut}
 # run DASE with no permutation and customized threshold
-DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,permut = F,
-                 cutoff_v = c(-2,2),enhancer_count_table=enhancer_count)
-DASE_out$boxplot
+DASE_out_p <- DASE(se_in=se_region,e_in=enhancer_region,permut = F,
+                 cutoff_v = c(-3,3),enhancer_count_table=enhancer_count)
+
+# boxplots of different threshold
+DASE_out_count$boxplot
+DASE_out_p$boxplot
 ```
 
-Because we have a larger threshold, more SEs are identified as *similar* category than before.
+Because we have a larger threshold (bottom plot), more SEs are identified as *similar* category than before (top plot).
 
 # Citation
 If you used DASE, please cite our paper: [https://www.biorxiv.org/content/10.1101/2021.09.25.461810v1] 
