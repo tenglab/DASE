@@ -14,7 +14,6 @@ DASE(
   s1_pair = F,
   s2_pair = F,
   permut = T,
-  permut_type = "normal",
   times = 10,
   cutoff_v = c(-1, 1),
   s1_r1_bam,
@@ -42,8 +41,6 @@ Format: c(chr:start-end, chr:start-end, ...).}
 \item{s2_pair}{if sample 2 is paired-end (default=FALSE)}
 
 \item{permut}{if you want permutation (default=TRUE)}
-
-\item{permut_type}{normal or stringent (default=normal)}
 
 \item{times}{permutation times (default=10)}
 

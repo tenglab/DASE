@@ -24,7 +24,12 @@ knitr::opts_chunk$set(
   warning = FALSE, 
   message = FALSE,
   cache = FALSE,
-  comment = "#>"
+  comment = "#>",
+  dev="png",
+  fig.show = "hold",
+  fig.width=8,
+  fig.height=4.5,
+  fig.align="center"
 )
 ```
 
@@ -118,7 +123,7 @@ DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,data_type = "bw",
 
 This section shows you how to use DASE with enhancer raw count table. The format of count table is shown bellow. Here we don't need BAM or BigWig files, because we already have the enhancer counts for each sample. We can run DASE as follow. This step will skip *featureCount*.
 
-```{r DASE2}
+```{r DASE3}
 # read enhancer count table
 enhancer_count_path <- system.file("extdata","chr21_enhancer_count.txt",package="DASE")
 enhancer_count <- read.table(enhancer_count_path,sep="\t",header=T)
@@ -132,52 +137,97 @@ DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,
 
 # Interpretation of DASE output files
 
-The output of DASE is a list with multiple data types. Major outputs are:
+The output of DASE is a list with multiple data types including:
 
+  1. lfc_shrink: a shrinking lfc object from DESeq2, it can be used to get a MA plot
+  1. cutoff: significant threshold of fitted log2 fold change.
+  1. density_plot: a density plot of permutation and original fitted log2 fold change, if *permut=T*.
+  1. boxplot: a boxplot of final SE categories
   1. se_category: a data frame contains final SE categories
-  
-  ```{r se_cat_out}
-  head(DASE_out$se_category)
-  ```
-  
   1. pattern_list: a list contains figures of each SE's pattern
-  
-  ```{r se_pattern_example}
-  # total number of final SEs
-  length(DASE_out$pattern_list)
-    
-  # an example of one sample
-  DASE_out$pattern_list[[1]]
-  ```
-  
   1. se_fit: a data frame contains DESeq2 output and spline-fitted log2 fold change of all constitute enhancers
 
-  ```{r se_pattern_example}
-  # example of se_fit
-  head(DASE_out$se_fit)
   
-  # total number of constitute enhancers
-  length(DASE_out$se_fit)
-  ```
-  
-## Significant threthold
-We use permutation of spline fitted log2 fold change to decide the significant threshold of   
+## Significant threshold
+We use permutation of spline fitted log2 fold change to decide the significant threshold. Under default settings, DASE will run permutation 10 times with *SEpermut* function. If don't use permutation, the default significant threshold is -1 and 1. You can use your own threshold with *cutoff_v* parameter. Please refer to function manual or *Additional options* section.
+
+```{r threshold}
+# Significant threshold
+DASE_out$cutoff
+
+# Permutation density plot
+DASE_out$density_plot
+```
+
+Black lines indicates the threshold which is obtained by the inflection point.
 
 ## Super-enhancer internal dynamic categories
 
+*SE_category, pattern_list, se_fit* are the output regarding to SE internal dynamics.
 
+```{r se_cat_out}
+# se_categories
+head(DASE_out$se_category)
+```
+  
+```{r se_pattern_example}
+# an example of one sample
+DASE_out$pattern_list[[10]]
+```
+This figure shows the constitute enhancer patterns within SE "chr21_34863697_34890719" which identified as *Shortened*. Black line is the fitted log2 fold change curve, dots indicate constitute enhancers. Red dots indicate the constitute enhancers with large weights.
+  
+```{r se_fit}
+# example of se_fit
+head(DASE_out$se_fit)
+```
+  
 # Additional options
+In addition of default parameters, DASE can take an blacklist file which contains the regions cannot be identified as enhancers. DASE also can take a customized blacklist region with *custom_range* parameter. We have included a blacklist file from ENCODE (accession ID: ENCFF356LFX) in our package.
 
-## *DASE with enhancer blaklist region*
+```{r blacklist}
+# blacklist file
+blacklist_path <- system.file("extdata","region_blacklist.bed",package="DASE")
+blacklist_region <- read.table(blacklist_path,sep="\t",header=F)
+head(blacklist_region)
+```
+
+There is also an option whether to choice permutation or not. The default setting of DASE will run permutation 10 times. You can turn it off with *permut=F*. When there is no permutation, the default threshold is -1 and 1. You can chose any threshold you like with *cutoff_v* parameter. However, defining customized threshold is only available under *permut=F*. 
+
+You can also chose the permutation type with *permut_type* parameter. This parameter takes string *normal* or *stringent*. *Stringent* is used for comparing two similar conditions, like before and after drug treatment of a same cell.
+
+## *DASE with enhancer blacklist region*
+Example of using blacklist options. Here, we focus on using DASE with enhancer count table.
+```{r blacklist_run}
+# run DASE with blacklist file and customized region
+DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,bl_file = blacklist_region,
+                 custom_range = c("chr21:1000-100000","chr21:123456-250000"),
+                 enhancer_count_table=enhancer_count)
+
+```
+
+You can find that the number of SEs is less than without blacklist region (<).
 
 ## *DASE with no permutation*
+Some examples of using permutation options. Here, we focus on using DASE with enhancer count table.
+```{r permut_s}
+# run DASE with stringent permutation
+DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,permut = T,times = 1,
+                 permut_type = "stringent",
+                 enhancer_count_table=enhancer_count)
+DASE_out$density_plot
+```
 
+You can see the permuted density plot is just a vertical line with 0. This setting can only be used for the comparison of similar conditions. Because our demo dataset is two different cell line (K562 vs. MCF7), *permut_type='stringent'* will not work.
 
+```{r no_permut}
+# run DASE with no permutation and customized threshold
+DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,permut = F,
+                 cutoff_v = c(-2,2),enhancer_count_table=enhancer_count)
+DASE_out$boxplot
+```
 
-
-
-
+Because we have a larger threshold, more SEs are identified as *similar* category than before.
 
 # Citation
-
+If you used DASE, please cite our paper: [https://www.biorxiv.org/content/10.1101/2021.09.25.461810v1] 
 

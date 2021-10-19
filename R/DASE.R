@@ -19,7 +19,6 @@
 #' @param s2_r1_bam path of sample 2 replicate 1 bam/bw file
 #' @param s2_r2_bam path of sample 2 replicate 2 bam/bw file
 #' @param permut if you want permutation (default=TRUE)
-#' @param permut_type normal or stringent (default=normal)
 #' @param times permutation times (default=10)
 #' @param cutoff_v fold change lower and upper cutoff vector.
 #' if permutation is used, it will use the value calculated by permutation. (default=c(-1.5,1.5))
@@ -56,7 +55,7 @@
 
 DASE <- function(se_in,e_in,bl_file,custom_range,
                  enhancer_count_table,data_type="bam",s1_pair=F,s2_pair=F,
-                 permut=T, permut_type="normal",times=10,cutoff_v=c(-1,1),
+                 permut=T,times=10,cutoff_v=c(-1,1),
                  s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
 
   # Step 1: filter super-enhancer with SEfilter.R with or without SE blacklist file
@@ -97,29 +96,15 @@ DASE <- function(se_in,e_in,bl_file,custom_range,
                              "se_merge_name")]
 
 
-  # chose different permut_type
-  if (permut_type == "normal") {
-    if (permut){
-      sample_pool <- e_in_se
-      step_4_out <- SEpermut(step_3_out$se_fit_df,sample_pool,times=times)
-      cutoff_vector <- step_4_out$cutoff
-    } else {
-      step_4_out <- SEpermut(step_3_out$se_fit_df,sample_pool,permut=F)
-      cutoff_vector <- cutoff_v
-    }
-
-  } else if (permut_type == "stringent") {
-
-    if (permut){
-      sample_pool <- rbind(e_not_in_se,e_in_se)
-      step_4_out <- SEpermut(step_3_out$se_fit_df,sample_pool,times=times)
-      cutoff_vector <- step_4_out$cutoff
-    } else {
-      step_4_out <- SEpermut(step_3_out$se_fit_df,sample_pool,permut=F)
-      cutoff_vector <- cutoff_v
-    }
+  # chose different permut
+  if (permut){
+    sample_pool <- e_in_se
+    step_4_out <- SEpermut(step_3_out$se_fit_df,sample_pool,times=times)
+    cutoff_vector <- step_4_out$cutoff
+  } else {
+    step_4_out <- SEpermut(step_3_out$se_fit_df,sample_pool,permut=F)
+    cutoff_vector <- cutoff_v
   }
-
 
   # step_5: segment
   print("Step 5: pattern segments process")
