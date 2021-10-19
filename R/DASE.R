@@ -27,9 +27,8 @@
 #' @param s2_pair if sample 2 is paired-end (default=FALSE)
 #'
 #' @return
-#' A list of 6 datasets: permutation density plot, pattern plots of each SE,
-#' enhancer fitted dataset, fold change cutoff vector,
-#' SE segment percentage dataset, and SE category./ranking dataset
+#' A list of 7 datasets: lfc_shrink, permutation density plot, pattern plots of each SE,
+#' enhancer fitted dataset, significant threshold cutoff, SE category and boxplot of SE category
 #'
 #' @import rtracklayer
 #' @import data.table
@@ -48,7 +47,7 @@
 #'
 #' # with blacklist and permutation 10 times
 #' se_main_list <- SEprofile(se_in=pooled_rose,e_in=pooled_enhancer,bl_file= blacklist,
-#' has_bl_file=TRUE, s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
+#' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 #'
 #' # no blacklist nor permutation 10 times
 #' se_main_list <- SEprofile(se_in=pooled_rose,e_in=pooled_enhancer,permut=FALSE,
@@ -139,11 +138,7 @@ DASE <- function(se_in,e_in,bl_file,custom_range,
   # cutoff_vector,
   # and SE segments profile to output list
 
-  output_list <- list(e_not_in_se = step_2_out$not_in_se_deseq,
-                      e_in_se = step_2_out$enhancer_deseq_result[,c("e_merge_name",
-                                                                   "S1_r1","S1_r2","S2_r1","S2_r2",
-                                                                   "se_merge_name")],
-                     lfc_shrink = step_2_out$lfc_shrink,
+  output_list <- list(lfc_shrink = step_2_out$lfc_shrink,
                      se_fit = step_3_out$se_fit_df,
                      cutoff = cutoff_vector,
                      density_plot = step_4_out$density_plot,

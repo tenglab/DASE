@@ -7,7 +7,7 @@
 SEfilter(se_in, bl_file, custom_range)
 }
 \arguments{
-\item{se_in}{pooled ROSE output file *_peaks_Gateway_SuperEnhancers.bed of all samples.}
+\item{se_in}{merged SE region bed file of all samples.}
 
 \item{bl_file}{super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX).}
 

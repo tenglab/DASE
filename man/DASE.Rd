@@ -59,9 +59,8 @@ if permutation is used, it will use the value calculated by permutation. (defaul
 \item{s2_r2_bam}{path of sample 2 replicate 2 bam/bw file}
 }
 \value{
-A list of 6 datasets: permutation density plot, pattern plots of each SE,
-enhancer fitted dataset, fold change cutoff vector,
-SE segment percentage dataset, and SE category./ranking dataset
+A list of 7 datasets: lfc_shrink, permutation density plot, pattern plots of each SE,
+enhancer fitted dataset, significant threshold cutoff, SE category and boxplot of SE category
 }
 \description{
 A function to get the category and ranking of SEs in one step
@@ -78,7 +77,7 @@ s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 
 # with blacklist and permutation 10 times
 se_main_list <- SEprofile(se_in=pooled_rose,e_in=pooled_enhancer,bl_file= blacklist,
-has_bl_file=TRUE, s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
+s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 
 # no blacklist nor permutation 10 times
 se_main_list <- SEprofile(se_in=pooled_rose,e_in=pooled_enhancer,permut=FALSE,

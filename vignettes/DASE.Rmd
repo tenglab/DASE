@@ -131,6 +131,7 @@ DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,
 ```
 
 # Interpretation of DASE output files
+
 The output of DASE is a list with multiple data types. Major outputs are:
 
   1. se_category: a data frame contains final SE categories
