@@ -7,7 +7,7 @@
 #' Then filter out SEs in the range of super-enhancer blacklist.
 #' Finally, remained SEs from different samples are merged to the longest representative SE.
 #'
-#' @param se_in pooled ROSE output file *_peaks_Gateway_SuperEnhancers.bed of all samples.
+#' @param se_in merged SE region bed file of all samples.
 #' @param bl_file super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX).
 #' @param custom_range a vector of extra customized blacklist to ignore.
 #' Format: c(chr:start-end, chr:start-end, ...).
