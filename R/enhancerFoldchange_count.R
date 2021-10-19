@@ -8,10 +8,8 @@
 #' DESeq2 is used to calculate the fold change of those enhancers
 #'
 #' @param e_df pooled macs2 output file *_peaks.narrowPeak of all samples.
-#' Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"
-#'
 #' @param se_df merged SE metadata from SEfilter
-#' @param e_count raw count matrix of pooled enhancers in each sample
+#' @param raw_count raw count matrix of pooled enhancers in each sample
 #'
 #' @return
 #' A list of 2 datasets: enhancer foldchang results dataset and sizefactor used in DESeq2
@@ -28,6 +26,7 @@
 #'
 
 enhancerFoldchange_count <- function(e_df,se_df,raw_count) {
+  colnames(raw_count)[1] <- "enhancer"
 
   # extract chr, start, end from raw_count
   raw_count_temp<- separate(data = raw_count, col = enhancer, into = c("chr", "start","end"), sep = "_")

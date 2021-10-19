@@ -10,7 +10,6 @@
 #' DESeq2 are used to calculate the fold change of those enhancers
 #'
 #' @param e_df pooled macs2 output file *_peaks.narrowPeak of all samples.
-#' Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"
 #'
 #' @param se_df merged SE metadata from SEfilter
 #' @param s1_r1_bw path of sample 1 replicate 1 bw file
@@ -36,9 +35,9 @@ enhancerFoldchange_bw <- function(e_df,se_df,
                                   s1_r1_bw,s1_r2_bw,s2_r1_bw,s2_r2_bw) {
 
   # merge enhancers with gaps less than 500bps
-  ir <- IRanges(e_df$start,
-                e_df$end,
-                names = e_df$chr)
+  ir <- IRanges(e_df$V2,
+                e_df$V3,
+                names = e_df$V1)
 
   e_merge_by_chr <- rbindlist(lapply(split(ir, names(ir)),
                                      function(x) as.data.table(reduce(x,min.gapwidth = 500))),

@@ -1,0 +1,153 @@
+---
+title: "DASE user's guide"
+author: |
+  | Xiang Liu <xiang.liu@moffitt.org>
+  | Mingxiang Teng <mingxiang.teng@moffitt.org>
+  | Department of Biostatistics and Bioinformatics, H. Lee Moffit Cancer Center &
+  | Research Institute, Tampa, FL, USA
+date: "`r Sys.Date()`"  
+output: 
+  BiocStyle::html_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{DASE user's guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignettePackage{DASE}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+library(DASE)
+```
+
+```{r, echo=FALSE, include=FALSE}
+BiocStyle::markdown()
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  error = TRUE,
+  warning = TRUE, 
+  message = FALSE,
+  cache = FALSE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+Super enhancers (SEs) were proposed as broad regulatory domains on genome, usually spanning a minimum
+of thousands of base pairs and consisting of multiple constitute enhancers. The constitute enhancers work together as a unit, instead of separately, to facilitate high enhancer activity. Aberrant SE activities, 
+which are critical to understand disease mechanisms, could be raised by the alterations of one or more of 
+their constitute enhancers. However, the state-of-art binary strategy in calling differential SEs only relies on overall activity changes, neglecting the local dynamics of constitute enhancers within SEs. DASE uses a weighted spline model to identify differential SEs from two conditions by accounting for the combinatorial effects of constitute enhancers weighted with their activities and locations (internal dynamics). In addition to overall changes, our medthod finds four novel types (*Shortened/lengthened*, *shifted*, *hollowed* and *other complex scenarios*) of differential SEs pointing to the structural differences within SEs.
+
+# Getting Started
+
+Load the package in R
+
+```{r library}
+library(DASE)
+```
+
+# Preparing Inputs
+
+DASE requires the following input files:
+
+  1. enhancer bed file: a merged enhancer bed file includes the enhancer peaks of all samples.
+  1. SE bed file: a merged SE bed file includes the SE regions of all samples.
+  1. Coverage files: can either be the path of bam/bw files for each condition and replicate, or just an enhancer count table of all conditions and replicates.
+
+Following are the examples of enhancer and SE bed files
+
+## *Enhancer bed file*
+
+The enhancer file can be any format of bed files, just make sure the first 6 columns contains the information of "chr","start","end","name","score",and "strand". Here is an example of bed files with only 6 columns.
+
+```{r enhancer_data}
+# load enhancer bed file
+enhancer_region <- read.table("inst/extdata/enhancer.bed",sep="\t",header=F)
+head(enhancer_region)
+```
+
+## *SE bed file*
+
+The SE file can be any format of bed files, just make sure the first 6 columns contains the information of "chr","start","end","name","score",and "strand". Here is an example of bed files with only 6 columns.
+
+```{r SE_data}
+# load SE bed file
+se_region <- read.table("inst/extdata/SE.bed",sep="\t",header=F)
+head(se_region)
+```
+
+# Basic usage of DASE
+
+In this section, we use DASE to find differential SEs with internal dynamics by comparing human chromosome 21 of two cancer cell lines (K562 and MCF7). Here, we focus on the basic usage of running DASE with different coverage input files (BAM, BigWig, and enhancer raw count table). This default setting will not include enhancer blacklist which indicates regions that don't have enhancers. In addition, under default setting, DASE will run permutation 10 times to get a significant threshold to identify SE categories. More additional features can be found later in the "Additional options" section.
+
+## *Running DASE with BAM or BigWig coverage files*
+
+This section shows you how to use DASE with BAM or BigWig coverage files. The BAM or BigWig files are for the reads count of enhancers in different samples. DASE use *featureCounts* to count the enhancer abundance within each sample. The first step is to get the path of BAM or BigWig file for each samples. Then with the imported enhancer and SE region files, we can run DASE as follow.
+
+```{r DASE1}
+# Path of BAM file for each condition
+s1_r1_bam <- system.file("extdata","K562_1_chr21.bam",package="DASE")
+s1_r2_bam <- system.file("extdata","K562_2_chr21.bam",package="DASE")
+s2_r1_bam <- system.file("extdata","MCF7_1_chr21.bam",package="DASE")
+s2_r2_bam <- system.file("extdata","MCF7_2_chr21.bam",package="DASE")
+
+# running DASE with BAM files
+se_region$V2
+test_1 <- SEfilter(se_in = se_region)
+DASE_out_bam <- DASE(se_region,enhancer_region,
+                     s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
+                     s2_r1_bam=s2_r1_bam,s2_r2_bam=s2_r2_bam)
+
+# Path of BigWig file for each condition
+s1_r1_bw <- system.file("extdata","K562_1_chr21.bw",package="DASE")
+s1_r2_bw <- system.file("extdata","K562_2_chr21.bw",package="DASE")
+s2_r1_bw <- system.file("extdata","MCF7_1_chr21.bw",package="DASE")
+s2_r2_bw <- system.file("extdata","MCF7_2_chr21.bw",package="DASE")
+
+# running DASE with BigWig files
+DASE_out_bw <- DASE(se_in=se_region,e_in=enhancer_region,data_type = "bw",
+                                   s1_r1_bam=s1_r1_bw,s1_r2_bam=s1_r2_bw,
+                                   s2_r1_bam=s2_r1_bw,s2_r2_bam=s2_r2_bw)
+
+```
+
+## *Running DASE with enhancer raw count table*
+
+This section shows you how to use DASE with enhancer raw count table. The format of count table is shown bellow. Here we don't need BAM or BigWig files, because we already have the enhancer counts for each sample. We can run DASE as follow. This step will skip *featureCount*.
+
+```{r DASE2}
+# read enhancer count table
+enhancer_count_path <- "inst/extdata/chr21_enhancer_count.txt"
+enhancer_count <- read.table(enhancer_count_path,sep="\t",header=T)
+head(enhancer_count)
+
+# run DASE
+DASE_out_count <- DASE(se_in=se_region,e_in=enhancer_region,
+                       enhancer_count_table=enhancer_count)
+
+```
+
+
+
+# Interpretation of DASE output files
+
+## Sigthrethold 
+## Super-enhancer internal dynamic categories
+
+
+# Additional options
+
+## *DASE with enhancer blaklist region*
+
+## *DASE with no permutation*
+
+
+
+
+
+
+
+# Citation
+
+

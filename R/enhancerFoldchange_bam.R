@@ -36,9 +36,9 @@ enhancerFoldchange_bam <- function(e_df,se_df,
                                s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
 
   # merge enhancers with gaps less than 500bps
-  ir <- IRanges(e_df$start,
-                e_df$end,
-                names = e_df$chr)
+  ir <- IRanges(e_df$V2,
+                e_df$V3,
+                names = e_df$V1)
 
   e_merge_by_chr <- rbindlist(lapply(split(ir, names(ir)),
                                      function(x) as.data.table(reduce(x,min.gapwidth = 0))),

@@ -7,12 +7,11 @@
 enhancerFoldchange_count(e_df, se_df, raw_count)
 }
 \arguments{
-\item{e_df}{pooled macs2 output file *_peaks.narrowPeak of all samples.
-Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"}
+\item{e_df}{pooled macs2 output file *_peaks.narrowPeak of all samples.}
 
 \item{se_df}{merged SE metadata from SEfilter}
 
-\item{e_count}{raw count matrix of pooled enhancers in each sample}
+\item{raw_count}{raw count matrix of pooled enhancers in each sample}
 }
 \value{
 A list of 2 datasets: enhancer foldchang results dataset and sizefactor used in DESeq2

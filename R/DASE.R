@@ -7,16 +7,12 @@
 #' The workflow of this function is "SEfilter -> enhancerFoldchange -> SEfitspline -> SEpattern -> SEcategory"
 #'
 #' @param se_in pooled ROSE output file *_peaks_Gateway_SuperEnhancers.bed of all samples.
-#' Header needs to be "CHROM,START,STOP,REGION_ID,Signal,STRAND"
-#' @param e_df pooled macs2 output file *_peaks.narrowPeak of all samples.
-#' Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"
-#' @param bl_file super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX) (default=FALSE)
-#' @param has_bl_file if there is a blacklist file (default=FALSE)
+#' @param e_in pooled macs2 output file *_peaks.narrowPeak of all samples.
+#' @param bl_file super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX)
 #' @param custom_range a vector of extra customized blacklist to ignore.
-#' Format: c(chr:start-end, chr:start-end, ...) (default=FALSE).
+#' Format: c(chr:start-end, chr:start-end, ...).
 #'
 #' @param data_type quantitative file format "bam" or "bw" (default=bam)
-#' @param has_enhancer_count if there is a raw count file of pooled enhancers (default=F)
 #' @param enhancer_count_table raw count file of pooled enhancers
 #' @param s1_r1_bam path of sample 1 replicate 1 bam/bw file
 #' @param s1_r2_bam path of sample 1 replicate 2 bam/bw file
@@ -46,45 +42,44 @@
 #' @export
 #' @examples
 #' # no blacklist with permutation 10 times
-#' se_main_list <- SEprofile(se_in=pooled_rose,e_df=pooled_enhancer,
+#' se_main_list <- SEprofile(se_in=pooled_rose,e_in=pooled_enhancer,
 #' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,
 #' s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 #'
 #' # with blacklist and permutation 10 times
-#' se_main_list <- SEprofile(se_in=pooled_rose,e_df=pooled_enhancer,bl_file= blacklist,
+#' se_main_list <- SEprofile(se_in=pooled_rose,e_in=pooled_enhancer,bl_file= blacklist,
 #' has_bl_file=TRUE, s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 #'
 #' # no blacklist nor permutation 10 times
-#' se_main_list <- SEprofile(se_in=pooled_rose,e_df=pooled_enhancer,permut=FALSE,
+#' se_main_list <- SEprofile(se_in=pooled_rose,e_in=pooled_enhancer,permut=FALSE,
 #' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 #'
 
-DASE <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,custom_range=F,has_enhancer_count=F,
-                 enhancer_count_table,data_type="bam",s1_pair=FALSE,s2_pair=FALSE,
-                 permut=TRUE, permut_type="normal",times=10,cutoff_v=c(-1,1),
+DASE <- function(se_in,e_in,bl_file,custom_range,
+                 enhancer_count_table,data_type="bam",s1_pair=F,s2_pair=F,
+                 permut=T, permut_type="normal",times=10,cutoff_v=c(-1,1),
                  s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
 
   # Step 1: filter super-enhancer with SEfilter.R with or without SE blacklist file
   print("Step 1: merge and filter SE")
-  step_1_out <- SEfilter(se_in,bl_file,has_bl_file,custom_range)
+  step_1_out <- SEfilter(se_in,bl_file=bl_file,custom_range=custom_range)
 
   # Step 2: get enhancer fold changes within each super-enhancer with enhancerFoldchange.R
   # Merged SE Output from step 1 as SE input for step 2
   print("Step 2: calculate log2FC of constituent enhancer using Deseq2")
 
   merged_se_df <- step_1_out$se_merged
-  if (data_type == "bam" & has_enhancer_count==F) {
-    step_2_out <- enhancerFoldchange_bam(e_df=e_df,se_df=merged_se_df,
+  if (data_type == "bam" & missing(enhancer_count_table)) {
+    step_2_out <- enhancerFoldchange_bam(e_df=e_in,se_df=merged_se_df,
                                        s1_pair=s1_pair,s2_pair=s2_pair,
                                        s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
                                        s2_r1_bam=s2_r1_bam ,s2_r2_bam=s2_r2_bam)
-  } else if (data_type=="bw" & has_enhancer_count==F){
-    step_2_out <- enhancerFoldchange_bw(e_df=e_df,se_df=merged_se_df,
-                                        s1_pair=s1_pair,s2_pair=s2_pair,
-                                        s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
-                                        s2_r1_bam=s2_r1_bam ,s2_r2_bam=s2_r2_bam)
-  } else if (has_enhancer_count==T) {
-    step_2_out <- enhancerFoldchange_count(e_df=e_df,se_df=merged_se_df,
+  } else if (data_type=="bw" & missing(enhancer_count_table)){
+    step_2_out <- enhancerFoldchange_bw(e_df=e_in,se_df=merged_se_df,
+                                        s1_r1_bw=s1_r1_bam,s1_r2_bw=s1_r2_bam,
+                                        s2_r1_bw=s2_r1_bam ,s2_r2_bw=s2_r2_bam)
+  } else if (!missing(enhancer_count_table)) {
+    step_2_out <- enhancerFoldchange_count(e_df=e_in,se_df=merged_se_df,
                                            raw_count=enhancer_count_table)
   }
 
@@ -92,6 +87,7 @@ DASE <- function(se_in,e_df,bl_file=FALSE,has_bl_file=FALSE,custom_range=F,has_e
   print("Step 3: bs-spline fit log2FC")
   print(paste0("Processing total of ",length(unique(step_2_out$enhancer_deseq_result$se_merge_name))," SEs"))
   step_3_out <- SEfitspline(step_2_out$enhancer_deseq_result)
+
   # Step 4: permutation to get cutoff (normal or stringent)
   print("Step 4: permutation to get log2FC cutoff")
   e_not_in_se <- step_2_out$count_matrix_not_in_se[,c("e_merge_name",

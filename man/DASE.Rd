@@ -6,16 +6,14 @@
 \usage{
 DASE(
   se_in,
-  e_df,
-  bl_file = FALSE,
-  has_bl_file = FALSE,
-  custom_range = F,
-  has_enhancer_count = F,
+  e_in,
+  bl_file,
+  custom_range,
   enhancer_count_table,
   data_type = "bam",
-  s1_pair = FALSE,
-  s2_pair = FALSE,
-  permut = TRUE,
+  s1_pair = F,
+  s2_pair = F,
+  permut = T,
   permut_type = "normal",
   times = 10,
   cutoff_v = c(-1, 1),
@@ -26,20 +24,14 @@ DASE(
 )
 }
 \arguments{
-\item{se_in}{pooled ROSE output file *_peaks_Gateway_SuperEnhancers.bed of all samples.
-Header needs to be "CHROM,START,STOP,REGION_ID,Signal,STRAND"}
+\item{se_in}{pooled ROSE output file *_peaks_Gateway_SuperEnhancers.bed of all samples.}
 
-\item{e_df}{pooled macs2 output file *_peaks.narrowPeak of all samples.
-Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"}
+\item{e_in}{pooled macs2 output file *_peaks.narrowPeak of all samples.}
 
-\item{bl_file}{super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX) (default=FALSE)}
-
-\item{has_bl_file}{if there is a blacklist file (default=FALSE)}
+\item{bl_file}{super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX)}
 
 \item{custom_range}{a vector of extra customized blacklist to ignore.
-Format: c(chr:start-end, chr:start-end, ...) (default=FALSE).}
-
-\item{has_enhancer_count}{if there is a raw count file of pooled enhancers (default=F)}
+Format: c(chr:start-end, chr:start-end, ...).}
 
 \item{enhancer_count_table}{raw count file of pooled enhancers}
 
@@ -80,16 +72,16 @@ The workflow of this function is "SEfilter -> enhancerFoldchange -> SEfitspline 
 }
 \examples{
 # no blacklist with permutation 10 times
-se_main_list <- SEprofile(se_in=pooled_rose,e_df=pooled_enhancer,
+se_main_list <- SEprofile(se_in=pooled_rose,e_in=pooled_enhancer,
 s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,
 s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 
 # with blacklist and permutation 10 times
-se_main_list <- SEprofile(se_in=pooled_rose,e_df=pooled_enhancer,bl_file= blacklist,
+se_main_list <- SEprofile(se_in=pooled_rose,e_in=pooled_enhancer,bl_file= blacklist,
 has_bl_file=TRUE, s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 
 # no blacklist nor permutation 10 times
-se_main_list <- SEprofile(se_in=pooled_rose,e_df=pooled_enhancer,permut=FALSE,
+se_main_list <- SEprofile(se_in=pooled_rose,e_in=pooled_enhancer,permut=FALSE,
 s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 
 }

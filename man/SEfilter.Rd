@@ -4,18 +4,15 @@
 \alias{SEfilter}
 \title{Filter super-enhancer}
 \usage{
-SEfilter(se_in, bl_file = FALSE, has_bl_file = FALSE, custom_range = FALSE)
+SEfilter(se_in, bl_file, custom_range)
 }
 \arguments{
-\item{se_in}{pooled ROSE output file *_peaks_Gateway_SuperEnhancers.bed of all samples.
-Header needs to be "CHROM,START,STOP,REGION_ID,Signal,STRAND"}
+\item{se_in}{pooled ROSE output file *_peaks_Gateway_SuperEnhancers.bed of all samples.}
 
-\item{bl_file}{super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX) (default=FALSE)}
-
-\item{has_bl_file}{if there is a blacklist file (default=FALSE)}
+\item{bl_file}{super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX).}
 
 \item{custom_range}{a vector of extra customized blacklist to ignore.
-Format: c(chr:start-end, chr:start-end, ...) (default=FALSE).}
+Format: c(chr:start-end, chr:start-end, ...).}
 }
 \value{
 se_filtered_no_bl: filtered SE datasets with merged SE names,

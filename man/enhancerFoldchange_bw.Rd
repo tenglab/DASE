@@ -7,8 +7,7 @@
 enhancerFoldchange_bw(e_df, se_df, s1_r1_bw, s1_r2_bw, s2_r1_bw, s2_r2_bw)
 }
 \arguments{
-\item{e_df}{pooled macs2 output file *_peaks.narrowPeak of all samples.
-Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"}
+\item{e_df}{pooled macs2 output file *_peaks.narrowPeak of all samples.}
 
 \item{se_df}{merged SE metadata from SEfilter}
 

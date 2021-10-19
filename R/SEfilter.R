@@ -8,11 +8,9 @@
 #' Finally, remained SEs from different samples are merged to the longest representative SE.
 #'
 #' @param se_in pooled ROSE output file *_peaks_Gateway_SuperEnhancers.bed of all samples.
-#' Header needs to be "CHROM,START,STOP,REGION_ID,Signal,STRAND"
-#' @param bl_file super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX) (default=FALSE)
-#' @param has_bl_file if there is a blacklist file (default=FALSE)
+#' @param bl_file super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX).
 #' @param custom_range a vector of extra customized blacklist to ignore.
-#' Format: c(chr:start-end, chr:start-end, ...) (default=FALSE).
+#' Format: c(chr:start-end, chr:start-end, ...).
 #'
 #' @return
 #' se_filtered_no_bl: filtered SE datasets with merged SE names,
@@ -30,9 +28,9 @@
 #' se_list <- SEfilter(se_in,bl_file,has_bl_file=TRUE)
 #'
 
-SEfilter <- function (se_in,bl_file=FALSE,has_bl_file=FALSE,custom_range = FALSE) {
+SEfilter <- function (se_in,bl_file,custom_range) {
   # get width of each SE
-  se_in$width <- se_in$STOP-se_in$START+1
+  se_in$width <- se_in$V3-se_in$V2+1
 
   # remove SEs whose width are within lower and upper 1%
   se_sort_df <- se_in[order(se_in$width),]
@@ -40,25 +38,37 @@ SEfilter <- function (se_in,bl_file=FALSE,has_bl_file=FALSE,custom_range = FALSE
                                 (nrow(se_in)-ceiling(nrow(se_in)*0.01)+1)),]
 
   # check if a SE is in blacklist
-  if (custom_range == F) {
+  if (missing(custom_range) & !missing(bl_file)) {
     new_bl_file <- bl_file
     new_bl_file$V2 <- as.integer(new_bl_file$V2)
     new_bl_file$V3 <- as.integer(new_bl_file$V3)
-  } else {
+  } else if (!missing(custom_range) & !missing(bl_file)) {
     extra_bl <- matrix(unlist(strsplit(custom_range,":|-")),
                        ncol=3, byrow=TRUE)
     new_bl_file <- rbind(bl_file,extra_bl)
     new_bl_file$V2 <- as.integer(new_bl_file$V2)
     new_bl_file$V3 <- as.integer(new_bl_file$V3)
+  } else if (!missing(custom_range) & missing(bl_file)){
+    extra_bl <- matrix(unlist(strsplit(custom_range,":|-")),
+                       ncol=3, byrow=TRUE)
+    new_bl_file <- data.frame(V1=extra_bl[,1],
+                              V2=extra_bl[,2],
+                              V3=extra_bl[,3])
+    new_bl_file$V2 <- as.integer(new_bl_file$V2)
+    new_bl_file$V3 <- as.integer(new_bl_file$V3)
+
+  } else if (missing(custom_range) & missing(bl_file)){
+    new_bl_file <- data.frame()
   }
-  if (has_bl_file == TRUE) {
+
+  if (!missing(bl_file) | !missing(custom_range)) {
     se_filter_df_in_bl <-data.frame()
     for (i in c(1:nrow(new_bl_file))) {
-      in_bl <- se_filter_df[which(se_filter_df$CHROM == new_bl_file$V1[i] &
-                                    se_filter_df$START >= new_bl_file$V2[i] &
-                                    se_filter_df$STOP  <= new_bl_file$V3[i]),]
+      in_bl <- se_filter_df[which(se_filter_df$V1 == new_bl_file$V1[i] &
+                                    se_filter_df$V2 >= new_bl_file$V2[i] &
+                                    se_filter_df$V3  <= new_bl_file$V3[i]),]
       se_filter_df_in_bl <- rbind(se_filter_df_in_bl,in_bl)
-      se_filter_df_no_bl <- se_filter_df[!(se_filter_df$REGION_ID %in% se_filter_df_in_bl$REGION_ID),]
+      se_filter_df_no_bl <- se_filter_df[!(se_filter_df$V4 %in% se_filter_df_in_bl$V4),]
 
     }
   } else {
@@ -67,9 +77,9 @@ SEfilter <- function (se_in,bl_file=FALSE,has_bl_file=FALSE,custom_range = FALSE
   }
 
   # merge SEs from each sample to the longest representative SE
-  ir <- IRanges(se_filter_df_no_bl$START,
-                se_filter_df_no_bl$STOP,
-                names=se_filter_df_no_bl$CHROM)
+  ir <- IRanges(se_filter_df_no_bl$V2,
+                se_filter_df_no_bl$V3,
+                names=se_filter_df_no_bl$V1)
 
   se_merge_by_chr <- rbindlist(lapply(split(ir, names(ir)),
                                       function(x) as.data.table(reduce(x))),
