@@ -1,80 +1,33 @@
-# DASE
+# DASE: Differnetial Analysis of Super Enhancers
 R package used to categorize and rank super-enhancer (SE) internal differences in two conditions.
 
-DASE R package:
-
-Version 0.1.0
-
-Dependency:
-
-DESeq2, GenomicRanges, Rsubread, apeglm, data.table, ggplot2, splines
+## Introduction
+Super enhancers (SEs) were proposed as broad regulatory domains on genome, usually spanning a minimum
+of thousands of base pairs and consisting of multiple constitute enhancers. The constitute enhancers work together as a unit, instead of separately, to facilitate high enhancer activity. Aberrant SE activities, 
+which are critical to understand disease mechanisms, could be raised by the alterations of one or more of 
+their constitute enhancers. However, the state-of-art binary strategy in calling differential SEs only relies on overall activity changes, neglecting the local dynamics of constitute enhancers within SEs. DASE uses a weighted spline model to identify differential SEs from two conditions by accounting for the combinatorial effects of constitute enhancers weighted with their activities and locations (internal dynamics). In addition to overall changes, our medthod finds four novel types (*Shortened/lengthened*, *shifted*, *hollowed* and *other complex scenarios*) of differential SEs pointing to the structural differences within SEs.
 
 ## Install
+
+DASE is a R package, it can be installed with source code documented in [GitHub](https://github.com/tenglab/DASE).
+
+To install DASE from GitHub, using the following command. It should also install all the dependencies DASE required. A complete list of dependencies can be found in the DESCRIPTION file.
+
 ```R
 # Public package
 devtools::install_github("https://github.com/tenglab/DASE.git")
+```
 
-# Private with token
-devtools::install_github("https://github.com/tenglab/DASE.git",auth_toke="your token")
-
-# load package
+## Using DASE
+First load DASE,
+```R
 library(DASE)
 ```
 
-# Usage
-## Inputs
- 1. SE peaks of all samples and replicates: test_data/se_peaks.bed
- 
- Header of the first 6 columns must be the same as follow
-| CHROM | START     | STOP      | REGION_ID                  | Signal | STRAND |
-| ----- |-----------| --------  | -------------------------- | ------ | ------ |
-| chr14 | 34355128  | 34380484  | 5_Peak_2778_lociStitched   | 496    | .      |
-| chr6  | 151869032 | 151917419 | 13_Peak_66874_lociStitched | 675    | .      |
-| chr3  | 149297239 | 149317229 | 4_Peak_182_lociStitched    | 340    | .      |
+Then follow the [DASE user's guild](http://127.0.0.1:13324/library/DASE/doc/DASE.html) to preform differneital analysis of SEs.
 
+## Citation
+If you use DASE, please cite our paper at (https://www.biorxiv.org/content/10.1101/2021.09.25.461810v1)
 
- 2. enhancer peaks of all samples and replicates: test_data/enhancer_peaks.bed
- 
- Header of the first 6 columns must be the same as follow
-| chr   | start     | end      | name       | score | strand |
-| ----- |---------- | -------- | ---------- | ----- | ------ |
-| chr18 | 63365927  | 63368565 | Peak_13186 | 1000  | .      |
-| chr2  | 3604982   | 3605258  | Peak_41195 | 175   | .      |
-| chr17 | 49408309  | 49408778 | Peak_75396 | 61    | .      |
-
- 4. path of bam files: s1_r1_bam_path, s1_r2_bam_path, s2_r1_bam_path, s2_r2_bam_path
- 5. SE blacklist (optional): test_data/ENCFF356LFX_blacklist.bed                                                                                  
-                                             
-## Examples
-```R
-# default: no blacklist file, permutation 10 times, both samples are single end
-se_test_out <- DASE(se_in = se_peaks.bed, e_df = enhancer_peaks.bed, 
-                    s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path, 
-                    s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
-
-# with blacklist and customize blacklist range
-se_test_out <- DASE(se_in = se_peaks.bed, e_df = enhancer_peaks.bed, 
-                         bl_file = ENCFF356LFX_blacklist.bed, has_bl_file = TRUE,
-                         custom_range = c("chr1:123-12345","chr12:12345-1234567"),
-                         s1_r1_bam = s1_r1_bam_path, s1_r2_bam = s1_r2_bam_path,
-                         s2_r1_bam = s2_r1_bam_path, s2_r2_bam = s2_r2_bam_path)
-                           
-# coverage is bw instead of bam
-se_test_out <- DASE(se_in = se_peaks.bed, e_df = enhancer_peaks.bed, 
-                         bl_file = ENCFF356LFX_blacklist.bed, has_bl_file = T,
-                         permut = T, data_type="bw",
-                         s1_r1_bam = s1_r1_bw_path, s1_r2_bam = s1_r2_bw_path,
-                         s2_r1_bam = s2_r1_bw_path, s2_r2_bam = s2_r2_bw_path)
-                         
-
-```
-## Output list
- 1. se_test_out$se_category: final SE categories and ranking
- 2. se_test_out$boxplot: boxplot of super-enhancer categories
- 3. se_test_out$density_plot: permutation density plot if permut=T, return NA if permut=F
- 4. se_test_out$cutoff: fold change cutoffs
- 5. se_test_out$se_fit: counts fold change and fitted fold change of enhancer within SEs 
- 6. se_test_out$pattern_list: list contain fitted line pattern plot of each SE
- 7. se_test_out$se_seg: SE segment percentage
- 8. se_test_out$se_meta: merged SE bed
- 9. se_test_out$se_deseq_out: constitute enhancer DEseq2 out table
+## Help
+Feel free to leave any questions and bugs at [GitHub issues](https://github.com/tenglab/DASE/issues).
