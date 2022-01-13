@@ -78,8 +78,8 @@ DASE <- function(se_in,e_in,bl_file,custom_range,
                                        s2_r1_bam=s2_r1_bam ,s2_r2_bam=s2_r2_bam)
   } else if (data_type=="bw" & missing(enhancer_count_table)){
     step_2_out <- enhancerFoldchange_bw(e_df=e_in,se_df=merged_se_df,
-                                        s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
-                                        s2_r1_bam=s2_r1_bam ,s2_r2_bam=s2_r2_bam)
+                                        s1_r1_bw=s1_r1_bam,s1_r2_bw=s1_r2_bam,
+                                        s2_r1_bw=s2_r1_bam ,s2_r2_bw=s2_r2_bam)
   } else if (!missing(enhancer_count_table)) {
     step_2_out <- enhancerFoldchange_count(e_df=e_in,se_df=merged_se_df,
                                            raw_count=enhancer_count_table)

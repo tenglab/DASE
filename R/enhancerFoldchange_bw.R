@@ -12,10 +12,10 @@
 #' @param e_df pooled macs2 output file *_peaks.narrowPeak of all samples.
 #'
 #' @param se_df merged SE metadata from SEfilter
-#' @param s1_r1_bam path of sample 1 replicate 1 bw file
-#' @param s1_r2_bam path of sample 1 replicate 2 bw file
-#' @param s2_r1_bam path of sample 2 replicate 1 bw file
-#' @param s2_r2_bam path of sample 2 replicate 2 bw file
+#' @param s1_r1_bw path of sample 1 replicate 1 bw file
+#' @param s1_r2_bw path of sample 1 replicate 2 bw file
+#' @param s2_r1_bw path of sample 2 replicate 1 bw file
+#' @param s2_r2_bw path of sample 2 replicate 2 bw file
 #'
 #' @return
 #' A list of 2 datasets: enhancer foldchang results dataset and sizefactor used in DESeq2
@@ -28,11 +28,11 @@
 #'
 #' @export
 #' @examples
-#' foldchange_list <- enhancerFoldchange(pool_enhancer_df,se_meta,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+#' foldchange_list <- enhancerFoldchange(pool_enhancer_df,se_meta,s1_r1_bw,s1_r2_bw,s2_r1_bw,s2_r2_bw)
 #'
 
 enhancerFoldchange_bw <- function(e_df,se_df,
-                                  s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
+                                  s1_r1_bw,s1_r2_bw,s2_r1_bw,s2_r2_bw) {
 
   # merge enhancers with gaps less than 500bps
   ir <- IRanges(e_df$V2,
@@ -68,10 +68,10 @@ enhancerFoldchange_bw <- function(e_df,se_df,
   # set mem.maxVSize to Inf otherwise will get memory limit error
   mem.maxVSize(vsize = Inf)
   chr_list <- unique(e_merge_by_chr$chr)
-  s1_1_count <- count_bw(s1_r1_bam,chr_list)
-  s1_2_count <- count_bw(s1_r2_bam,chr_list)
-  s2_1_count <- count_bw(s2_r1_bam,chr_list)
-  s2_2_count <- count_bw(s2_r2_bam,chr_list)
+  s1_1_count <- count_bw(s1_r1_bw,chr_list)
+  s1_2_count <- count_bw(s1_r2_bw,chr_list)
+  s2_1_count <- count_bw(s2_r1_bw,chr_list)
+  s2_2_count <- count_bw(s2_r2_bw,chr_list)
 
   # get final count matrix
   counts_merge_1 <- merge(s1_1_count,s1_2_count,by="e_merge_name")

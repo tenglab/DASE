@@ -1,5 +1,5 @@
 ---
-title: "DASE user's guide"
+title: "_DASE_ user's guide"
 author: |
   | Xiang Liu <xiang.liu@moffitt.org>
   | Mingxiang Teng <mingxiang.teng@moffitt.org>
@@ -39,7 +39,7 @@ knitr::opts_chunk$set(
 Super enhancers (SEs) were proposed as broad regulatory domains on genome, usually spanning a minimum
 of thousands of base pairs and consisting of multiple constitute enhancers. The constitute enhancers work together as a unit, instead of separately, to facilitate high enhancer activity. Aberrant SE activities, 
 which are critical to understand disease mechanisms, could be raised by the alterations of one or more of 
-their constitute enhancers. However, the state-of-art binary strategy in calling differential SEs only relies on overall activity changes, neglecting the local dynamics of constitute enhancers within SEs. DASE uses a weighted spline model to identify differential SEs from two conditions by accounting for the combinatorial effects of constitute enhancers weighted with their activities and locations (internal dynamics). In addition to overall changes, our medthod finds four novel types (*Shortened/lengthened*, *shifted*, *hollowed* and *other complex scenarios*) of differential SEs pointing to the structural differences within SEs.
+their constitute enhancers. However, the state-of-art binary strategy in calling differential SEs only relies on overall activity changes, neglecting the local dynamics of constitute enhancers within SEs. DASE uses a weighted spline model to identify differential SEs from two conditions by accounting for the combinatorial effects of constitute enhancers weighted with their activities and locations (internal dynamics). In addition to overall changes, our medthod finds four novel types (*Shortened/lengthened*, *Shifted*, *Hollowed* and *other complex scenarios*) of differential SEs pointing to the structural differences within SEs.
 
 # Getting Started
 
@@ -57,7 +57,7 @@ DASE requires the following input files:
   1. SE bed file: a merged SE bed file includes the SE regions of all samples.
   1. Coverage files: can either be the path of bam/bw files for each condition and replicate, or just an enhancer count table of all conditions and replicates.
 
-Following are the examples of enhancer and SE bed files
+Followings are the examples of enhancer and SE bed files
 
 ## *Enhancer bed file*
 
@@ -87,22 +87,7 @@ In this section, we use DASE to find differential SEs with internal dynamics by 
 
 ## *Run DASE with BAM or BigWig coverage files*
 
-This section shows you how to use DASE with BAM or BigWig coverage files. The BAM or BigWig files are for the reads count of enhancers in different samples. DASE uses *featureCounts* to get the enhancer abundance of each sample with BAM file and *rtracklayer* with BigWig file. The first step is to get the path of BAM or BigWig file for each samples. Then with the imported enhancer and SE region files, we can run DASE as follow.
-
-```{r DASE1}
-# path of BAM file for each condition
-s1_r1_bam <- system.file("extdata","K562_1_chr21.bam",package="DASE")
-s1_r2_bam <- system.file("extdata","K562_2_chr21.bam",package="DASE")
-s2_r1_bam <- system.file("extdata","MCF7_1_chr21.bam",package="DASE")
-s2_r2_bam <- system.file("extdata","MCF7_2_chr21.bam",package="DASE")
-
-# running DASE with BAM files
-se_region$V2
-test_1 <- SEfilter(se_in = se_region)
-DASE_out <- DASE(se_region,enhancer_region,
-                 s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
-                 s2_r1_bam=s2_r1_bam,s2_r2_bam=s2_r2_bam)
-```
+This section shows you how to use DASE with BAM or BigWig coverage files. The BAM or BigWig files are for the reads count of enhancers in different samples. DASE uses *featureCounts* to get the enhancer abundance of each sample with BAM file and *rtracklayer* with BigWig file. The first step is to get the path of BAM or BigWig file for each samples. Then with the imported enhancer and SE region files, we can run DASE as follow (Here we use BigWig files as example).
 
 Run DASE with BigWig files.
 
@@ -134,6 +119,37 @@ head(enhancer_count)
 DASE_out_count <- DASE(se_in=se_region,e_in=enhancer_region,
                  enhancer_count_table=enhancer_count)
 
+```
+
+## *Run _DASE_ with different spline functions*
+
+_DASE_ use spline functions to fit the log2 fold change value of constituent enhancers within each SEs.There are 3 spline functions (b-spline, natural spline, and smooth.spline) implemented in _DASE_. _DASE_ use b-spline as default. Those 3 functions provide similar results, however they may have some different performance in some cases. The examples below shows some comparison of those spline functions.
+
+![spline compare figuers.](~/Projects/super_enhancer/se_diff_paper/DASE_test/spline_comparison.png)
+
+Smooth spline can not handle small data points like others do (figure a). When there are large number of data points (usually large than 6), all the spline functions has similar performance (figure c). However, in some cases, those spline functions may perform differently by how they handle the weights of each data point (figure b).
+
+Users can chose their preferred spline function with *spline_fun* parameter. Following are some examples of run _DASE_ with different spline functions.
+
+```{r DASE4}
+# rund DASE with b-spline function (default)
+DASE_out_bs <- DASE(se_in=se_region,e_in=enhancer_region,
+                 enhancer_count_table=enhancer_count,permut=F)
+
+# run DASE with natural spline function
+DASE_out_ns <- DASE(se_in=se_region,e_in=enhancer_region,
+                 enhancer_count_table=enhancer_count,permut=F,
+                 spline_fun = "ns")
+
+# run DASE with smooth spline function
+DASE_out_smooth <- DASE(se_in=se_region,e_in=enhancer_region,
+                 enhancer_count_table=enhancer_count,permut=F,
+                 spline_fun = "smooth")
+
+# spline fitted plots of different spline functions
+DASE_out_bs$pattern_list[[7]]
+DASE_out_ns$pattern_list[[7]]
+DASE_out_smooth$pattern_list[[7]]
 ```
 
 # Interpretation of DASE output files
