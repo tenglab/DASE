@@ -201,7 +201,7 @@ The output of _DASE_ is a list with multiple data types including:
 ### *Significant threshold*
 We use permutation of spline fitted log2 fold changes to decide the significant threshold. Under 
 default settings, _DASE_ will run permutation 10 times with *SEpermut* function. If permutation is 
-disabled, the default significant threshold is -1 and 1. You can also choose your own thresholds with 
+disabled, the default significant threshold is -1 and 1. Users can also choose their own thresholds with 
 *cutoff_v* parameter. Please refer to the  *Additional options* section for this.
 
 ```{r threshold}
@@ -297,5 +297,5 @@ By comparing results based on different threshold cutoffs, the right plot (with 
 identified  more SEs in the *similar* category than the left plot (with smaller threshold cutoff).
 
 # Citation
-If you used _DASE_, please cite our paper: [https://www.biorxiv.org/content/10.1101/2021.09.25.461810v1] 
+Please cite our paper when using DASE: [https://www.biorxiv.org/content/10.1101/2021.09.25.461810] 
 
