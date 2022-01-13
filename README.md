@@ -13,7 +13,7 @@ by accounting for the combinatorial effects of constituent enhancers weighted wi
 (*shortened*, *shifted*, *hollowed* and *other complex scenarios*) of differential SEs pointing to the 
 structural differences within SEs.
 
-## Install
+## Installation
 
 DASE is an R package with its source code documented in this [repository](https://github.com/tenglab/DASE).
 
@@ -26,9 +26,10 @@ installation. In addition, R package *devtools* is required to start the install
 devtools::install_github("https://github.com/tenglab/DASE.git")
 ```
 
-# Install DASE with dependencies and vignettes
+Or, Install with vignettes and dependencies.
+
 ```R
-# install DASE with vignettes and dependencies
+# Install DASE with vignettes and dependencies
 devtools::install_github("https://github.com/tenglab/DASE.git",build_vignettes = TRUE)
 ```
 
@@ -39,8 +40,10 @@ library(DASE)
 ```
 
 Then, follow the [**User's Guild**](https://github.com/tenglab/DASE/blob/master/DASE_guide.pdf) 
-to preform SE differneital analysis. In the guide, we detailed how to prepare input files, swith input 
-formats, interpret the outputs as well as some spline fitting examples. 
+to perform SE differential analysis. In the guide, we detail how to prepare input files, switch input 
+formats, interpret outputs files as well as some spline fitting examples.
+
+The users are also encouraged to refer to the help pages of R functions in this package. 
 
 ## Citation
 If you use DASE, please cite our paper at (https://www.biorxiv.org/content/10.1101/2021.09.25.461810)
