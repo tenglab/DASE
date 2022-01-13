@@ -1,10 +1,10 @@
 #' Fit enhancer fold change and normal premut
 #'
-#' A function uses bs-spline weighted by basemean to fit the enhancer fold change
+#' A function uses natural spline weighted by basemean to fit the enhancer fold change
 #' within each SE.
 #'
 #' @details
-#' This function will fit the enhancer fold change within each SE by using bs-spline
+#' This function will fit the enhancer fold change within each SE by using natural spline
 #' weighted by the max basemean of two samples.
 #' @param e_deseq_out_df enhancer output file from enhancerFoldchange
 #'
@@ -20,16 +20,16 @@
 #'
 #' @export
 #' @examples
-#' fit_list <- SEfitspline(enhancerFoldchange_out)
+#' fit_list <- SEfitspline_ns(enhancerFoldchange_out)
 #'
 
-SEfitspline <- function(e_deseq_out_df){
+SEfitspline_ns <- function(e_deseq_out_df){
   #--------------------------------------------------------------
   e_deseq_out_df$s1_mean <- (e_deseq_out_df$S1_r1_norm+e_deseq_out_df$S1_r2_norm)/2
   e_deseq_out_df$s2_mean <- (e_deseq_out_df$S2_r1_norm+e_deseq_out_df$S2_r2_norm)/2
   e_deseq_out_df$max_mean <- apply(e_deseq_out_df[,c("s1_mean","s2_mean")],1,FUN=max)
 
-  # create original bs-spline fit
+  # create original n-spline fit
   fit_out <- data.frame()
   spline_plot_df_out <- data.frame()
 
@@ -50,8 +50,8 @@ SEfitspline <- function(e_deseq_out_df){
 
     # check if only 1 enhancer
     if (nrow(temp_pattern) == 1) {
-      spline_bs_fit <- lm(log2FoldChange.1~bs(width_mid,
-                                              degree=2),
+      spline_bs_fit <- lm(log2FoldChange.1~ns(width_mid,
+                                              df=2),
                           data = temp_pattern,
                           weights = max_mean)
 
@@ -75,24 +75,24 @@ SEfitspline <- function(e_deseq_out_df){
       # different df based on n_top
       if (n_top <= 4) {
         # df=2
-        spline_bs_fit <- lm(log2FoldChange.1~bs(width_mid,
-                                                degree=2,
+        spline_bs_fit <- lm(log2FoldChange.1~ns(width_mid,
+                                                df=2,
                                                 Boundary.knots = c(min(width_mid)-5,max(width_mid)+5)),
                             data = temp_pattern,
                             weights = max_mean)
 
       } else if (n_top >= 6) {
         # df=4
-        spline_bs_fit <- lm(log2FoldChange.1~bs(width_mid,
-                                                degree=4,
+        spline_bs_fit <- lm(log2FoldChange.1~ns(width_mid,
+                                                df=4,
                                                 Boundary.knots = c(min(width_mid)-5,max(width_mid)+5)),
                             data = temp_pattern,
                             weights = max_mean)
 
       } else {
         # df=3
-        spline_bs_fit <- lm(log2FoldChange.1~bs(width_mid,
-                                                degree=3,
+        spline_bs_fit <- lm(log2FoldChange.1~ns(width_mid,
+                                                df=3,
                                                 Boundary.knots = c(min(width_mid)-5,max(width_mid)+5)),
                             data = temp_pattern,
                             weights = max_mean)

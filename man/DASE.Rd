@@ -13,6 +13,7 @@ DASE(
   data_type = "bam",
   s1_pair = F,
   s2_pair = F,
+  spline_fun = "bs",
   permut = T,
   times = 10,
   cutoff_v = c(-1, 1),
@@ -39,6 +40,8 @@ Format: c(chr:start-end, chr:start-end, ...).}
 \item{s1_pair}{if sample 1 is paired-end (default=FALSE)}
 
 \item{s2_pair}{if sample 2 is paired-end (default=FALSE)}
+
+\item{spline_fun}{spline functions ("bs", "ns", and "smooth". default=bs)}
 
 \item{permut}{if you want permutation (default=TRUE)}
 
@@ -67,17 +70,19 @@ This function is the main function used to get the category and ranking of SEs.
 The workflow of this function is "SEfilter -> enhancerFoldchange -> SEfitspline -> SEpattern -> SEcategory"
 }
 \examples{
-# no blacklist with permutation 10 times
-se_main_list <- SEprofile(se_in=pooled_rose,e_in=pooled_enhancer,
+# no blacklist with permutation 10 times with b-spline function
+se_main_list <- DASE(se_in=pooled_rose,e_in=pooled_enhancer,
 s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,
 s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 
-# with blacklist and permutation 10 times
-se_main_list <- SEprofile(se_in=pooled_rose,e_in=pooled_enhancer,bl_file= blacklist,
-s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
+# with blacklist and permutation 10 times with n-spline function
+se_main_list <- DASE(se_in=pooled_rose,e_in=pooled_enhancer,bl_file= blacklist,
+s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path,
+spline_fun="ns")
 
-# no blacklist nor permutation 10 times
-se_main_list <- SEprofile(se_in=pooled_rose,e_in=pooled_enhancer,permut=FALSE,
-s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
+# no blacklist nor permutation 10 times with smooth spline function
+se_main_list <- DASE(se_in=pooled_rose,e_in=pooled_enhancer,permut=FALSE,
+s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path,
+spline_fun="smooth")
 
 }

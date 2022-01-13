@@ -4,20 +4,20 @@
 \alias{enhancerFoldchange_bw}
 \title{Calculate the fold change of enhancers}
 \usage{
-enhancerFoldchange_bw(e_df, se_df, s1_r1_bw, s1_r2_bw, s2_r1_bw, s2_r2_bw)
+enhancerFoldchange_bw(e_df, se_df, s1_r1_bam, s1_r2_bam, s2_r1_bam, s2_r2_bam)
 }
 \arguments{
 \item{e_df}{pooled macs2 output file *_peaks.narrowPeak of all samples.}
 
 \item{se_df}{merged SE metadata from SEfilter}
 
-\item{s1_r1_bw}{path of sample 1 replicate 1 bw file}
+\item{s1_r1_bam}{path of sample 1 replicate 1 bw file}
 
-\item{s1_r2_bw}{path of sample 1 replicate 2 bw file}
+\item{s1_r2_bam}{path of sample 1 replicate 2 bw file}
 
-\item{s2_r1_bw}{path of sample 2 replicate 1 bw file}
+\item{s2_r1_bam}{path of sample 2 replicate 1 bw file}
 
-\item{s2_r2_bw}{path of sample 2 replicate 2 bw file}
+\item{s2_r2_bam}{path of sample 2 replicate 2 bw file}
 }
 \value{
 A list of 2 datasets: enhancer foldchang results dataset and sizefactor used in DESeq2
@@ -33,6 +33,6 @@ rtracklayer is used if privide bw file
 DESeq2 are used to calculate the fold change of those enhancers
 }
 \examples{
-foldchange_list <- enhancerFoldchange(pool_enhancer_df,se_meta,s1_r1_bw,s1_r2_bw,s2_r1_bw,s2_r2_bw)
+foldchange_list <- enhancerFoldchange(pool_enhancer_df,se_meta,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
 
 }

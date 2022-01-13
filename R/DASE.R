@@ -18,6 +18,7 @@
 #' @param s1_r2_bam path of sample 1 replicate 2 bam/bw file
 #' @param s2_r1_bam path of sample 2 replicate 1 bam/bw file
 #' @param s2_r2_bam path of sample 2 replicate 2 bam/bw file
+#' @param spline_fun spline functions ("bs", "ns", and "smooth". default=bs)
 #' @param permut if you want permutation (default=TRUE)
 #' @param times permutation times (default=10)
 #' @param cutoff_v fold change lower and upper cutoff vector.
@@ -39,22 +40,25 @@
 #'
 #' @export
 #' @examples
-#' # no blacklist with permutation 10 times
-#' se_main_list <- SEprofile(se_in=pooled_rose,e_in=pooled_enhancer,
+#' # no blacklist with permutation 10 times with b-spline function
+#' se_main_list <- DASE(se_in=pooled_rose,e_in=pooled_enhancer,
 #' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,
 #' s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 #'
-#' # with blacklist and permutation 10 times
-#' se_main_list <- SEprofile(se_in=pooled_rose,e_in=pooled_enhancer,bl_file= blacklist,
-#' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
+#' # with blacklist and permutation 10 times with n-spline function
+#' se_main_list <- DASE(se_in=pooled_rose,e_in=pooled_enhancer,bl_file= blacklist,
+#' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path,
+#' spline_fun="ns")
 #'
-#' # no blacklist nor permutation 10 times
-#' se_main_list <- SEprofile(se_in=pooled_rose,e_in=pooled_enhancer,permut=FALSE,
-#' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
+#' # no blacklist nor permutation 10 times with smooth spline function
+#' se_main_list <- DASE(se_in=pooled_rose,e_in=pooled_enhancer,permut=FALSE,
+#' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path,
+#' spline_fun="smooth")
 #'
 
 DASE <- function(se_in,e_in,bl_file,custom_range,
                  enhancer_count_table,data_type="bam",s1_pair=F,s2_pair=F,
+                 spline_fun="bs",
                  permut=T,times=10,cutoff_v=c(-1,1),
                  s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
 
@@ -74,17 +78,28 @@ DASE <- function(se_in,e_in,bl_file,custom_range,
                                        s2_r1_bam=s2_r1_bam ,s2_r2_bam=s2_r2_bam)
   } else if (data_type=="bw" & missing(enhancer_count_table)){
     step_2_out <- enhancerFoldchange_bw(e_df=e_in,se_df=merged_se_df,
-                                        s1_r1_bw=s1_r1_bam,s1_r2_bw=s1_r2_bam,
-                                        s2_r1_bw=s2_r1_bam ,s2_r2_bw=s2_r2_bam)
+                                        s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
+                                        s2_r1_bam=s2_r1_bam ,s2_r2_bam=s2_r2_bam)
   } else if (!missing(enhancer_count_table)) {
     step_2_out <- enhancerFoldchange_count(e_df=e_in,se_df=merged_se_df,
                                            raw_count=enhancer_count_table)
   }
 
-  # Step 3: using weighted bs-spline to fit the fold change
-  print("Step 3: bs-spline fit log2FC")
-  print(paste0("Processing total of ",length(unique(step_2_out$enhancer_deseq_result$se_merge_name))," SEs"))
-  step_3_out <- SEfitspline(step_2_out$enhancer_deseq_result)
+  # Step 3: using weighted b-spline to fit the fold change
+  if (spline_fun=="bs") {
+    print("Step 3: b-spline fit log2FC")
+    print(paste0("Processing total of ",length(unique(step_2_out$enhancer_deseq_result$se_merge_name))," SEs"))
+    step_3_out <- SEfitspline_bs(step_2_out$enhancer_deseq_result)
+  } else if(spline_fun=="ns") {
+    print("Step 3: natural spline fit log2FC")
+    print(paste0("Processing total of ",length(unique(step_2_out$enhancer_deseq_result$se_merge_name))," SEs"))
+    step_3_out <- SEfitspline_ns(step_2_out$enhancer_deseq_result)
+  } else {
+    print("Step 3: smooth spline fit log2FC")
+    print(paste0("Processing total of ",length(unique(step_2_out$enhancer_deseq_result$se_merge_name))," SEs"))
+    step_3_out <- SEfitspline_smooth(step_2_out$enhancer_deseq_result)
+  }
+
 
   # Step 4: permutation to get cutoff (normal or stringent)
   print("Step 4: permutation to get log2FC cutoff")
