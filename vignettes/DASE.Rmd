@@ -9,7 +9,7 @@ date: "`r Sys.Date()`"
 output: 
   pdf_document: 
     toc: true
-  rmarkdown::html_vignette:
+  #rmarkdown::html_vignette:
 graphics: yes
 vignette: >
   %\VignetteIndexEntry{DASE user's guide}
@@ -119,9 +119,9 @@ DASE_out_count <- DASE(se_in=se_region,e_in=enhancer_region,
 
 _DASE_ use spline functions to fit the log2 fold change value of constituent enhancers within each SEs.There are 3 spline functions (b-spline, natural spline, and smooth.spline) implemented in _DASE_. _DASE_ use b-spline as default. Those 3 functions provide similar results, however they may have some different performance in some cases. The examples below shows some comparison of those spline functions.
 
-![spline compare figuers.](spline_comparison.png){width=80%}
+![Examples of spline function comparison.](spline_comparison.png){width=80%}
 
-Smooth spline can not handle small data points like others do (figure a). When there are large number of data points (usually larger than 6), all the spline functions has similar performance (figure c). However, in some cases, those spline functions may perform differently by how they handle the weights of each data point (figure b).
+Smooth spline can not handle small data points like others do (Figure 1a). When there are large number of data points (usually larger than 6), all the spline functions has similar performance (Figure 1c). However, in some cases, those spline functions may perform differently by how they handle the weights of each data point (Figure 1b).
 
 Users can chose their preferred spline function with *spline_fun* parameter. Following are some examples of run _DASE_ with different spline functions.
 
@@ -149,6 +149,8 @@ grid.arrange(DASE_out_bs$pattern_list[[7]],
              DASE_out_smooth$pattern_list[[7]],nrow=1)
 ```
 
+Left is b-spline function, middle is natural spline function, and right is smooth spline function.
+
 # Interpretation of _DASE_ output files
 
 The output of _DASE_ is a list with multiple data types including:
@@ -170,7 +172,7 @@ We use permutation of spline fitted log2 fold change to decide the significant t
 DASE_out_count$cutoff
 ```
 
-```{r, density_plot,fig.show = "hold",fig.width=4,fig.height=4,fig.align="center"}
+```{r, density_plot,fig.show = "hold",fig.width=4,fig.height=4,fig.align="center",out.width="90%"}
 # Permutation density plot
 DASE_out_count$density_plot
 ```
@@ -186,7 +188,7 @@ Black lines indicates the threshold which is obtained by the inflection point.
 head(DASE_out_count$se_category)
 ```
   
-```{r, pattern_example,fig.show = "hold",fig.width=4,fig.height=4,fig.align="center"}
+```{r, pattern_example,fig.show = "hold",fig.width=4,fig.height=3,fig.align="center",out.width="80%"}
 # an example of one sample
 DASE_out_count$pattern_list[[1]]
 ```
@@ -245,7 +247,7 @@ grid.arrange(DASE_out_count$boxplot,
 
 ```
 
-Because we have a larger threshold (bottom plot), more SEs are identified as *similar* category than before (top plot).
+Because we have a larger threshold (right plot), more SEs are identified as *similar* category than before (left plot).
 
 # Citation
 If you used _DASE_, please cite our paper: [https://www.biorxiv.org/content/10.1101/2021.09.25.461810v1] 
