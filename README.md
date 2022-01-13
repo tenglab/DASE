@@ -19,7 +19,8 @@ DASE is an R package with its source code documented in this [repository](https:
 
 Please follow the steps below to install DASE in R. Dependency packages noted in the 
 [DESCRIPTION](https://github.com/tenglab/DASE/blob/master/DESCRIPTION) file are required to ensure successful
-installation. In addition, R package *devtools* is required to start the installation.
+installation. These packages can be found from CRAN or Bioconductor repositories. In addition, 
+R package *devtools* is required to start the installation.
 
 ```R
 # Install DASE
