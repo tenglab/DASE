@@ -30,7 +30,7 @@ First load DASE,
 library(DASE)
 ```
 
-Then follow the [DASE user's guild](https://github.com/tenglab/DASE/blob/master/vignettes/DASE.pdf) to preform differneital analysis of SEs.
+Then follow the [DASE user's guild](https://github.com/tenglab/DASE/blob/master/DASE_guide.pdf) to preform differneital analysis of SEs.
 
 ## Citation
 If you use DASE, please cite our paper at (https://www.biorxiv.org/content/10.1101/2021.09.25.461810v1)
