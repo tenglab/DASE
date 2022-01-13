@@ -7,15 +7,15 @@ author: |
   | Research Institute, Tampa, FL, USA
 date: "`r Sys.Date()`"  
 output: 
-  rmarkdown::html_vignette:
-  #pdf_document: 
+  pdf_document: 
     toc: true
+  rmarkdown::html_vignette:
 graphics: yes
 vignette: >
   %\VignetteIndexEntry{DASE user's guide}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignettePackage{DASE}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
 ---
 
 ```{r, echo=FALSE, include=FALSE}
@@ -26,11 +26,7 @@ knitr::opts_chunk$set(
   message = FALSE,
   cache = FALSE,
   comment = "#>",
-  dev="png",
-  fig.show = "hold",
-  fig.width=4,
-  fig.height=4,
-  fig.align="center"
+  dev="png"
 )
 ```
 
@@ -81,15 +77,13 @@ se_region <- read.table(se_path,sep="\t",header=F)
 head(se_region)
 ```
 
-# Basic usage of DASE
+# Basic usage of _DASE_
 
 In this section, we use DASE to find differential SEs with internal dynamics by comparing human chromosome 21 of two cancer cell lines (K562 and MCF7). Here, we focus on the basic usage of running DASE with different coverage input files (BAM, BigWig, and enhancer raw count table). This default setting will not include enhancer blacklist which indicates regions that don't have enhancers. In addition, under default setting, DASE will run permutation 10 times to get a significant threshold to identify SE categories. More additional features can be found later in the "Additional options" section.
 
-## *Run DASE with BAM or BigWig coverage files*
+## *Run _DASE_ with BAM or BigWig coverage files*
 
-This section shows you how to use DASE with BAM or BigWig coverage files. The BAM or BigWig files are for the reads count of enhancers in different samples. DASE uses *featureCounts* to get the enhancer abundance of each sample with BAM file and *rtracklayer* with BigWig file. The first step is to get the path of BAM or BigWig file for each samples. Then with the imported enhancer and SE region files, we can run DASE as follow (Here we use BigWig files as example).
-
-Run DASE with BigWig files.
+This section shows you how to use _DASE_ with BAM or BigWig coverage files. The BAM or BigWig files are for the reads count of enhancers in different samples. _DASE_ uses *featureCounts* to get the enhancer abundance of each sample with BAM file and *rtracklayer* with BigWig file. The first step is to get the path of BAM or BigWig file for each samples. Then with the imported enhancer and SE region files, we can run _DASE_ as follow (Here we use BigWig files as example).
 
 ```{r DASE2}
 # path of BigWig file for each condition
@@ -105,7 +99,7 @@ DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,data_type = "bw",
 
 ```
 
-## *Run DASE with enhancer raw count table*
+## *Run _DASE_ with enhancer raw count table*
 
 This section shows you how to use DASE with enhancer raw count table. The format of count table is shown bellow. Here we don't need BAM or BigWig files, because we already have the enhancer counts for each sample. We can run DASE as follow. This step will skip *featureCount*.
 
@@ -125,9 +119,9 @@ DASE_out_count <- DASE(se_in=se_region,e_in=enhancer_region,
 
 _DASE_ use spline functions to fit the log2 fold change value of constituent enhancers within each SEs.There are 3 spline functions (b-spline, natural spline, and smooth.spline) implemented in _DASE_. _DASE_ use b-spline as default. Those 3 functions provide similar results, however they may have some different performance in some cases. The examples below shows some comparison of those spline functions.
 
-![spline compare figuers.](~/Projects/super_enhancer/se_diff_paper/DASE_test/spline_comparison.png)
+![spline compare figuers.](spline_comparison.png){width=80%}
 
-Smooth spline can not handle small data points like others do (figure a). When there are large number of data points (usually large than 6), all the spline functions has similar performance (figure c). However, in some cases, those spline functions may perform differently by how they handle the weights of each data point (figure b).
+Smooth spline can not handle small data points like others do (figure a). When there are large number of data points (usually larger than 6), all the spline functions has similar performance (figure c). However, in some cases, those spline functions may perform differently by how they handle the weights of each data point (figure b).
 
 Users can chose their preferred spline function with *spline_fun* parameter. Following are some examples of run _DASE_ with different spline functions.
 
@@ -145,16 +139,19 @@ DASE_out_ns <- DASE(se_in=se_region,e_in=enhancer_region,
 DASE_out_smooth <- DASE(se_in=se_region,e_in=enhancer_region,
                  enhancer_count_table=enhancer_count,permut=F,
                  spline_fun = "smooth")
-
-# spline fitted plots of different spline functions
-DASE_out_bs$pattern_list[[7]]
-DASE_out_ns$pattern_list[[7]]
-DASE_out_smooth$pattern_list[[7]]
 ```
 
-# Interpretation of DASE output files
+```{r, spline_fig,fig.show = "hold",fig.width=10,fig.height=4,fig.align="center",out.width="80%"}
+# spline fitted plots of different spline functions
+library(gridExtra)
+grid.arrange(DASE_out_bs$pattern_list[[7]],
+             DASE_out_ns$pattern_list[[7]],
+             DASE_out_smooth$pattern_list[[7]],nrow=1)
+```
 
-The output of DASE is a list with multiple data types including:
+# Interpretation of _DASE_ output files
+
+The output of _DASE_ is a list with multiple data types including:
 
   1. lfc_shrink: a shrinking lfc object from DESeq2, it can be used to get a MA plot
   1. cutoff: significant threshold of fitted log2 fold change.
@@ -166,12 +163,14 @@ The output of DASE is a list with multiple data types including:
 
   
 ## Significant threshold
-We use permutation of spline fitted log2 fold change to decide the significant threshold. Under default settings, DASE will run permutation 10 times with *SEpermut* function. If don't use permutation, the default significant threshold is -1 and 1. You can use your own threshold with *cutoff_v* parameter. Please refer to function manual or *Additional options* section.
+We use permutation of spline fitted log2 fold change to decide the significant threshold. Under default settings, _DASE_ will run permutation 10 times with *SEpermut* function. If don't use permutation, the default significant threshold is -1 and 1. You can use your own threshold with *cutoff_v* parameter. Please refer to function manual or *Additional options* section.
 
 ```{r threshold}
 # Significant threshold
 DASE_out_count$cutoff
+```
 
+```{r, density_plot,fig.show = "hold",fig.width=4,fig.height=4,fig.align="center"}
 # Permutation density plot
 DASE_out_count$density_plot
 ```
@@ -187,7 +186,7 @@ Black lines indicates the threshold which is obtained by the inflection point.
 head(DASE_out_count$se_category)
 ```
   
-```{r se_pattern_example}
+```{r, pattern_example,fig.show = "hold",fig.width=4,fig.height=4,fig.align="center"}
 # an example of one sample
 DASE_out_count$pattern_list[[1]]
 ```
@@ -200,7 +199,7 @@ head(DASE_out_count$se_fit)
 ```
   
 # Additional options
-In addition of default parameters, DASE can take an blacklist file which contains the regions cannot be identified as enhancers. DASE also can take a customized blacklist region with *custom_range* parameter. We have included a blacklist file from ENCODE (accession ID: ENCFF356LFX) in our package.
+In addition of default parameters, _DASE_ can take an blacklist file which contains the regions cannot be identified as enhancers. _DASE_ also can take a customized blacklist region with *custom_range* parameter. We have included a blacklist file from ENCODE (accession ID: ENCFF356LFX) in our package.
 
 ```{r blacklist}
 # blacklist file
@@ -236,14 +235,18 @@ DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,times=3,
 # run DASE with no permutation and customized threshold
 DASE_out_p <- DASE(se_in=se_region,e_in=enhancer_region,permut = F,
                  cutoff_v = c(-3,3),enhancer_count_table=enhancer_count)
+```
 
+```{r, permutation_example,fig.show = "hold",fig.width=8,fig.height=4,fig.align="center",out.width="80%"}
 # boxplots of different threshold
-DASE_out_count$boxplot
-DASE_out_p$boxplot
+library(gridExtra)
+grid.arrange(DASE_out_count$boxplot,
+             DASE_out_p$boxplot,nrow=1)
+
 ```
 
 Because we have a larger threshold (bottom plot), more SEs are identified as *similar* category than before (top plot).
 
 # Citation
-If you used DASE, please cite our paper: [https://www.biorxiv.org/content/10.1101/2021.09.25.461810v1] 
+If you used _DASE_, please cite our paper: [https://www.biorxiv.org/content/10.1101/2021.09.25.461810v1] 
 
