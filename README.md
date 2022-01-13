@@ -9,7 +9,7 @@ differential analysis is performed to compare SE activities between cell conditi
 strategy in estimating differential SEs relies on overall activities and neglect the changes in length 
 and structure of SEs. DASE uses a weighted spline model to identify differential SEs between two conditions 
 by accounting for the combinatorial effects of constituent enhancers weighted with their activities
- and locations (internal dynamics). In addition to overall changes, our medthod finds four novel types 
+and locations (internal dynamics). In addition to overall changes, our method finds four novel types 
 (*shortened*, *shifted*, *hollowed* and *other complex scenarios*) of differential SEs pointing to the 
 structural differences within SEs.
 
@@ -23,6 +23,7 @@ installation. In addition, R package *devtools* is required to start the install
 
 ```R
 # Install DASE
+library(devtools)
 devtools::install_github("https://github.com/tenglab/DASE.git")
 ```
 
@@ -39,7 +40,7 @@ First load DASE,
 library(DASE)
 ```
 
-Then, follow the [**User's Guild**](https://github.com/tenglab/DASE/blob/master/DASE_guide.pdf) 
+Then, follow the [**User's Guide**](https://github.com/tenglab/DASE/blob/master/DASE_guide.pdf) 
 to perform SE differential analysis. In the guide, we detail how to prepare input files, switch input 
 formats, interpret outputs files as well as some spline fitting examples.
 

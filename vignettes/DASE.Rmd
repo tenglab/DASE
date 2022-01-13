@@ -1,10 +1,10 @@
 ---
-title: "_DASE_ user's guide"
+title: "_DASE_ User's Guide"
 author: |
   | Xiang Liu <xiang.liu@moffitt.org>
   | Mingxiang Teng <mingxiang.teng@moffitt.org>
-  | Department of Biostatistics and Bioinformatics, H. Lee Moffit Cancer Center &
-  | Research Institute, Tampa, FL, USA
+  | Department of Biostatistics and Bioinformatics
+  | Moffit Cancer Center, Tampa, FL, USA
 date: "`r Sys.Date()`"  
 output: 
   pdf_document: 
@@ -32,10 +32,17 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-Super enhancers (SEs) were proposed as broad regulatory domains on genome, usually spanning a minimum
-of thousands of base pairs and consisting of multiple constitute enhancers. The constitute enhancers work together as a unit, instead of separately, to facilitate high enhancer activity. Aberrant SE activities, 
-which are critical to understand disease mechanisms, could be raised by the alterations of one or more of 
-their constitute enhancers. However, the state-of-art binary strategy in calling differential SEs only relies on overall activity changes, neglecting the local dynamics of constitute enhancers within SEs. DASE uses a weighted spline model to identify differential SEs from two conditions by accounting for the combinatorial effects of constitute enhancers weighted with their activities and locations (internal dynamics). In addition to overall changes, our medthod finds four novel types (*Shortened/lengthened*, *Shifted*, *Hollowed* and *other complex scenarios*) of differential SEs pointing to the structural differences within SEs.
+Super enhancers (SEs) are broad enhancer domains usually containing multiple constituent 
+enhancers that hold elevated activities in gene regulation. Disruption in one or more 
+constituent enhancers causes aberrant SE activities that lead to gene dysregulation in 
+diseases. To quantify SE aberrations, differential analysis is performed to compare SE
+activities between cell conditions. The state-of-art strategy in estimating differential 
+SEs relies on overall activities and neglect the changes in length and structure of SEs. 
+DASE uses a weighted spline model to identify differential SEs between two conditions by 
+accounting for the combinatorial effects of constituent enhancers weighted with their 
+activities and locations (internal dynamics). In addition to overall changes, our method 
+finds four novel types (shortened, shifted, hollowed and other complex scenarios) of 
+differential SEs pointing to the structural differences within SEs.
 
 # Getting Started
 
@@ -49,41 +56,56 @@ library(DASE)
 
 DASE requires the following input files:
 
-  1. enhancer bed file: a merged enhancer bed file includes the enhancer peaks of all samples.
-  1. SE bed file: a merged SE bed file includes the SE regions of all samples.
-  1. Coverage files: can either be the path of bam/bw files for each condition and replicate, or just an enhancer count table of all conditions and replicates.
+  1. Enhancer BED file: a merged enhancer BED file including the enhancers (e.g. H3K27Ac sequencing peaks)
+     from all compared samples.
+  1. SE BED file: a merged SE BED file including the SE regions from all compared samples.
+  1. Coverage files: either the path of BAM/BigWig files for each condition and replicate, or a sequencing 
+     count table for all enhancers across conditions and replicates.
 
-Followings are the examples of enhancer and SE bed files
+Below are the examples of the enhancer and SE BED files, following the UCSC definition 
+(https://genome.ucsc.edu/FAQ/FAQformat.html).
 
-## *Enhancer bed file*
+### *Enhancer BED file*
 
-The enhancer file can be any format of bed files, just make sure the first 6 columns contains the information of "chr","start","end","name","score",and "strand". Here is an example of bed files with only 6 columns.
+The enhancer BED file can be of any table formats as long as  the first 6 columns contain
+the information of "chromosome","start","end","name","score" and "strand". Here is an example of 
+BED files with only 6 columns.
 
 ```{r enhancer_data}
-# load enhancer bed file
+# load enhancer BED file
 enhancer_path <- system.file("extdata","enhancer.bed",package="DASE")
 enhancer_region <- read.table(enhancer_path,sep="\t",header=F)
 head(enhancer_region)
 ```
 
-## *SE bed file*
+### *SE BED file*
 
-The SE file can be any format of bed files, just make sure the first 6 columns contains the information of "chr","start","end","name","score",and "strand". Here is an example of bed files with only 6 columns.
+The SE BED file can be of any formats as long as the first 6 columns contain the information of
+"chromosome","start","end","name","score",and "strand". Here is an example of BED files with only 6 columns.
 
 ```{r SE_data}
-# load SE bed file
+# load SE BED file
 se_path <- system.file("extdata","SE.bed",package="DASE")
 se_region <- read.table(se_path,sep="\t",header=F)
 head(se_region)
 ```
 
-# Basic usage of _DASE_
+# Basic Usage of _DASE_
 
-In this section, we use DASE to find differential SEs with internal dynamics by comparing human chromosome 21 of two cancer cell lines (K562 and MCF7). Here, we focus on the basic usage of running DASE with different coverage input files (BAM, BigWig, and enhancer raw count table). This default setting will not include enhancer blacklist which indicates regions that don't have enhancers. In addition, under default setting, DASE will run permutation 10 times to get a significant threshold to identify SE categories. More additional features can be found later in the "Additional options" section.
+In this section, we use DASE to find differential SEs by comparing SE profiles on **chromosome 21** between
+two cancer cell lines (K562 and MCF7). Here, we focus on the basic usage of running DASE with different
+coverage input files (BAM, BigWig, and enhancer raw count table). By default, DASE will run permutations
+to determine a significant threshold to aid the defining of different SE categories. Additional options,
+such as blacklist region removal and running without permutation can be found later in the "Additional 
+Options" section.
 
-## *Run _DASE_ with BAM or BigWig coverage files*
+### *Run _DASE_ with BAM or BigWig coverage files*
 
-This section shows you how to use _DASE_ with BAM or BigWig coverage files. The BAM or BigWig files are for the reads count of enhancers in different samples. _DASE_ uses *featureCounts* to get the enhancer abundance of each sample with BAM file and *rtracklayer* with BigWig file. The first step is to get the path of BAM or BigWig file for each samples. Then with the imported enhancer and SE region files, we can run _DASE_ as follow (Here we use BigWig files as example).
+This section demonstrates _DASE_ with BAM or BigWig input files. The BAM or BigWig files are used to estimate 
+the reads counts of enhancers in different samples. _DASE_ uses *featureCounts* to count the enhancer abundance 
+from BAM files or uses *rtracklayer* for BigWig files. The first step is to get the paths of all BAM or BigWig 
+files for each sample. Then, with the specified enhancer and SE regions, we can run _DASE_ as follow 
+(Here we use BigWig files as an example).
 
 ```{r DASE2}
 # path of BigWig file for each condition
@@ -99,9 +121,11 @@ DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,data_type = "bw",
 
 ```
 
-## *Run _DASE_ with enhancer raw count table*
+### *Run _DASE_ with enhancer raw count table*
 
-This section shows you how to use DASE with enhancer raw count table. The format of count table is shown bellow. Here we don't need BAM or BigWig files, because we already have the enhancer counts for each sample. We can run DASE as follow. This step will skip *featureCount*.
+This section demonstrates DASE with enhancer raw count table. Instead of count enhancer reads from BAM or 
+BigWig files, the function adapts count table directly to save time and space. The format of count table 
+is shown below.  The count table is adapted with parameter *enhancer_count_table*.
 
 ```{r DASE3}
 # read enhancer count table
@@ -115,15 +139,25 @@ DASE_out_count <- DASE(se_in=se_region,e_in=enhancer_region,
 
 ```
 
-## *Run _DASE_ with different spline functions*
+### *Run _DASE_ with different spline functions*
 
-_DASE_ use spline functions to fit the log2 fold change value of constituent enhancers within each SEs.There are 3 spline functions (b-spline, natural spline, and smooth.spline) implemented in _DASE_. _DASE_ use b-spline as default. Those 3 functions provide similar results, however they may have some different performance in some cases. The examples below shows some comparison of those spline functions.
+_DASE_ uses spline functions to fit log2 fold change values of constituent enhancers between conditions.
+We chose to implement 3 widely-adapted spline functions (b-spline, natural spline, and smooth.spline) 
+in _DASE_ to provide flexibility, although we only reported results from b-splines in our manuscript 
+due to its superiority in practice. _DASE_ uses b-spline as default. The three functions provide similar
+ results overall. However, they could have very different performance in some cases. The examples below 
+show a brief comparison between  spline functions.
 
-![Examples of spline function comparison.](spline_comparison.png){width=80%}
+![Spline fitting on different SEs.](spline_comparison.png){width=80%}
 
-Smooth spline can not handle small data points like others do (Figure 1a). When there are large number of data points (usually larger than 6), all the spline functions has similar performance (Figure 1c). However, in some cases, those spline functions may perform differently by how they handle the weights of each data point (Figure 1b).
+Smooth spline performs badly on SEs with a small number of constituent enhancers (fitting points) (Figure 1a). 
+When there are more number of data points (usually larger than 6), all spline functions show similar performance
+(Figure 1c). However, in practice, natural splines might overfit when regression weights are considered based 
+on our algorithms (Figure 1b). Note that we implement a strategy to control overfitting with b-spline 
+(see our manuscript).
 
-Users can chose their preferred spline function with *spline_fun* parameter. Following are some examples of run _DASE_ with different spline functions.
+Users can chose different spline functions  with *spline_fun* parameter in "DASE". 
+Following are some examples of run _DASE_ with different spline functions.
 
 ```{r DASE4}
 # rund DASE with b-spline function (default)
@@ -149,23 +183,26 @@ grid.arrange(DASE_out_bs$pattern_list[[7]],
              DASE_out_smooth$pattern_list[[7]],nrow=1)
 ```
 
-Left is b-spline function, middle is natural spline function, and right is smooth spline function.
+Left is b-spline; middle is natural spline; right is smooth spline.
 
-# Interpretation of _DASE_ output files
+# Interpretation of _DASE_ Outputs
 
 The output of _DASE_ is a list with multiple data types including:
 
-  1. lfc_shrink: a shrinking lfc object from DESeq2, it can be used to get a MA plot
-  1. cutoff: significant threshold of fitted log2 fold change.
-  1. density_plot: a density plot of permutation and original fitted log2 fold change, if *permut=T*.
+  1. lfc_shrink: a shrinking lfc object from DESeq2. It can be used to creat MA plot
+  1. cutoff: significant threshold for fitted log2 fold changes.
+  1. density_plot: a density plot of permutation and original fitted log2 fold changes, if *permut=T*.
   1. boxplot: a boxplot of final SE categories
-  1. se_category: a data frame contains final SE categories
-  1. pattern_list: a list contains figures of each SE's pattern
-  1. se_fit: a data frame contains DESeq2 output and spline-fitted log2 fold change of all constitute enhancers
+  1. se_category: a data frame containing final SE categories
+  1. pattern_list: a list containing figures for each SE pattern
+  1. se_fit: a data frame containing DESeq2 output and spline-fitted log2 fold change of all constitute enhancers
 
   
-## Significant threshold
-We use permutation of spline fitted log2 fold change to decide the significant threshold. Under default settings, _DASE_ will run permutation 10 times with *SEpermut* function. If don't use permutation, the default significant threshold is -1 and 1. You can use your own threshold with *cutoff_v* parameter. Please refer to function manual or *Additional options* section.
+### *Significant threshold*
+We use permutation of spline fitted log2 fold changes to decide the significant threshold. Under 
+default settings, _DASE_ will run permutation 10 times with *SEpermut* function. If permutation is 
+disabled, the default significant threshold is -1 and 1. You can also choose your own thresholds with 
+*cutoff_v* parameter. Please refer to the  *Additional options* section for this.
 
 ```{r threshold}
 # Significant threshold
@@ -177,11 +214,12 @@ DASE_out_count$cutoff
 DASE_out_count$density_plot
 ```
 
-Black lines indicates the threshold which is obtained by the inflection point.
+Black dash lines indicate the thresholds which are obtained based on the inflection points of the 
+permutation distribution.
 
-## Super-enhancer internal dynamic categories
+### *Super-enhancer internal dynamic categories*
 
-*SE_category, pattern_list, se_fit* are the output related to SE internal dynamics.
+*SE_category, pattern_list, se_fit* are the outputs related to SE internal dynamics.
 
 ```{r se_cat_out}
 # se_categories
@@ -193,15 +231,19 @@ head(DASE_out_count$se_category)
 DASE_out_count$pattern_list[[1]]
 ```
 
-This figure shows the constitute enhancer patterns within SE "chr21_34863697_34890719" which identified as *Shortened*. Black line is the fitted log2 fold change curve, dots indicate constitute enhancers. Red dots indicate the constitute enhancers with large weights.
+This figure shows the constituent enhancer patterns within a SE example which is identified as *shortened*. 
+Black line is the fitted log2 fold change curve; dots indicate constituent enhancers. Red dots indicate 
+the constituent enhancers with heavy weights.
   
 ```{r se_fit}
 # example of se_fit
 head(DASE_out_count$se_fit)
 ```
   
-# Additional options
-In addition of default parameters, _DASE_ can take an blacklist file which contains the regions cannot be identified as enhancers. _DASE_ also can take a customized blacklist region with *custom_range* parameter. We have included a blacklist file from ENCODE (accession ID: ENCFF356LFX) in our package.
+# Additional Options
+In addition of default parameters, _DASE_ can exclude the ENCODE blacklist regions from consideration. 
+_DASE_ can also adapt an user-define blacklist region with *custom_range* parameter. We have included 
+the human blacklist region file from ENCODE (accession ID: ENCFF356LFX) in our package.
 
 ```{r blacklist}
 # blacklist file
@@ -210,10 +252,13 @@ blacklist_region <- read.table(blacklist_path,sep="\t",header=F)
 head(blacklist_region)
 ```
 
-There is also an option whether to choice permutation or not. The default setting of DASE will run permutation 10 times. You can turn it off with *permut=F*. When there is no permutation, the default threshold is -1 and 1. You can chose any threshold you like with *cutoff_v* parameter. However, defining customized threshold is only available under *permut=F*. 
+There is also an option to opt-out permutation calculation. The default setting of DASE will run 
+permutation 10 times. Users can turn it off with *permut=F*. When there is no permutation, the default 
+thresholds are -1 and 1, or users can choose the thresholds they like with *cutoff_v* parameter. 
+However, defining customized thresholds are only available under *permut=F*. 
 
-## *DASE with enhancer blacklist region*
-Example of using blacklist options. Here, we focus on using DASE with enhancer count table.
+### *DASE with enhancer blacklist region*
+Example of using blacklist option. 
 ```{r blacklist_run}
 # run DASE with blacklist file and customized region
 DASE_out_bl <- DASE(se_in=se_region,e_in=enhancer_region,bl_file = blacklist_region,
@@ -222,10 +267,11 @@ DASE_out_bl <- DASE(se_in=se_region,e_in=enhancer_region,bl_file = blacklist_reg
 
 ```
 
-You can find that the number of SEs (8) in "DASE_out_bl" is less than "DASE_out_count" which is without blacklist region (34).
+Users can find that the number of SEs (i.e. 8) in "DASE_out_bl" is less than that in "DASE_out_count" 
+which is calculated without blacklist region (i.e. 34).
 
-## *DASE with no permutation*
-Some examples of using permutation options. Here, we focus on using DASE with enhancer count table.
+### *DASE with no permutation*
+Two examples of different permutation options. 
 
 ```{r permut_1}
 # run DASE with permutation 3 times
@@ -234,7 +280,7 @@ DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,times=3,
 ```
 
 ```{r no_permut}
-# run DASE with no permutation and customized threshold
+# run DASE wit customized threshold
 DASE_out_p <- DASE(se_in=se_region,e_in=enhancer_region,permut = F,
                  cutoff_v = c(-3,3),enhancer_count_table=enhancer_count)
 ```
@@ -247,7 +293,8 @@ grid.arrange(DASE_out_count$boxplot,
 
 ```
 
-Because we have a larger threshold (right plot), more SEs are identified as *similar* category than before (left plot).
+By comparing results based on different threshold cutoffs, the right plot (with larger threshold cutoff) 
+identified  more SEs in the *similar* category than the left plot (with smaller threshold cutoff).
 
 # Citation
 If you used _DASE_, please cite our paper: [https://www.biorxiv.org/content/10.1101/2021.09.25.461810v1] 
