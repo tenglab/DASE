@@ -12,7 +12,7 @@ License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 URL: https://github.com/tenglab/DASE
 Depends:
-	R (>= 3.1.0),
+	R (>= 4.0.3),
 	GenomicRanges (>= 1.42.0)
 Imports:
 	data.table (>= 1.14.0),
