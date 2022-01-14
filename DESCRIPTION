@@ -21,7 +21,7 @@ Imports:
 	data.table (>= 1.14.0),
 	ggplot2 (>= 3.3.3),
 	splines (>= 4.0.3),
-	rtacklayer (>=1.50.0)
+	rtracklayer (>=1.50.0)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
