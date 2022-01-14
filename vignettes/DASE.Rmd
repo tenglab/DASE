@@ -251,7 +251,7 @@ the constituent enhancers with heavy weights.
 head(DASE_out_count$ce_fit)
 ```
 
-Columns from "e_merge_name" to "width" indicate the property of each CEs. Columns from "S1_r1" to "S2_r2_norm" indicate the coverage of each CE in each sample. Columns from "baseMean" to "pvalue" indicate the results of _DESeq2_. Columns from "baseMean_shrink" to "padj_shrink" indicate _DESeq2_ shrinkage value. Please refer to _DASE_ help for more informations.
+Columns from "e_merge_name" to "width" indicate the property of each CEs. Columns from "S1_r1" to "S2_r2_norm" indicate the coverage of each CE in each sample. Columns from "baseMean" to "pvalue" indicate the results of _DESeq2_. Columns from "baseMean_shrink" to "padj_shrink" indicate _DESeq2_ shrinkage value. Please refer to _DASE_ help for more information.
 
 # Additional Options
 In addition of default parameters, _DASE_ can exclude the ENCODE blacklist regions from consideration. 
