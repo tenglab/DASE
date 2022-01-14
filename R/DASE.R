@@ -43,10 +43,10 @@
 #' total_width: width of merged SE (unit=k).
 #' number_enhancer: number of CEs in each SE.
 #' category: SE category identified by _DASE_.
-#' direction: enrichment direction of SEs (none:Other or non-differential category; +: enriched in sample 2; -: enriched in sample 1; l:  sample 1 shifted in 5' direction; r: sample 2 shifted in 5' direction).
-#' non_mid_percent: percentage of non middle segments.
+#' direction: enrichment direction of SEs (none:Other or non-differential category; +: enriched in sample 2; -: enriched in sample 1; l: sample 1 shifted in 5' direction; r: sample 2 shifted in 5' direction).
+#' non_mid_percent: total activity occupancy of the segments that go beyond the threshold cutoffs.
 #' mean_FC: mean of log2 SE coverage fold change.
-#' rank: SE category ranking based on non_mid_percent first and mean_FC for each SE category. (rank=1 means the most like to the SE category.)
+#' rank: SE category ranking based on non_mid_percent first and mean_FC for each SE category. (rank=1 means the most changed in the corresponding SE category.)
 #'
 #' Each column in ce_fit represents:
 #'

@@ -285,6 +285,11 @@ DASE_out_bl <- DASE(se_in=se_region,e_in=enhancer_region,bl_file = blacklist_reg
                  custom_range = c("chr21:14735763-29634779","chr21:33539902-43710703"),
                  enhancer_count_table=enhancer_count)
 
+# number of SEs with blacklist range
+nrow(DASE_out_bl$se_category)
+
+# number of SEs without blacklist range
+nrow(DASE_out_count$se_category)
 ```
 
 Users can find that the number of SEs (i.e. 8) in "DASE_out_bl" is less than that in "DASE_out_count" 
