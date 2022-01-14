@@ -12,6 +12,34 @@ SEfitspline_smooth(e_deseq_out_df)
 \value{
 se_fit_df: enhancer fitted dataframe
 spline_plot_df_out: spline fitted line plot dataframe
+
+Each column in se_fit_df represents:
+
+e_merge_name: name of merged CEs.
+chr: chromosome of CEs.
+start: start posation of CEs.
+end: end posation of CEs.
+width: width of CEs.
+S1_r1: coverage of sample 1 replicate 1.
+S1_r2: coverage of sample 1 replicate 2.
+S2_r1: coverage of sample 2 replicate 1.
+S2_r2: coverage of sample 2 replicate 2.
+S1_r1_norm: normalized coverage of sample 1 replicate 1.
+S1_r2_norm: normalized coverage of sample 1 replicate 2.
+S2_r1_norm: normalized coverage of sample 2 replicate 1.
+S2_r2_norm: normalized coverage of sample 2 replicate 2.
+baseMean: normalized coverage mean of all samples.
+log2FoldChange: log2 fold change of normalized coverage.
+lfcSE: log2 fold change standard error.
+stat: statistic of log2 fold change.
+pvalue: p-value of log2 fold change.
+padj: adjusted p-value of log2 fold change.
+baseMean_shrink: shrinkage of normalized coverage mean of all samples based on the methods of \emph{DESeq2}.
+log2FoldChange_shrink: shrinkage of log2 fold change..
+lfcSE_shrink: shrinkage of log2 fold change standard error.
+pvalue_shrink: shrinkage of log2 fold change p-value
+padj_shrink: shrinkage of log2 fold change adjusted p-value
+se_merge_name: merged SE names
 }
 \description{
 A function uses smooth.spline weighted by basemean to fit the enhancer fold change

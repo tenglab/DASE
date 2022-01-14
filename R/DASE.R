@@ -6,8 +6,8 @@
 #' This function is the main function used to get the category and ranking of SEs.
 #' The workflow of this function is "SEfilter -> enhancerFoldchange -> SEfitspline -> SEpattern -> SEcategory"
 #'
-#' @param se_in pooled ROSE output file *_peaks_Gateway_SuperEnhancers.bed of all samples.
-#' @param e_in pooled macs2 output file *_peaks.narrowPeak of all samples.
+#' @param se_in pooled SE bed file of all samples.
+#' @param e_in pooled enhancer bed file of all samples.
 #' @param bl_file super-enhancer blacklist bed file download from ENCODE (ENCFF356LFX)
 #' @param custom_range a vector of extra customized blacklist to ignore.
 #' Format: c(chr:start-end, chr:start-end, ...).
@@ -27,8 +27,54 @@
 #' @param s2_pair if sample 2 is paired-end (default=FALSE)
 #'
 #' @return
-#' A list of 7 datasets: lfc_shrink, permutation density plot, pattern plots of each SE,
-#' enhancer fitted dataset, significant threshold cutoff, SE category and boxplot of SE category
+#' The output of DASE is a list with multiple data types including:
+#'
+#' lfc_shrink: a shrinking lfc object from _DESeq2_ for all enhancers. It can be used to creat MA plot
+#' cutoff: significant threshold for fitted log2 fold changes.
+#' density_plot: a density plot of permutation and original fitted log2 fold changes, if *permut=T*.
+#' boxplot: a boxplot of final SE categories
+#' se_category: a data frame containing final SE categories
+#' pattern_list: a list containing figures for each SE pattern
+#' ce_fit: a data frame containing DESeq2 output and spline-fitted log2 fold change of all constitute enhancers
+#'
+#' Each column in se_category represents:
+#'
+#' se_merge_name: name of merged SE,"chr_start_end".
+#' total_width: width of merged SE (unit=k).
+#' number_enhancer: number of CEs in each SE.
+#' category: SE category identified by _DASE_.
+#' direction: enrichment direction of SEs (none:Other or non-differential category; +: enriched in sample 2; -: enriched in sample 1; l:  sample 1 shifted in 5' direction; r: sample 2 shifted in 5' direction).
+#' non_mid_percent: percentage of non middle segments.
+#' mean_FC: mean of log2 SE coverage fold change.
+#' rank: SE category ranking based on non_mid_percent first and mean_FC for each SE category. (rank=1 means the most like to the SE category.)
+#'
+#' Each column in ce_fit represents:
+#'
+#' e_merge_name: name of merged CEs.
+#' chr: chromosome of CEs.
+#' start: start posation of CEs.
+#' end: end posation of CEs.
+#' width: width of CEs.
+#' S1_r1: coverage of sample 1 replicate 1.
+#' S1_r2: coverage of sample 1 replicate 2.
+#' S2_r1: coverage of sample 2 replicate 1.
+#' S2_r2: coverage of sample 2 replicate 2.
+#' S1_r1_norm: normalized coverage of sample 1 replicate 1.
+#' S1_r2_norm: normalized coverage of sample 1 replicate 2.
+#' S2_r1_norm: normalized coverage of sample 2 replicate 1.
+#' S2_r2_norm: normalized coverage of sample 2 replicate 2.
+#' baseMean: normalized coverage mean of all samples.
+#' log2FoldChange: log2 fold change of normalized coverage.
+#' lfcSE: log2 fold change standard error.
+#' stat: statistic of log2 fold change.
+#' pvalue: p-value of log2 fold change.
+#' padj: adjusted p-value of log2 fold change.
+#' baseMean_shrink: shrinkage of normalized coverage mean of all samples.
+#' log2FoldChange_shrink: shrinkage of log2 fold change..
+#' lfcSE_shrink: shrinkage of log2 fold change standard error.
+#' pvalue_shrink: shrinkage of log2 fold change p-value
+#' padj_shrink: shrinkage of log2 fold change adjusted p-value
+#' se_merge_name: merged SE names
 #'
 #' @import rtracklayer
 #' @import data.table
@@ -41,17 +87,17 @@
 #' @export
 #' @examples
 #' # no blacklist with permutation 10 times with b-spline function
-#' se_main_list <- DASE(se_in=pooled_rose,e_in=pooled_enhancer,
+#' se_main_list <- DASE(se_in=pooled_se,e_in=pooled_enhancer,
 #' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,
 #' s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
 #'
 #' # with blacklist and permutation 10 times with n-spline function
-#' se_main_list <- DASE(se_in=pooled_rose,e_in=pooled_enhancer,bl_file= blacklist,
+#' se_main_list <- DASE(se_in=pooled_se,e_in=pooled_enhancer,bl_file= blacklist,
 #' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path,
 #' spline_fun="ns")
 #'
 #' # no blacklist nor permutation 10 times with smooth spline function
-#' se_main_list <- DASE(se_in=pooled_rose,e_in=pooled_enhancer,permut=FALSE,
+#' se_main_list <- DASE(se_in=pooled_se,e_in=pooled_enhancer,permut=FALSE,
 #' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path,
 #' spline_fun="smooth")
 #'
@@ -131,6 +177,11 @@ DASE <- function(se_in,e_in,bl_file,custom_range,
   step_6_out <- SEcategory(step_5_out$se_segment_percent,step_3_out$se_fit_df)
 
 
+  # change ce_fit name
+  step_3_out$se_fit_df <- step_3_out$se_fit_df[,-c(26:32)]
+  colnames(step_3_out$se_fit_df)[20:24] <- c("baseMean_shrink","log2FoldChange_shrink","lfcSE_shrink",
+                                             "pvalue_shrink","padj_shrink")
+
   # make final output: final category and ranking file,
   # permutation density plots
   # pattern plots of each SEs,
@@ -139,7 +190,7 @@ DASE <- function(se_in,e_in,bl_file,custom_range,
   # and SE segments profile to output list
 
   output_list <- list(lfc_shrink = step_2_out$lfc_shrink,
-                     se_fit = step_3_out$se_fit_df,
+                     ce_fit = step_3_out$se_fit_df,
                      cutoff = cutoff_vector,
                      density_plot = step_4_out$density_plot,
                      pattern_list = step_5_out$plots,

@@ -99,7 +99,7 @@ to determine a significant threshold to aid the defining of different SE categor
 such as blacklist region removal and running without permutation can be found later in the "Additional 
 Options" section.
 
-### *Run _DASE_ with BAM or BigWig coverage files*
+### *Run DASE with BAM or BigWig coverage files*
 
 This section demonstrates _DASE_ with BAM or BigWig input files. The BAM or BigWig files are used to estimate 
 the reads counts of enhancers in different samples. _DASE_ uses *featureCounts* to count the enhancer abundance 
@@ -121,11 +121,11 @@ DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,data_type = "bw",
 
 ```
 
-### *Run _DASE_ with enhancer raw count table*
+### *Run DASE with enhancer raw count table*
 
 This section demonstrates DASE with enhancer raw count table. Instead of count enhancer reads from BAM or 
 BigWig files, the function adapts count table directly to save time and space. The format of count table 
-is shown below.  The count table is adapted with parameter *enhancer_count_table*.
+is shown below. The first column must be the enhancer name with "chr_start_end" format. The count table is adapted with parameter *enhancer_count_table*.
 
 ```{r DASE3}
 # read enhancer count table
@@ -139,7 +139,7 @@ DASE_out_count <- DASE(se_in=se_region,e_in=enhancer_region,
 
 ```
 
-### *Run _DASE_ with different spline functions*
+### *Run DASE with different spline functions*
 
 _DASE_ uses spline functions to fit log2 fold change values of constituent enhancers between conditions.
 We chose to implement 3 widely-adapted spline functions (b-spline, natural spline, and smooth.spline) 
@@ -189,13 +189,13 @@ Left is b-spline; middle is natural spline; right is smooth spline.
 
 The output of _DASE_ is a list with multiple data types including:
 
-  1. lfc_shrink: a shrinking lfc object from DESeq2. It can be used to creat MA plot
+  1. lfc_shrink: a shrinking lfc object from _DESeq2_ for all enhancers. It can be used to creat MA plot.
   1. cutoff: significant threshold for fitted log2 fold changes.
   1. density_plot: a density plot of permutation and original fitted log2 fold changes, if *permut=T*.
-  1. boxplot: a boxplot of final SE categories
-  1. se_category: a data frame containing final SE categories
-  1. pattern_list: a list containing figures for each SE pattern
-  1. se_fit: a data frame containing DESeq2 output and spline-fitted log2 fold change of all constitute enhancers
+  1. boxplot: a boxplot of final SE categories.
+  1. se_category: a data frame containing final SE categories.
+  1. pattern_list: a list containing figures for each SE pattern.
+  1. ce_fit: a data frame containing DESeq2 output and spline-fitted log2 fold change of all constitute enhancers.
 
   
 ### *Significant threshold*
@@ -219,13 +219,24 @@ permutation distribution.
 
 ### *Super-enhancer internal dynamic categories*
 
-*SE_category, pattern_list, se_fit* are the outputs related to SE internal dynamics.
+*SE_category, pattern_list, ce_fit* are the outputs related to SE internal dynamics.
 
 ```{r se_cat_out}
 # se_categories
 head(DASE_out_count$se_category)
 ```
-  
+
+Each column represents the following:
+
+  1. se_merge_name: name of merged SE,"chr_start_end".
+  1. total_width: width of merged SE (unit=k).
+  1. number_enhancer: number of CEs in each SE.
+  1. category: SE category identified by _DASE_.
+  1. direction: enrichment direction of SEs (none:Other or non-differential category; +: enriched in sample 2; -: enriched in sample 1; l:  sample 1 shifted in 5' direction; r: sample 2 shifted in 5' direction).
+  1. non_mid_percent: percentage of non middle segments.
+  1. mean_FC: mean of log2 SE coverage fold change.
+  1. rank: SE category ranking based on non_mid_percent first and mean_FC for each SE category. (rank=1 means the most like to the SE category.)
+
 ```{r, pattern_example,fig.show = "hold",fig.width=4,fig.height=3,fig.align="center",out.width="80%"}
 # an example of one sample
 DASE_out_count$pattern_list[[1]]
@@ -236,10 +247,12 @@ Black line is the fitted log2 fold change curve; dots indicate constituent enhan
 the constituent enhancers with heavy weights.
   
 ```{r se_fit}
-# example of se_fit
-head(DASE_out_count$se_fit)
+# example of ce_fit
+head(DASE_out_count$ce_fit)
 ```
-  
+
+Columns from "e_merge_name" to "width" indicate the property of each CEs. Columns from "S1_r1" to "S2_r2_norm" indicate the coverage of each CE in each sample. Columns from "baseMean" to "pvalue" indicate the results of _DESeq2_. Columns from "baseMean_shrink" to "padj_shrink" indicate _DESeq2_ shrinkage value. Please refer to _DASE_ help for more informations.
+
 # Additional Options
 In addition of default parameters, _DASE_ can exclude the ENCODE blacklist regions from consideration. 
 _DASE_ can also adapt an user-define blacklist region with *custom_range* parameter. We have included 

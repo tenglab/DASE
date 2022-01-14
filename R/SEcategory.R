@@ -11,7 +11,16 @@
 #' @param e_fit enhancer deseq out file from enhancerFoldchange
 #'
 #' @return
-#' A dataset of final SE category and ranking.
+#' A dataset of final SE category and ranking. Each column represents the following:
+#'
+#' se_merge_name: name of merged SE,"chr_start_end".
+#' total_width: width of merged SE (unit=k).
+#' number_enhancer: number of CEs in each SE.
+#' category: SE category identified by _DASE_.
+#' direction: enrichment direction of SEs (none:Other or non-differential category; +: enriched in sample 2; -: enriched in sample 1; l:  sample 1 shifted in 5' direction; r: sample 2 shifted in 5' direction).
+#' non_mid_percent: percentage of non middle segments.
+#' mean_FC: mean of log2 SE coverage fold change.
+#' rank: SE category ranking based on non_mid_percent first and mean_FC for each SE category. (rank=1 means the most like to the SE category.)
 #'
 #' @import ggplot2
 #'
