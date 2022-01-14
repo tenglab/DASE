@@ -232,10 +232,13 @@ Each column represents the following:
   1. total_width: width of merged SE (unit=k).
   1. number_enhancer: number of CEs in each SE.
   1. category: SE category identified by _DASE_.
-  1. direction: enrichment direction of SEs (none:Other or non-differential category; +: enriched in sample 2; -: enriched in sample 1; l:  sample 1 shifted in 5' direction; r: sample 2 shifted in 5' direction).
-  1. non_mid_percent: percentage of non middle segments.
-  1. mean_FC: mean of log2 SE coverage fold change.
-  1. rank: SE category ranking based on non_mid_percent first and mean_FC for each SE category. (rank=1 means the most like to the SE category.)
+  1. direction: enrichment direction of SEs (none: Other or non-differential category; 
+     +: enriched in sample 2; -: enriched in sample 1; l: sample 1 shifted into 5' direction; 
+     r: sample 2 shifted into 5' direction).
+  1. non_mid_percent: total activity occupancy of the segments that go beyond the threshold cutoffs.
+  1. mean_FC: mean of the log2 fold change of SE coverage.
+  1. rank: SE category ranking based on *non_mid_percent* and *mean_FC* in  each SE category. 
+     (rank=1 means the most changed in the corresponding SE category.)
 
 ```{r, pattern_example,fig.show = "hold",fig.width=4,fig.height=3,fig.align="center",out.width="80%"}
 # an example of one sample
@@ -251,7 +254,11 @@ the constituent enhancers with heavy weights.
 head(DASE_out_count$ce_fit)
 ```
 
-Columns from "e_merge_name" to "width" indicate the property of each CEs. Columns from "S1_r1" to "S2_r2_norm" indicate the coverage of each CE in each sample. Columns from "baseMean" to "pvalue" indicate the results of _DESeq2_. Columns from "baseMean_shrink" to "padj_shrink" indicate _DESeq2_ shrinkage value. Please refer to _DASE_ help for more information.
+Columns from "e_merge_name" to "width" indicate the characteristics of each CE. Columns from "S1_r1" to 
+"S2_r2_norm" indicate the coverage and normalized coverage of each CE in each sample. Columns from 
+"baseMean" to "pvalue" indicate the differential testing results from  _DESeq2_. Columns from 
+"baseMean_shrink" to "padj_shrink" indicate shrinkage estimation of differential anlaysis from _DESeq2_. 
+Please refer to help functions in _DASE_ for more information.
 
 # Additional Options
 In addition of default parameters, _DASE_ can exclude the ENCODE blacklist regions from consideration. 

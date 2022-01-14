@@ -2,7 +2,7 @@
 % Please edit documentation in R/DASE.R
 \name{DASE}
 \alias{DASE}
-\title{Main function to get SE category}
+\title{Main function to estimate differential SEs}
 \usage{
 DASE(
   se_in,
@@ -109,10 +109,10 @@ padj_shrink: shrinkage of log2 fold change adjusted p-value
 se_merge_name: merged SE names
 }
 \description{
-A function to get the category and ranking of SEs in one step
+A function to estimate and rank  differential SEs in one step
 }
 \details{
-This function is the main function used to get the category and ranking of SEs.
+This function is the main function used to estimate the differential category and ranking of SEs.
 The workflow of this function is "SEfilter -> enhancerFoldchange -> SEfitspline -> SEpattern -> SEcategory"
 }
 \examples{
