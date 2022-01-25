@@ -200,7 +200,7 @@ DASE <- function(se_in,e_in,bl_file,custom_range,
     cutoff_vector <- step_4_out$cutoff
   } else if (permut==FALSE){
     print("Step 4: no permutation, skipping")
-    step_4_out <- SEpermut(step_3_out$se_fit_df,sample_pool,permut=F)
+    step_4_out <- SEpermut_bs(step_3_out$se_fit_df,sample_pool,permut=F)
     cutoff_vector <- cutoff_v
   }
 

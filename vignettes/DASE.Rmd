@@ -122,7 +122,8 @@ c1_path <- paste(s1_r1_bw,s1_r2_bw,s1_r3_bw,sep=",")
 c2_path <- paste(s2_r1_bw,s2_r2_bw,s2_r3_bw,s2_r4_bw,sep=",")
 
 # running DASE with BigWig files
-DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,data_type = "bw",
+DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,
+                 data_type = "bw",
                  condition_1=c1_path,
                  condition_2=c2_path)
 
@@ -130,9 +131,10 @@ DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,data_type = "bw",
 
 In order to run _DASE_ with BAM file, two more parameters (c1_pair and c2_pair) need to be specified indicating whether the BAM files are paired-reads or not. An example command is shown as following. Please refer to ?DASE for more information.
 
-```{r DASE_BAM eval=FALSE}
+```{r DASE_BAM, eval=FALSE,echo=T}
 # running DASE with BigWig files
-DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,data_type = "bw",
+DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,
+                 data_type = "bw",
                  condition_1="path_to_bam/c1_r1.bam,path_to_bam/c1_r2.bam,...",
                  condition_2="path_to_bam/c2_r1.bam,path_to_bam/c2_r2.bam,path_to_bam/c2_r3.bam,...",
                  c1_pair = "F,T,...",
@@ -153,7 +155,8 @@ enhancer_count <- read.table(enhancer_count_path,sep="\t",header=T)
 head(enhancer_count)
 
 # run DASE, need to specify the number of replicates in each condition with parameter c1_n, c2_n
-DASE_out_count <- DASE(se_in = se_region,e_in = enhancer_region,
+DASE_out_count <- DASE(se_in = se_region,
+                       e_in = enhancer_region,
                        enhancer_count_table=enhancer_count,
                        c1_n=3,
                        c2_n=4)
@@ -183,17 +186,23 @@ Following are some examples of run _DASE_ with different spline functions.
 ```{r DASE4}
 # rund DASE with b-spline function (default)
 DASE_out_bs <- DASE(se_in=se_region,e_in=enhancer_region,
-                 enhancer_count_table=enhancer_count,permut=F)
+                    enhancer_count_table=enhancer_count,
+                    c1_n=3,c2_n=4,
+                    permut=F)
 
 # run DASE with natural spline function
 DASE_out_ns <- DASE(se_in=se_region,e_in=enhancer_region,
-                 enhancer_count_table=enhancer_count,permut=F,
-                 spline_fun = "ns")
+                    enhancer_count_table=enhancer_count,
+                    c1_n=3,c2_n=4,
+                    permut=F,
+                    spline_fun = "ns",)
 
 # run DASE with smooth spline function
 DASE_out_smooth <- DASE(se_in=se_region,e_in=enhancer_region,
-                 enhancer_count_table=enhancer_count,permut=F,
-                 spline_fun = "smooth")
+                        enhancer_count_table=enhancer_count,
+                        c1_n=3,c2_n=4,
+                        permut=F,
+                        spline_fun = "smooth")
 ```
 
 ```{r, spline_fig,fig.show = "hold",fig.width=10,fig.height=4,fig.align="center",out.width="80%"}
@@ -304,7 +313,8 @@ Example of using blacklist option.
 # run DASE with blacklist file and customized region
 DASE_out_bl <- DASE(se_in=se_region,e_in=enhancer_region,bl_file = blacklist_region,
                  custom_range = c("chr21:14735763-29634779","chr21:33539902-43710703"),
-                 enhancer_count_table=enhancer_count)
+                 enhancer_count_table=enhancer_count,
+                 c1_n=3,c2_n=4)
 
 # number of SEs with blacklist range
 nrow(DASE_out_bl$se_category)
@@ -322,13 +332,15 @@ Two examples of different permutation options.
 ```{r permut_1}
 # run DASE with permutation 3 times
 DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,times=3,
-                 cutoff_v = c(-2,2),enhancer_count_table=enhancer_count)
+                 cutoff_v = c(-2,2),enhancer_count_table=enhancer_count,
+                 c1_n=3,c2_n=4)
 ```
 
 ```{r no_permut}
 # run DASE wit customized threshold
 DASE_out_p <- DASE(se_in=se_region,e_in=enhancer_region,permut = F,
-                 cutoff_v = c(-3,3),enhancer_count_table=enhancer_count)
+                 cutoff_v = c(-3,3),enhancer_count_table=enhancer_count,
+                 c1_n=3,c2_n=4)
 ```
 
 ```{r, permutation_example,fig.show = "hold",fig.width=8,fig.height=4,fig.align="center",out.width="80%"}
