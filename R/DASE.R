@@ -150,7 +150,7 @@ DASE <- function(se_in,e_in,bl_file,custom_range,
                                         condition_2=condition_2)
 
   } else if (!missing(enhancer_count_table)) {
-    print("Step 2: calculate log2FC of constituent enhancer using Deseq2 with raw enhancer count table")
+    cat("Step 2: calculate log2FC of constituent enhancer using Deseq2 \nwith raw enhancer count table")
     step_2_out <- enhancerFoldchange_count(e_df=e_in,se_df=merged_se_df,
                                            raw_count=enhancer_count_table,
                                            c1_n=c1_n,
