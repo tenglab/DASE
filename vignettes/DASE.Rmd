@@ -276,10 +276,10 @@ Each column represents the following:
 
 ```{r, pattern_example,fig.show = "hold",fig.width=4,fig.height=3,fig.align="center",out.width="80%"}
 # an example of one sample
-DASE_out_count$pattern_list[[1]]
+DASE_out_count$pattern_list[[11]]
 ```
 
-This figure shows the constituent enhancer patterns within a SE example which is identified as *shortened*. 
+This figure shows the constituent enhancer patterns within a SE example which is identified as *Shortened*. 
 Black line is the fitted log2 fold change curve; dots indicate constituent enhancers. Red dots indicate 
 the constituent enhancers with heavy weights.
   
@@ -341,7 +341,7 @@ DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,times=3,
 ```
 
 ```{r no_permut}
-# run DASE wit customized threshold
+# run DASE with customized threshold
 DASE_out_p <- DASE(se_in=se_region,e_in=enhancer_region,permut = F,
                  cutoff_v = c(-3,3),enhancer_count_table=enhancer_count,
                  c1_n=3,c2_n=4)

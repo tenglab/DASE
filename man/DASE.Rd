@@ -75,44 +75,43 @@ se_category: a data frame containing final SE categories
 pattern_list: a list containing figures for each SE pattern
 ce_fit: a data frame containing DESeq2 output and spline-fitted log2 fold change of all constitute enhancers
 
-Each column in se_category represents:
+Each column in se_category represents:\cr
 
-se_merge_name: name of merged SE,"chr_start_end".
-total_width: width of merged SE (unit=k).
-number_enhancer: number of CEs in each SE.
-category: SE category identified by \emph{DASE}.
-direction: enrichment direction of SEs (none:Other or non-differential category; +: enriched in sample 2; -: enriched in sample 1; l: sample 1 shifted in 5' direction; r: sample 2 shifted in 5' direction).
-non_mid_percent: total activity occupancy of the segments that go beyond the threshold cutoffs.
-mean_FC: mean of log2 SE coverage fold change.
-rank: SE category ranking based on non_mid_percent first and mean_FC for each SE category. (rank=1 means the most changed in the corresponding SE category.)
+se_merge_name: name of merged SE,"chr_start_end".\cr
+total_width: width of merged SE (unit=k).\cr
+number_enhancer: number of CEs in each SE.\cr
+category: SE category identified by \emph{DASE}.\cr
+direction: enrichment direction of SEs (none:Other or non-differential category;
++: enriched in sample 2; -: enriched in sample 1;
+l: sample 1 shifted in 5' direction; r: sample 2 shifted in 5' direction).
+non_mid_percent: total activity occupancy of the segments that go beyond the threshold cutoffs.\cr
+mean_FC: mean of log2 SE coverage fold change.\cr
+rank: SE category ranking based on non_mid_percent first and mean_FC for each SE category.
+(rank=1 means the most changed in the corresponding SE category.)\cr
 
-Each column in ce_fit represents:
+Each column in ce_fit represents:\cr
 
-e_merge_name: name of merged CEs.
-chr: chromosome of CEs.
-start: start posation of CEs.
-end: end posation of CEs.
-width: width of CEs.
-C1_1: coverage of condition 1 replicate 1.
-C1_2: coverage of condition 1 replicate 2.
-C2_1: coverage of condition 2 replicate 1.
-C2_2: coverage of condition 2 replicate 2.
-C1_1_norm: normalized coverage of condition 1 replicate 1.
-C1_2_norm: normalized coverage of condition 1 replicate 2.
-C2_1_norm: normalized coverage of condition 2 replicate 1.
-C2_2_norm: normalized coverage of condition 2 replicate 2.
-baseMean: normalized coverage mean of all samples.
-log2FoldChange: log2 fold change of normalized coverage.
-lfcSE: log2 fold change standard error.
-stat: statistic of log2 fold change.
-pvalue: p-value of log2 fold change.
-padj: adjusted p-value of log2 fold change.
-baseMean_shrink: shrinkage of normalized coverage mean of all samples.
-log2FoldChange_shrink: shrinkage of log2 fold change..
-lfcSE_shrink: shrinkage of log2 fold change standard error.
-pvalue_shrink: shrinkage of log2 fold change p-value
-padj_shrink: shrinkage of log2 fold change adjusted p-value
-se_merge_name: merged SE names
+e_merge_name: name of merged CEs.\cr
+chr: chromosome of CEs.\cr
+start: start posation of CEs.\cr
+end: end posation of CEs.\cr
+width: width of CEs.\cr
+C1_\emph{: coverage of condition 1 replicate \}.\cr
+C2_\emph{: coverage of condition 2 replicate \}.\cr
+C1_\emph{_norm: normalized coverage of condition 1 replicate \}.\cr
+C2_\emph{_norm: normalized coverage of condition 2 replicate \}.\cr
+baseMean: normalized coverage mean of all samples.\cr
+log2FoldChange: log2 fold change of normalized coverage.\cr
+lfcSE: log2 fold change standard error.\cr
+stat: statistic of log2 fold change.\cr
+pvalue: p-value of log2 fold change.\cr
+padj: adjusted p-value of log2 fold change.\cr
+baseMean_shrink: shrinkage of normalized coverage mean of all samples.\cr
+log2FoldChange_shrink: shrinkage of log2 fold change.\cr
+lfcSE_shrink: shrinkage of log2 fold change standard error.\cr
+pvalue_shrink: shrinkage of log2 fold change p-value.\cr
+padj_shrink: shrinkage of log2 fold change adjusted p-value.\cr
+se_merge_name: merged SE names.\cr
 }
 \description{
 A function to get the category and ranking of SEs in one step
@@ -130,12 +129,16 @@ c1_pair="F,F",c2_pair="F,F")
 
 # with blacklist and permutation 10 times with n-spline function
 se_main_list <- DASE(se_in=pooled_se,e_in=pooled_enhancer,bl_file= blacklist,
-s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path,
+condition_1="s1_r1_path,s1_r2_path",
+condition_2="s2_r1_path,s2_r2_path",
+c1_pair="F,F",c2_pair="F,F"
 spline_fun="ns")
 
 # no blacklist nor permutation 10 times with smooth spline function
 se_main_list <- DASE(se_in=pooled_se,e_in=pooled_enhancer,permut=FALSE,
-s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path,
+condition_1="s1_r1_path,s1_r2_path",
+condition_2="s2_r1_path,s2_r2_path",
+c1_pair="F,F",c2_pair="F,F"
 spline_fun="smooth")
 
 }
