@@ -7,6 +7,8 @@
 #' This function will fit the enhancer fold change within each SE by using natural spline
 #' weighted by the max basemean of two samples.
 #' @param e_deseq_out_df enhancer output file from enhancerFoldchange
+#' @param c1_n number of replicates (samples) in condition 1.
+#' @param c2_n number of replicates (samples) in condition 2.
 #'
 #' @return
 #' se_fit_df: enhancer fitted dataframe
@@ -19,14 +21,14 @@
 #' start: start posation of CEs.
 #' end: end posation of CEs.
 #' width: width of CEs.
-#' S1_r1: coverage of sample 1 replicate 1.
-#' S1_r2: coverage of sample 1 replicate 2.
-#' S2_r1: coverage of sample 2 replicate 1.
-#' S2_r2: coverage of sample 2 replicate 2.
-#' S1_r1_norm: normalized coverage of sample 1 replicate 1.
-#' S1_r2_norm: normalized coverage of sample 1 replicate 2.
-#' S2_r1_norm: normalized coverage of sample 2 replicate 1.
-#' S2_r2_norm: normalized coverage of sample 2 replicate 2.
+#' C1_r1: coverage of condition 1 replicate 1.
+#' C1_r2: coverage of condition 1 replicate 2.
+#' C2_r1: coverage of condition 2 replicate 1.
+#' C2_r2: coverage of condition 2 replicate 2.
+#' C1_r1_norm: normalized coverage of condition 1 replicate 1.
+#' C1_r2_norm: normalized coverage of condition 1 replicate 2.
+#' C2_r1_norm: normalized coverage of condition 2 replicate 1.
+#' C2_r2_norm: normalized coverage of condition 2 replicate 2.
 #' baseMean: normalized coverage mean of all samples.
 #' log2FoldChange: log2 fold change of normalized coverage.
 #' lfcSE: log2 fold change standard error.
@@ -48,14 +50,16 @@
 #'
 #' @export
 #' @examples
-#' fit_list <- SEfitspline_ns(enhancerFoldchange_out)
+#' fit_list <- SEfitspline_ns(enhancerFoldchange_out,c1_n=2,c2_n=2)
 #'
 
-SEfitspline_ns <- function(e_deseq_out_df){
+SEfitspline_ns <- function(e_deseq_out_df,c1_n,c2_n){
   #--------------------------------------------------------------
-  e_deseq_out_df$s1_mean <- (e_deseq_out_df$S1_r1_norm+e_deseq_out_df$S1_r2_norm)/2
-  e_deseq_out_df$s2_mean <- (e_deseq_out_df$S2_r1_norm+e_deseq_out_df$S2_r2_norm)/2
-  e_deseq_out_df$max_mean <- apply(e_deseq_out_df[,c("s1_mean","s2_mean")],1,FUN=max)
+  # normalized count start index
+  norm_start <- 5+c1_n+c2_n+1
+  e_deseq_out_df$C1_mean <- rowMeans(e_deseq_out_df[,norm_start:(norm_start+c1_n-1)])
+  e_deseq_out_df$C2_mean <- rowMeans(e_deseq_out_df[,(norm_start+c1_n):(norm_start+c1_n+c2_n-1)])
+  e_deseq_out_df$max_mean <- apply(e_deseq_out_df[,c("C1_mean","C2_mean")],1,FUN=max)
 
   # create original n-spline fit
   fit_out <- data.frame()

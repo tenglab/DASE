@@ -14,17 +14,23 @@
 #'
 #' @param data_type quantitative file format "bam" or "bw" (default=bam)
 #' @param enhancer_count_table raw count file of pooled enhancers
-#' @param s1_r1_bam path of sample 1 replicate 1 bam/bw file
-#' @param s1_r2_bam path of sample 1 replicate 2 bam/bw file
-#' @param s2_r1_bam path of sample 2 replicate 1 bam/bw file
-#' @param s2_r2_bam path of sample 2 replicate 2 bam/bw file
+#' @param condition_1 path of bam/bw files for condition 1 replicates, separated by ",".
+#'                    Example: condition_1="path_to_bam/c1_r1.bam,path_to_bam/c1_r2.bam,...".
+#' @param condition_2 path of bam/bw files for condition 1 replicates, separated by ",".
+#'                    Example: condition_2="path_to_bam/c2_r1.bam,path_to_bam/c2_r2.bam,...".
+#' @param c1_pair if replicates of condition 1 is paired-end, separated by ",".
+#'                Order need to match with parameter condition_1.
+#'                Example: c1_pair="FALSE(or F),TRUE(or T),...". (only available for bam file)
+#' @param c2_pair if replicates of condition 1 is paired-end, separated by ",".
+#'                Order need to match with parameter condition_2.
+#'                Example: c2_pair="FALSE(or F),TRUE(or T),...". (only available for bam file)
+#' @param c1_n number of replicates (samples) in condition 1 (only available for raw count table).
+#' @param c2_n number of replicates (samples) in condition 2 (only available for raw count table).
 #' @param spline_fun spline functions ("bs", "ns", and "smooth". default=bs)
 #' @param permut if you want permutation (default=TRUE)
 #' @param times permutation times (default=10)
 #' @param cutoff_v fold change lower and upper cutoff vector.
 #' if permutation is used, it will use the value calculated by permutation. (default=c(-1.5,1.5))
-#' @param s1_pair if sample 1 is paired-end (default=FALSE)
-#' @param s2_pair if sample 2 is paired-end (default=FALSE)
 #'
 #' @return
 #' The output of DASE is a list with multiple data types including:
@@ -55,14 +61,14 @@
 #' start: start posation of CEs.
 #' end: end posation of CEs.
 #' width: width of CEs.
-#' S1_r1: coverage of sample 1 replicate 1.
-#' S1_r2: coverage of sample 1 replicate 2.
-#' S2_r1: coverage of sample 2 replicate 1.
-#' S2_r2: coverage of sample 2 replicate 2.
-#' S1_r1_norm: normalized coverage of sample 1 replicate 1.
-#' S1_r2_norm: normalized coverage of sample 1 replicate 2.
-#' S2_r1_norm: normalized coverage of sample 2 replicate 1.
-#' S2_r2_norm: normalized coverage of sample 2 replicate 2.
+#' C1_1: coverage of condition 1 replicate 1.
+#' C1_2: coverage of condition 1 replicate 2.
+#' C2_1: coverage of condition 2 replicate 1.
+#' C2_2: coverage of condition 2 replicate 2.
+#' C1_1_norm: normalized coverage of condition 1 replicate 1.
+#' C1_2_norm: normalized coverage of condition 1 replicate 2.
+#' C2_1_norm: normalized coverage of condition 2 replicate 1.
+#' C2_2_norm: normalized coverage of condition 2 replicate 2.
 #' baseMean: normalized coverage mean of all samples.
 #' log2FoldChange: log2 fold change of normalized coverage.
 #' lfcSE: log2 fold change standard error.
@@ -88,8 +94,9 @@
 #' @examples
 #' # no blacklist with permutation 10 times with b-spline function
 #' se_main_list <- DASE(se_in=pooled_se,e_in=pooled_enhancer,
-#' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,
-#' s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path)
+#' condition_1="s1_r1_path,s1_r2_path",
+#' condition_2="s2_r1_path,s2_r2_path",
+#' c1_pair="F,F",c2_pair="F,F")
 #'
 #' # with blacklist and permutation 10 times with n-spline function
 #' se_main_list <- DASE(se_in=pooled_se,e_in=pooled_enhancer,bl_file= blacklist,
@@ -103,10 +110,10 @@
 #'
 
 DASE <- function(se_in,e_in,bl_file,custom_range,
-                 enhancer_count_table,data_type="bam",s1_pair=F,s2_pair=F,
+                 enhancer_count_table,data_type="bam",
                  spline_fun="bs",
                  permut=T,times=10,cutoff_v=c(-1,1),
-                 s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
+                 condition_1,condition_2,c1_pair,c2_pair,c1_n,c2_n) {
 
   # Step 1: filter super-enhancer with SEfilter.R with or without SE blacklist file
   print("Step 1: merge and filter SE")
@@ -114,55 +121,85 @@ DASE <- function(se_in,e_in,bl_file,custom_range,
 
   # Step 2: get enhancer fold changes within each super-enhancer with enhancerFoldchange.R
   # Merged SE Output from step 1 as SE input for step 2
-  print("Step 2: calculate log2FC of constituent enhancer using Deseq2")
+
+  # get replicates number in each condition
+  if (!missing(enhancer_count_table)) {
+    c1_n <- c1_n
+    c2_n <- c2_n
+  } else {
+    c1_bam <- unlist(strsplit(gsub(" ","",condition_1),","))
+    c2_bam <- unlist(strsplit(gsub(" ","",condition_2),","))
+
+    c1_n <- length(c1_bam)
+    c2_n <- length(c2_bam)
+  }
 
   merged_se_df <- step_1_out$se_merged
   if (data_type == "bam" & missing(enhancer_count_table)) {
+    print("Step 2: calculate log2FC of constituent enhancer using Deseq2 with bam file")
     step_2_out <- enhancerFoldchange_bam(e_df=e_in,se_df=merged_se_df,
-                                       s1_pair=s1_pair,s2_pair=s2_pair,
-                                       s1_r1_bam=s1_r1_bam,s1_r2_bam=s1_r2_bam,
-                                       s2_r1_bam=s2_r1_bam ,s2_r2_bam=s2_r2_bam)
+                                         condition_1=condition_1,
+                                         condition_2=condition_2,
+                                         c1_pair=c1_pair,
+                                         c2_pair=c2_pair)
+
   } else if (data_type=="bw" & missing(enhancer_count_table)){
+    print("Step 2: calculate log2FC of constituent enhancer using Deseq2 with bw file")
     step_2_out <- enhancerFoldchange_bw(e_df=e_in,se_df=merged_se_df,
-                                        s1_r1_bw=s1_r1_bam,s1_r2_bw=s1_r2_bam,
-                                        s2_r1_bw=s2_r1_bam ,s2_r2_bw=s2_r2_bam)
+                                        condition_1=condition_1,
+                                        condition_2=condition_2)
+
   } else if (!missing(enhancer_count_table)) {
+    print("Step 2: calculate log2FC of constituent enhancer using Deseq2 with raw enhancer count table")
     step_2_out <- enhancerFoldchange_count(e_df=e_in,se_df=merged_se_df,
-                                           raw_count=enhancer_count_table)
+                                           raw_count=enhancer_count_table,
+                                           c1_n=c1_n,
+                                           c2_n=c2_n)
   }
 
   # Step 3: using weighted b-spline to fit the fold change
   if (spline_fun=="bs") {
     print("Step 3: b-spline fit log2FC")
     print(paste0("Processing total of ",length(unique(step_2_out$enhancer_deseq_result$se_merge_name))," SEs"))
-    step_3_out <- SEfitspline_bs(step_2_out$enhancer_deseq_result)
+    step_3_out <- SEfitspline_bs(step_2_out$enhancer_deseq_result,c1_n=c1_n,c2_n=c2_n)
   } else if(spline_fun=="ns") {
     print("Step 3: natural spline fit log2FC")
     print(paste0("Processing total of ",length(unique(step_2_out$enhancer_deseq_result$se_merge_name))," SEs"))
-    step_3_out <- SEfitspline_ns(step_2_out$enhancer_deseq_result)
+    step_3_out <- SEfitspline_ns(step_2_out$enhancer_deseq_result,c1_n=c1_n,c2_n=c2_n)
   } else {
     print("Step 3: smooth spline fit log2FC")
     print(paste0("Processing total of ",length(unique(step_2_out$enhancer_deseq_result$se_merge_name))," SEs"))
-    step_3_out <- SEfitspline_smooth(step_2_out$enhancer_deseq_result)
+    step_3_out <- SEfitspline_smooth(step_2_out$enhancer_deseq_result,c1_n=c1_n,c2_n=c2_n)
   }
 
 
-  # Step 4: permutation to get cutoff (normal or stringent)
-  print("Step 4: permutation to get log2FC cutoff")
-  e_not_in_se <- step_2_out$count_matrix_not_in_se[,c("e_merge_name",
-                                                     "S1_r1","S1_r2","S2_r1","S2_r2",
-                                                     "se_merge_name")]
-  e_in_se <- step_2_out$enhancer_deseq_result[,c("e_merge_name",
-                             "S1_r1","S1_r2","S2_r1","S2_r2",
-                             "se_merge_name")]
+  # Step 4: permutation to get cutoff
+  e_in_se <- subset(step_2_out$enhancer_deseq_result,
+                    select=c('e_merge_name',colnames(step_2_out$enhancer_deseq_result)[6:(5+c1_n+c2_n)],
+                                                              'se_merge_name'))
 
 
   # chose different permut
-  if (permut){
+  if (permut & spline_fun=="bs"){
+    print("Step 4: permutation with bs-spline to get log2FC cutoff")
     sample_pool <- e_in_se
-    step_4_out <- SEpermut(step_3_out$se_fit_df,sample_pool,times=times)
+    step_4_out <- SEpermut_bs(step_3_out$se_fit_df,sample_pool,times=times,
+                              c1_n=c1_n,c2_n=c2_n)
     cutoff_vector <- step_4_out$cutoff
-  } else {
+  } else if (permut & spline_fun=="ns") {
+    print("Step 4: permutation with natrual spline to get log2FC cutoff")
+    sample_pool <- e_in_se
+    step_4_out <- SEpermut_ns(step_3_out$se_fit_df,sample_pool,times=times,
+                              c1_n=c1_n,c2_n=c2_n)
+    cutoff_vector <- step_4_out$cutoff
+  } else if (permut & spline_fun=="smooth") {
+    print("Step 4: permutation with smooth spline to get log2FC cutoff")
+    sample_pool <- e_in_se
+    step_4_out <- SEpermut_smooth(step_3_out$se_fit_df,sample_pool,times=times,
+                              c1_n=c1_n,c2_n=c2_n)
+    cutoff_vector <- step_4_out$cutoff
+  } else if (permut==FALSE){
+    print("Step 4: no permutation, skipping")
     step_4_out <- SEpermut(step_3_out$se_fit_df,sample_pool,permut=F)
     cutoff_vector <- cutoff_v
   }

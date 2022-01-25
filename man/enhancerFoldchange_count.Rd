@@ -4,14 +4,19 @@
 \alias{enhancerFoldchange_count}
 \title{Calculate the fold change of enhancers}
 \usage{
-enhancerFoldchange_count(e_df, se_df, raw_count)
+enhancerFoldchange_count(e_df, se_df, raw_count, c1_n, c2_n)
 }
 \arguments{
 \item{e_df}{pooled macs2 output file *_peaks.narrowPeak of all samples.}
 
-\item{se_df}{merged SE metadata from SEfilter}
+\item{se_df}{merged SE metadata from SEfilter.}
 
-\item{raw_count}{raw count matrix of pooled enhancers in each sample}
+\item{raw_count}{raw count matrix of pooled enhancers in each sample.
+The order of sample columns need to be "condition1_rep1, condition1_rep2,...,condition2_rep1,condition2_rep2"}
+
+\item{c1_n}{number of replicates (samples) in condition 1.}
+
+\item{c2_n}{number of replicates (samples) in condition 2.}
 }
 \value{
 A list of 2 datasets: enhancer foldchang results dataset and sizefactor used in DESeq2
@@ -25,6 +30,6 @@ Then enhancers are merged with no gaps.
 DESeq2 is used to calculate the fold change of those enhancers
 }
 \examples{
-foldchange_list <- enhancerFoldchange_bam(pool_enhancer_df,se_meta,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+foldchange_list <- enhancerFoldchange_count(e_df,se_df,raw_count,c1_n=2,c2_n=2)
 
 }

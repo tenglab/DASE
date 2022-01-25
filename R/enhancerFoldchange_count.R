@@ -8,8 +8,11 @@
 #' DESeq2 is used to calculate the fold change of those enhancers
 #'
 #' @param e_df pooled macs2 output file *_peaks.narrowPeak of all samples.
-#' @param se_df merged SE metadata from SEfilter
-#' @param raw_count raw count matrix of pooled enhancers in each sample
+#' @param se_df merged SE metadata from SEfilter.
+#' @param raw_count raw count matrix of pooled enhancers in each sample.
+#'                  The order of sample columns need to be "condition1_rep1, condition1_rep2,...,condition2_rep1,condition2_rep2"
+#' @param c1_n number of replicates (samples) in condition 1.
+#' @param c2_n number of replicates (samples) in condition 2.
 #'
 #' @return
 #' A list of 2 datasets: enhancer foldchang results dataset and sizefactor used in DESeq2
@@ -22,10 +25,10 @@
 #'
 #' @export
 #' @examples
-#' foldchange_list <- enhancerFoldchange_bam(pool_enhancer_df,se_meta,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+#' foldchange_list <- enhancerFoldchange_count(e_df,se_df,raw_count,c1_n=2,c2_n=2)
 #'
 
-enhancerFoldchange_count <- function(e_df,se_df,raw_count) {
+enhancerFoldchange_count <- function(e_df,se_df,raw_count,c1_n,c2_n) {
   colnames(raw_count)[1] <- "enhancer"
 
   # extract chr, start, end from raw_count
@@ -39,10 +42,12 @@ enhancerFoldchange_count <- function(e_df,se_df,raw_count) {
   e_merge_by_chr <- rbindlist(lapply(split(ir, names(ir)),
                                      function(x) as.data.table(reduce(x,min.gapwidth = 0))),
                               idcol = "chr")
-  # create merged enhancer names
-  e_merge_by_chr$e_merge_name <- apply(e_merge_by_chr[,c(1:3)],1, paste,collapse ="_" )
-  e_merge_by_chr$e_merge_name <- gsub(" ","",e_merge_by_chr$e_merge_name)
+  colnames(e_merge_by_chr) <- c("chr","start","end","width")
 
+  # create merged enhancer names
+  e_merge_by_chr$e_merge_name <- paste0(e_merge_by_chr$chr,"_",e_merge_by_chr$start,"_",e_merge_by_chr$end)
+
+  # find overlaps with new merged enhancers and aggregate the count of them
   ir_merge <- IRanges(e_merge_by_chr$start,
                       e_merge_by_chr$end,
                       names=e_merge_by_chr$chr)
@@ -51,7 +56,7 @@ enhancerFoldchange_count <- function(e_df,se_df,raw_count) {
 
   raw_count_temp$e_merge_name[queryHits(hit)] <- e_merge_by_chr$e_merge_name[subjectHits(hit)]
 
-  # aggreagte count
+  # aggregate count
   count_matrix <- aggregate(.~e_merge_name,data=raw_count_temp[-c(1:3)],sum)
 
 
@@ -64,10 +69,11 @@ enhancerFoldchange_count <- function(e_df,se_df,raw_count) {
   not_zero_in_se <- apply(count_matrix, 1, function(row) sum(row) != 0)
   count_matrix <- count_matrix[not_zero_in_se,]
 
+  # change column names
+  colnames(count_matrix) <- gsub("S","C",colnames(count_matrix))
   # make sample data for DESeq2
-  sample_data <- data.frame(row.names = c("S1_r1","S1_r2",
-                                          "S2_r1","S2_r2"),
-                            condition = c("S1","S1","S2","S2"))
+  sample_data <- data.frame(row.names = colnames(count_matrix),
+                            condition = c(rep("C1",c1_n),rep("C2",c2_n)))
 
   dds <- DESeqDataSetFromMatrix(countData = count_matrix,
                                 colData = sample_data,
@@ -81,10 +87,10 @@ enhancerFoldchange_count <- function(e_df,se_df,raw_count) {
 
   raw_count <- counts(dds)
   normalized_count <- counts(dds,normalized=TRUE)
-  colnames(normalized_count) <- c("S1_r1_norm","S1_r2_norm","S2_r1_norm","S2_r2_norm")
+  colnames(normalized_count) <- paste0(colnames(normalized_count),"_norm")
 
   # shrinking LFC and MA plot
-  resLFC <- lfcShrink(dds, coef="condition_S2_vs_S1", type="apeglm")
+  resLFC <- lfcShrink(dds, coef="condition_C2_vs_C1", type="apeglm")
 
   # make final output
   temp_output <- data.frame()

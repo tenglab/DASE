@@ -11,12 +11,16 @@
 #' Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,peak"
 #'
 #' @param se_df merged SE metadata from SEfilter
-#' @param s1_r1_bam path of sample 1 replicate 1 bam file
-#' @param s1_r2_bam path of sample 1 replicate 2 bam file
-#' @param s2_r1_bam path of sample 2 replicate 1 bam file
-#' @param s2_r2_bam path of sample 2 replicate 2 bam file
-#' @param s1_pair if sample 1 is paired-end (default=FALSE)
-#' @param s2_pair if sample 2 is paired-end (default=FALSE)
+#' @param condition_1 path of bam files for condition 1 replicates, separated by ",".
+#'                    Example: condition_1="path_to_bam/c1_r1.bam,path_to_bam/c1_r2.bam,...".
+#' @param condition_2 path of bam files for condition 1 replicates, separated by ",".
+#'                    Example: condition_2="path_to_bam/c2_r1.bam,path_to_bam/c2_r2.bam,...".
+#' @param c1_pair if replicates of condition 1 is paired-end, separated by ",".
+#'                Order need to match with parameter condition_1.
+#'                Example: c1_pair="FALSE(or F),TRUE(or T),..."
+#' @param c2_pair if replicates of condition 1 is paired-end, separated by ",".
+#'                Order need to match with parameter condition_2.
+#'                Example: c2_pair="FALSE(or F),TRUE(or T),..."
 #'
 #' @return
 #' A list of 2 datasets: enhancer foldchang results dataset and sizefactor used in DESeq2
@@ -28,12 +32,16 @@
 #'
 #' @export
 #' @examples
-#' foldchange_list <- enhancerFoldchange_bam(pool_enhancer_df,se_meta,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+#' foldchange_list <- enhancerFoldchange_bam(pool_enhancer_df,se_meta,
+#'                        condition_1="path_to_bam/c1_r1.bam,path_to_bam/c1_r2.bam,...",
+#'                        condition_2="path_to_bam/c2_r1.bam,path_to_bam/c2_r2.bam,...",
+#'                        c1_pair="F,T,...",
+#'                        c2_pair="F,T,...")
 #'
 
 enhancerFoldchange_bam <- function(e_df,se_df,
-                               s1_pair=FALSE,s2_pair=FALSE,
-                               s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam) {
+                               c1_pair=FALSE,c2_pair=FALSE,
+                               condition_1,condition_2) {
 
   # merge enhancers with gaps less than 500bps
   ir <- IRanges(e_df$V2,
@@ -44,63 +52,68 @@ enhancerFoldchange_bam <- function(e_df,se_df,
                                      function(x) as.data.table(reduce(x,min.gapwidth = 0))),
                               idcol = "chr")
 
+  colnames(e_merge_by_chr) <- c("chr","start","end","width")
+
   # create merged enhancer names
-  e_merge_by_chr$e_merge_name <- apply(e_merge_by_chr[,c(1:3)],1, paste,collapse ="_" )
-  e_merge_by_chr$e_merge_name <- gsub(" ","",e_merge_by_chr$e_merge_name)
+  e_merge_by_chr$e_merge_name <- paste0(e_merge_by_chr$chr,"_",e_merge_by_chr$start,"_",e_merge_by_chr$end)
 
   # feature count enhancer in SE
   # create enhancer in SE SAF format file
-  fc_saf_in <- e_merge_by_chr[,c(5,1,2,3)]
+  fc_saf_in <- e_merge_by_chr[,c("e_merge_name","chr","start","end")]
   fc_saf_in$Strand <- rep(".",nrow(fc_saf_in))
   colnames(fc_saf_in) <- c("GeneID","Chr","Start","End","Strand")
 
-  # count each bam files
-  # check if sample 1 is  paired-end
-  if (s1_pair == F) {
-    s1_r1_fc_in <- featureCounts(files=s1_r1_bam,annot.ext=fc_saf_in,
-                                 isGTFAnnotationFile = "SAF")
-    s1_r2_fc_in <- featureCounts(files=s1_r2_bam,annot.ext=fc_saf_in,
-                                 isGTFAnnotationFile = "SAF")
+  # get each replicates and if they are paired-end reads
+  c1_bam <- unlist(strsplit(gsub(" ","",condition_1),","))
+  c2_bam <- unlist(strsplit(gsub(" ","",condition_2),","))
+
+  c1_if_p <- unlist(strsplit(gsub(" ","",c1_pair),","))
+  c2_if_p <- unlist(strsplit(gsub(" ","",c2_pair),","))
+
+  # feature count
+  # check number of replicates >= 2
+  if (length(c1_bam)>=2 & length(c2_bam)>=2) {
+    # initial count matrix
+    count_matrix_c1 <- data.frame(matrix(nrow = nrow(e_merge_by_chr),ncol = length(c1_bam)))
+    count_matrix_c2 <- data.frame(matrix(nrow = nrow(e_merge_by_chr),ncol = length(c2_bam)))
+    row.names(count_matrix_c1) <- e_merge_by_chr$e_merge_name
+    row.names(count_matrix_c2) <- e_merge_by_chr$e_merge_name
+
+    # count condition 1
+    for (c1_i in 1:length(c1_bam)) {
+      c1_fc_tmp <- paste0("C1_",c1_i)
+      assign(c1_fc_tmp,featureCounts(files=c1_bam[c1_i],annot.ext=fc_saf_in,
+                                 isGTFAnnotationFile = "SAF",
+                                 isPairedEnd=as.logical(c1_if_p[c1_i])))
+      count_matrix_c1[,c1_i] <- get(c1_fc_tmp)[[1]][,1]
+      colnames(count_matrix_c1)[c1_i] <- c1_fc_tmp
+    }
+
+    # count condition 2
+    for (c2_i in 1:length(c2_bam)) {
+      c2_fc_tmp <- paste0("C2_",c2_i)
+      assign(c2_fc_tmp,featureCounts(files=c2_bam[c2_i],annot.ext=fc_saf_in,
+                                     isGTFAnnotationFile = "SAF",
+                                     isPairedEnd=as.logical(c2_if_p[c2_i])))
+      count_matrix_c2[,c2_i] <- get(c2_fc_tmp)[[1]][,1]
+      colnames(count_matrix_c2)[c2_i] <- c2_fc_tmp
+    }
+
   } else {
-    s1_r1_fc_in <- featureCounts(files=s1_r1_bam,annot.ext=fc_saf_in,
-                                 isGTFAnnotationFile = "SAF",
-                                 isPairedEnd=TRUE)
-    s1_r2_fc_in <- featureCounts(files=s1_r2_bam,annot.ext=fc_saf_in,
-                                 isGTFAnnotationFile = "SAF",
-                                 isPairedEnd=TRUE)
+    print("DASE need more than 2 replicates in each condition.")
   }
-
-  # check if smaple 2 is paired-end
-  if (s2_pair == F) {
-    s2_r1_fc_in <- featureCounts(files=s2_r1_bam,annot.ext=fc_saf_in,
-                                 isGTFAnnotationFile = "SAF")
-    s2_r2_fc_in <- featureCounts(files=s2_r2_bam,annot.ext=fc_saf_in,
-                                 isGTFAnnotationFile = "SAF")
-  } else {
-    s2_r1_fc_in <- featureCounts(files=s2_r1_bam,annot.ext=fc_saf_in,
-                                 isGTFAnnotationFile = "SAF",
-                                 isPairedEnd=TRUE)
-    s2_r2_fc_in <- featureCounts(files=s2_r2_bam,annot.ext=fc_saf_in,
-                                 isGTFAnnotationFile = "SAF",
-                                 isPairedEnd=TRUE)
-  }
-
-
 
   # DESeq2 fold-change for enhancer in SE only
   # make count matrix
-  count_matrix <- as.data.frame(cbind(s1_r1_fc_in$counts,s1_r2_fc_in$counts,
-                                      s2_r1_fc_in$counts,s2_r2_fc_in$counts))
-  colnames(count_matrix) <- c("S1_r1","S1_r2","S2_r1","S2_r2")
+  count_matrix <- cbind(count_matrix_c1,count_matrix_c2)
 
   # remove enhancers with 0 value for all sample
   not_zero_in_se <- apply(count_matrix, 1, function(row) sum(row) != 0)
   count_matrix <- count_matrix[not_zero_in_se,]
 
   # make sample data for DESeq2
-  sample_data <- data.frame(row.names = c("S1_r1","S1_r2",
-                                          "S2_r1","S2_r2"),
-                            condition = c("S1","S1","S2","S2"))
+  sample_data <- data.frame(row.names = colnames(count_matrix),
+                            condition = c(rep("C1",length(c1_bam)),rep("C2",length(c2_bam))))
 
   dds <- DESeqDataSetFromMatrix(countData = count_matrix,
                                 colData = sample_data,
@@ -114,10 +127,10 @@ enhancerFoldchange_bam <- function(e_df,se_df,
 
   raw_count <- counts(dds)
   normalized_count <- counts(dds,normalized=TRUE)
-  colnames(normalized_count) <- c("S1_r1_norm","S1_r2_norm","S2_r1_norm","S2_r2_norm")
+  colnames(normalized_count) <- paste0(colnames(normalized_count),"_norm")
 
   # shrinking LFC and MA plot
-  resLFC <- lfcShrink(dds, coef="condition_S2_vs_S1", type="apeglm")
+  resLFC <- lfcShrink(dds, coef="condition_C2_vs_C1", type="apeglm")
 
   # make final output
   temp_output <- data.frame()

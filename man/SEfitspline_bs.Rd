@@ -4,10 +4,14 @@
 \alias{SEfitspline_bs}
 \title{Fit enhancer fold change and normal premut}
 \usage{
-SEfitspline_bs(e_deseq_out_df)
+SEfitspline_bs(e_deseq_out_df, c1_n, c2_n)
 }
 \arguments{
 \item{e_deseq_out_df}{enhancer output file from enhancerFoldchange}
+
+\item{c1_n}{number of replicates (samples) in condition 1.}
+
+\item{c2_n}{number of replicates (samples) in condition 2.}
 }
 \value{
 se_fit_df: enhancer fitted dataframe
@@ -20,14 +24,14 @@ chr: chromosome of CEs.
 start: start posation of CEs.
 end: end posation of CEs.
 width: width of CEs.
-S1_r1: coverage of sample 1 replicate 1.
-S1_r2: coverage of sample 1 replicate 2.
-S2_r1: coverage of sample 2 replicate 1.
-S2_r2: coverage of sample 2 replicate 2.
-S1_r1_norm: normalized coverage of sample 1 replicate 1.
-S1_r2_norm: normalized coverage of sample 1 replicate 2.
-S2_r1_norm: normalized coverage of sample 2 replicate 1.
-S2_r2_norm: normalized coverage of sample 2 replicate 2.
+C1_1: coverage of condition 1 replicate 1.
+C1_2: coverage of condition 1 replicate 2.
+C2_1: coverage of condition 2 replicate 1.
+C2_2: coverage of condition 2 replicate 2.
+C1_1_norm: normalized coverage of condition 1 replicate 1.
+C1_2_norm: normalized coverage of condition 1 replicate 2.
+C2_1_norm: normalized coverage of condition 2 replicate 1.
+C2_2_norm: normalized coverage of condition 2 replicate 2.
 baseMean: normalized coverage mean of all samples.
 log2FoldChange: log2 fold change of normalized coverage.
 lfcSE: log2 fold change standard error.
@@ -50,6 +54,6 @@ This function will fit the enhancer fold change within each SE by using b-spline
 weighted by the max basemean of two samples.
 }
 \examples{
-fit_list <- SEfitspline_bs(enhancerFoldchange_out)
+fit_list <- SEfitspline_bs(enhancerFoldchange_out,c1_n=2,c2_n=2)
 
 }

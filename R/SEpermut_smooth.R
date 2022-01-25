@@ -6,12 +6,15 @@
 #' A permutation of counts of enhancers in SEs is used to decide the
 #' cutoff of significant log2FC with shuffling pool. Cutoff was calculate by slope equal to range(y)/range(x).
 #' The max value in range(-2,-1) and min value in range(1,2) are set to be lower and upper cutoff.
+#' Coupled with smooth spline function.
 #'
 #' @param spline_fit_out enhancer output file from SEfitspline
 #' @param sample_pool enhancer counts shuffling pool
 #' (header must be "e_merge_name","S1_r1","S1_r2","S2_r1","S2_r2", "se_merge_name"))
 #' @param times permutation times (default=10)
 #' @param permut if you want permutation (default=TRUE)
+#' @param c1_n number of replicates (samples) in condition 1.
+#' @param c2_n number of replicates (samples) in condition 2.
 #'
 #' @return
 #' se_permutation_df: permutation data frame
@@ -26,37 +29,38 @@
 #' @export
 #' @examples
 #' # default permutation 10 times
-#' permut_out <- SEpermut(fit_spline_out_df,sample_pool)
+#' permut_out <- SEpermut_smooth(fit_spline_out_df,sample_pool,c1_n=2,c2_n=2)
 #'
 #' # permutation 5 times
-#' permut_out <- SEpermut(fit_spline_out_df,sample_pool,times=5)
+#' permut_out <- SEpermut_smooth(fit_spline_out_df,sample_pool,times=5,c1_n=2,c2_n=2)
 #'
 #' # no permutation
-#' permut_out <- SEpermut(fit_spline_out_df,sample_pool,permut=F)
+#' permut_out <- SEpermut_smooth(fit_spline_out_df,sample_pool,permut=F,c1_n=2,c2_n=2)
 
-SEpermut <- function(spline_fit_out,sample_pool,permut=T,times=10) {
-
+SEpermut_smooth <- function(spline_fit_out,sample_pool,permut=T,times=10,c1_n,c2_n) {
   permut_out <- data.frame()
   if (permut) {
     for (shuffle_i in c(1:times)) {
       print(paste0("Permutation: ",shuffle_i))
       # shuffle counts
-      temp_permut <- spline_fit_out[,c('e_merge_name','S1_r1','S1_r2','S2_r1','S2_r2',
-                                       'width_mid','baseMean.1','se_merge_name')]
-      temp_permut$S1_r1 <- sample(sample_pool$S1_r1,size=nrow(temp_permut))
-      temp_permut$S1_r2 <- sample(sample_pool$S1_r2,size=nrow(temp_permut))
-      temp_permut$S2_r1 <- sample(sample_pool$S2_r1,size=nrow(temp_permut))
-      temp_permut$S2_r2 <- sample(sample_pool$S2_r2,size=nrow(temp_permut))
+      col_list <- c('e_merge_name',colnames(spline_fit_out)[6:(5+c1_n+c2_n)],
+                    'width_mid','se_merge_name')
+      temp_permut <- subset(spline_fit_out,select=col_list)
+
+      for (si in 2:(1+c1_n+c2_n)) {
+        temp_permut[[si]] <- sample(sample_pool[[si]],size=nrow(temp_permut))
+      }
+
 
       # DESeq2 fold-change
       # make count matrix
-      count_matrix <- as.data.frame(temp_permut[,c('S1_r1','S1_r2','S2_r1','S2_r2')])
+      count_matrix <- as.data.frame(subset(temp_permut,select=c(colnames(spline_fit_out)[6:(5+c1_n+c2_n)])))
       rownames(count_matrix) <- temp_permut$e_merge_name
 
       # remove row.sum = 0
       no_zero_count_matrix <- count_matrix[rowSums(count_matrix)>0,]
       sample_data <- data.frame(row.names = colnames(no_zero_count_matrix),
-                                condition = c("S1","S1","S2","S2"))
+                                condition = c(rep("C1",c1_n),rep("C2",c2_n)))
       dds <- DESeqDataSetFromMatrix(countData = no_zero_count_matrix,
                                     colData = sample_data,
                                     design = ~ condition)
@@ -67,22 +71,22 @@ SEpermut <- function(spline_fit_out,sample_pool,permut=T,times=10) {
 
       # save raw counts and normalized counts
       normalized_count <- counts(dds,normalized=TRUE)
-      colnames(normalized_count) <- c("S1_r1_norm","S1_r2_norm","S2_r1_norm","S2_r2_norm")
+      colnames(normalized_count) <- paste0(colnames(normalized_count),"_norm")
       normalized_count <- setDT(as.data.frame(normalized_count), keep.rownames = "e_merge_name")[]
 
       # lfc shrinking
-      resLFC <- lfcShrink(dds, coef="condition_S2_vs_S1", type="apeglm")
+      resLFC <- lfcShrink(dds, coef="condition_C2_vs_C1", type="apeglm")
       new_resLFC <-setDT(as.data.frame(resLFC), keep.rownames = "e_merge_name")[]
 
       # make final output
-
       temp_shuffle_count_df_temp <- merge(temp_permut,normalized_count,by="e_merge_name")
       temp_shuffle_count_df <- merge(temp_shuffle_count_df_temp,new_resLFC,by="e_merge_name")
 
       # add max_mean
-      temp_shuffle_count_df$s1_mean <- (temp_shuffle_count_df$S1_r1_norm+temp_shuffle_count_df$S1_r2_norm)/2
-      temp_shuffle_count_df$s2_mean <- (temp_shuffle_count_df$S2_r1_norm+temp_shuffle_count_df$S2_r2_norm)/2
-      temp_shuffle_count_df$max_mean <- apply(temp_shuffle_count_df[,c('s1_mean','s2_mean')],1,FUN=max)
+      norm_start <-  1+c1_n+c2_n+3
+      temp_shuffle_count_df$C1_mean <- rowMeans(temp_shuffle_count_df[,norm_start:(norm_start+c1_n-1)])
+      temp_shuffle_count_df$C2_mean <- rowMeans(temp_shuffle_count_df[,(norm_start+c1_n):(norm_start+c1_n+c2_n-1)])
+      temp_shuffle_count_df$max_mean <- apply(temp_shuffle_count_df[,c('C1_mean','C2_mean')],1,FUN=max)
 
       # get new fitted value
       permut_fit <- data.frame()
@@ -108,6 +112,9 @@ SEpermut <- function(spline_fit_out,sample_pool,permut=T,times=10) {
 
           shuffle_enhancer$permut_spline_bs <- spline_bs_fit$fitted.values
 
+          # save fitted.values for permutation
+          shuffle_enhancer$permut_spline_bs <- spline_bs_fit$fitted.values
+
         } else {
           # get df based on number of enhancer whose cumsum is > 95%
           n_top <- min(which(shuffle_enhancer$cumsum > 95))
@@ -120,28 +127,18 @@ SEpermut <- function(spline_fit_out,sample_pool,permut=T,times=10) {
                                                     Boundary.knots = c(min(width_mid)-5,max(width_mid)+5)),
                                 data = shuffle_enhancer,
                                 weights = max_mean)
+            # save fitted.values for permutation
+            shuffle_enhancer$permut_spline_bs <- spline_bs_fit$fitted.values
 
-          } else if (n_top >= 6) {
+          } else if (n_top >= 5) {
               # df=4
-              spline_bs_fit <- lm(log2FoldChange~bs(width_mid,
-                                                      degree=4,
-                                                      Boundary.knots = c(min(width_mid)-5,max(width_mid)+5)),
-                                  data = shuffle_enhancer,
-                                  weights = max_mean)
+              spline_bs_fit <- smooth.spline(x=shuffle_enhancer$width_mid,y=shuffle_enhancer$log2FoldChange,
+                                             w=shuffle_enhancer$max_mean,
+                                             df=4)
 
-          } else {
-            # df=3
-            spline_bs_fit <- lm(log2FoldChange~bs(width_mid,
-                                                    degree=3,
-                                                    Boundary.knots = c(min(width_mid)-5,max(width_mid)+5)),
-                                data = shuffle_enhancer,
-                                weights = max_mean)
-
+              # save fitted.values for permutation
+              shuffle_enhancer$permut_spline_bs <- spline_bs_fit$y
           }
-
-          # save fitted.values for permutation
-          shuffle_enhancer$permut_spline_bs <- spline_bs_fit$fitted.values
-
         }
 
         permut_fit <- rbind(permut_fit,shuffle_enhancer)

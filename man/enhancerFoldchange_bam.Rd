@@ -7,12 +7,10 @@
 enhancerFoldchange_bam(
   e_df,
   se_df,
-  s1_pair = FALSE,
-  s2_pair = FALSE,
-  s1_r1_bam,
-  s1_r2_bam,
-  s2_r1_bam,
-  s2_r2_bam
+  c1_pair = FALSE,
+  c2_pair = FALSE,
+  condition_1,
+  condition_2
 )
 }
 \arguments{
@@ -21,17 +19,19 @@ Header needs to be "chr, start,end,name,score,strand,signalValue,pValue,qValue,p
 
 \item{se_df}{merged SE metadata from SEfilter}
 
-\item{s1_pair}{if sample 1 is paired-end (default=FALSE)}
+\item{c1_pair}{if replicates of condition 1 is paired-end, separated by ",".
+Order need to match with parameter condition_1.
+Example: c1_pair="FALSE(or F),TRUE(or T),..."}
 
-\item{s2_pair}{if sample 2 is paired-end (default=FALSE)}
+\item{c2_pair}{if replicates of condition 1 is paired-end, separated by ",".
+Order need to match with parameter condition_2.
+Example: c2_pair="FALSE(or F),TRUE(or T),..."}
 
-\item{s1_r1_bam}{path of sample 1 replicate 1 bam file}
+\item{condition_1}{path of bam files for condition 1 replicates, separated by ",".
+Example: condition_1="path_to_bam/c1_r1.bam,path_to_bam/c1_r2.bam,...".}
 
-\item{s1_r2_bam}{path of sample 1 replicate 2 bam file}
-
-\item{s2_r1_bam}{path of sample 2 replicate 1 bam file}
-
-\item{s2_r2_bam}{path of sample 2 replicate 2 bam file}
+\item{condition_2}{path of bam files for condition 1 replicates, separated by ",".
+Example: condition_2="path_to_bam/c2_r1.bam,path_to_bam/c2_r2.bam,...".}
 }
 \value{
 A list of 2 datasets: enhancer foldchang results dataset and sizefactor used in DESeq2
@@ -45,6 +45,10 @@ Then enhancers are merged if there gaps are within 500bps.
 Feature count and DESeq2 are used to calculate the fold change of those enhancers
 }
 \examples{
-foldchange_list <- enhancerFoldchange_bam(pool_enhancer_df,se_meta,s1_r1_bam,s1_r2_bam,s2_r1_bam,s2_r2_bam)
+foldchange_list <- enhancerFoldchange_bam(pool_enhancer_df,se_meta,
+                       condition_1="path_to_bam/c1_r1.bam,path_to_bam/c1_r2.bam,...",
+                       condition_2="path_to_bam/c2_r1.bam,path_to_bam/c2_r2.bam,...",
+                       c1_pair="F,T,...",
+                       c2_pair="F,T,...")
 
 }

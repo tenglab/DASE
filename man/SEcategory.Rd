@@ -24,7 +24,7 @@ mean_FC: mean of log2 SE coverage fold change.
 rank: SE category ranking based on non_mid_percent first and mean_FC for each SE category. (rank=1 means the most like to the SE category.)
 }
 \description{
-A function to estimate the category of SEs based on SE segment percentage file
+A function to get the category of SEs based on SE segment percentage file
 }
 \details{
 This function will create the category of SEs (similar, strengthen/weaken, shorten,

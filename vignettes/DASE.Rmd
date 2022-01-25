@@ -67,7 +67,7 @@ Below are the examples of the enhancer and SE BED files, following the UCSC defi
 
 ### *Enhancer BED file*
 
-The enhancer BED file can be of any table formats as long as  the first 6 columns contain
+The enhancer BED file can be of any table formats as long as the first 6 columns contain
 the information of "chromosome","start","end","name","score" and "strand". Here is an example of 
 BED files with only 6 columns.
 
@@ -103,21 +103,40 @@ Options" section.
 
 This section demonstrates _DASE_ with BAM or BigWig input files. The BAM or BigWig files are used to estimate 
 the reads counts of enhancers in different samples. _DASE_ uses *featureCounts* to count the enhancer abundance 
-from BAM files or uses *rtracklayer* for BigWig files. The first step is to get the paths of all BAM or BigWig 
-files for each sample. Then, with the specified enhancer and SE regions, we can run _DASE_ as follow 
+from BAM files or uses *rtracklayer* for BigWig files. The first step is to concatenated the paths of all BAM or BigWig 
+files for each sample/condition into one string separated by ",". Then, with the specified enhancer and SE regions, we can run _DASE_ as follow. 
 (Here we use BigWig files as an example).
 
 ```{r DASE2}
 # path of BigWig file for each condition
 s1_r1_bw <- system.file("extdata","K562_1_chr21.bw",package="DASE")
 s1_r2_bw <- system.file("extdata","K562_2_chr21.bw",package="DASE")
+s1_r3_bw <- system.file("extdata","K562_3_chr21.bw",package="DASE")
 s2_r1_bw <- system.file("extdata","MCF7_1_chr21.bw",package="DASE")
 s2_r2_bw <- system.file("extdata","MCF7_2_chr21.bw",package="DASE")
+s2_r3_bw <- system.file("extdata","MCF7_3_chr21.bw",package="DASE")
+s2_r4_bw <- system.file("extdata","MCF7_4_chr21.bw",package="DASE")
+
+# concatenated path into one string for each sample/condition
+c1_path <- paste(s1_r1_bw,s1_r2_bw,s1_r3_bw,sep=",")
+c2_path <- paste(s2_r1_bw,s2_r2_bw,s2_r3_bw,s2_r4_bw,sep=",")
 
 # running DASE with BigWig files
 DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,data_type = "bw",
-                 s1_r1_bam=s1_r1_bw,s1_r2_bam=s1_r2_bw,
-                 s2_r1_bam=s2_r1_bw,s2_r2_bam=s2_r2_bw)
+                 condition_1=c1_path,
+                 condition_2=c2_path)
+
+```
+
+In order to run _DASE_ with BAM file, two more parameters (c1_pair and c2_pair) need to be specified indicating whether the BAM files are paired-reads or not. An example command is shown as following. Please refer to ?DASE for more information.
+
+```{r DASE_BAM eval=FALSE}
+# running DASE with BigWig files
+DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,data_type = "bw",
+                 condition_1="path_to_bam/c1_r1.bam,path_to_bam/c1_r2.bam,...",
+                 condition_2="path_to_bam/c2_r1.bam,path_to_bam/c2_r2.bam,path_to_bam/c2_r3.bam,...",
+                 c1_pair = "F,T,...",
+                 c2_pair = "T,F,F,...")
 
 ```
 
@@ -125,17 +144,19 @@ DASE_out <- DASE(se_in=se_region,e_in=enhancer_region,data_type = "bw",
 
 This section demonstrates DASE with enhancer raw count table. Instead of count enhancer reads from BAM or 
 BigWig files, the function adapts count table directly to save time and space. The format of count table 
-is shown below. The first column must be the enhancer name with "chr_start_end" format. The count table is adapted with parameter *enhancer_count_table*.
+is shown below. The first column must be the enhancer name with "chr_start_end" format. The order of following columns need to be condition 1 replicates and condition 2 replicates. The count table is adapted with parameter *enhancer_count_table*.
 
 ```{r DASE3}
 # read enhancer count table
-enhancer_count_path <- system.file("extdata","chr21_enhancer_count.txt",package="DASE")
+enhancer_count_path <- system.file("extdata","chr21_enhancer_count_mutiple_replicates.txt",package="DASE")
 enhancer_count <- read.table(enhancer_count_path,sep="\t",header=T)
 head(enhancer_count)
 
-# run DASE
-DASE_out_count <- DASE(se_in=se_region,e_in=enhancer_region,
-                 enhancer_count_table=enhancer_count)
+# run DASE, need to specify the number of replicates in each condition with parameter c1_n, c2_n
+DASE_out_count <- DASE(se_in = se_region,e_in = enhancer_region,
+                       enhancer_count_table=enhancer_count,
+                       c1_n=3,
+                       c2_n=4)
 
 ```
 
