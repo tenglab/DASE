@@ -43,44 +43,43 @@
 #' pattern_list: a list containing figures for each SE pattern
 #' ce_fit: a data frame containing DESeq2 output and spline-fitted log2 fold change of all constitute enhancers
 #'
-#' Each column in se_category represents:
+#' Each column in se_category represents:\cr
 #'
-#' se_merge_name: name of merged SE,"chr_start_end".
-#' total_width: width of merged SE (unit=k).
-#' number_enhancer: number of CEs in each SE.
-#' category: SE category identified by _DASE_.
-#' direction: enrichment direction of SEs (none:Other or non-differential category; +: enriched in sample 2; -: enriched in sample 1; l: sample 1 shifted in 5' direction; r: sample 2 shifted in 5' direction).
-#' non_mid_percent: total activity occupancy of the segments that go beyond the threshold cutoffs.
-#' mean_FC: mean of log2 SE coverage fold change.
-#' rank: SE category ranking based on non_mid_percent first and mean_FC for each SE category. (rank=1 means the most changed in the corresponding SE category.)
+#' se_merge_name: name of merged SE,"chr_start_end".\cr
+#' total_width: width of merged SE (unit=k).\cr
+#' number_enhancer: number of CEs in each SE.\cr
+#' category: SE category identified by _DASE_.\cr
+#' direction: enrichment direction of SEs (none:Other or non-differential category;
+#' +: enriched in sample 2; -: enriched in sample 1;
+#' l: sample 1 shifted in 5' direction; r: sample 2 shifted in 5' direction).
+#' non_mid_percent: total activity occupancy of the segments that go beyond the threshold cutoffs.\cr
+#' mean_FC: mean of log2 SE coverage fold change.\cr
+#' rank: SE category ranking based on non_mid_percent first and mean_FC for each SE category.
+#' (rank=1 means the most changed in the corresponding SE category.)\cr
 #'
-#' Each column in ce_fit represents:
+#' Each column in ce_fit represents:\cr
 #'
-#' e_merge_name: name of merged CEs.
-#' chr: chromosome of CEs.
-#' start: start posation of CEs.
-#' end: end posation of CEs.
-#' width: width of CEs.
-#' C1_1: coverage of condition 1 replicate 1.
-#' C1_2: coverage of condition 1 replicate 2.
-#' C2_1: coverage of condition 2 replicate 1.
-#' C2_2: coverage of condition 2 replicate 2.
-#' C1_1_norm: normalized coverage of condition 1 replicate 1.
-#' C1_2_norm: normalized coverage of condition 1 replicate 2.
-#' C2_1_norm: normalized coverage of condition 2 replicate 1.
-#' C2_2_norm: normalized coverage of condition 2 replicate 2.
-#' baseMean: normalized coverage mean of all samples.
-#' log2FoldChange: log2 fold change of normalized coverage.
-#' lfcSE: log2 fold change standard error.
-#' stat: statistic of log2 fold change.
-#' pvalue: p-value of log2 fold change.
-#' padj: adjusted p-value of log2 fold change.
-#' baseMean_shrink: shrinkage of normalized coverage mean of all samples.
-#' log2FoldChange_shrink: shrinkage of log2 fold change..
-#' lfcSE_shrink: shrinkage of log2 fold change standard error.
-#' pvalue_shrink: shrinkage of log2 fold change p-value
-#' padj_shrink: shrinkage of log2 fold change adjusted p-value
-#' se_merge_name: merged SE names
+#' e_merge_name: name of merged CEs.\cr
+#' chr: chromosome of CEs.\cr
+#' start: start posation of CEs.\cr
+#' end: end posation of CEs.\cr
+#' width: width of CEs.\cr
+#' C1_*: coverage of condition 1 replicate \*.\cr
+#' C2_*: coverage of condition 2 replicate \*.\cr
+#' C1_*_norm: normalized coverage of condition 1 replicate \*.\cr
+#' C2_*_norm: normalized coverage of condition 2 replicate \*.\cr
+#' baseMean: normalized coverage mean of all samples.\cr
+#' log2FoldChange: log2 fold change of normalized coverage.\cr
+#' lfcSE: log2 fold change standard error.\cr
+#' stat: statistic of log2 fold change.\cr
+#' pvalue: p-value of log2 fold change.\cr
+#' padj: adjusted p-value of log2 fold change.\cr
+#' baseMean_shrink: shrinkage of normalized coverage mean of all samples.\cr
+#' log2FoldChange_shrink: shrinkage of log2 fold change.\cr
+#' lfcSE_shrink: shrinkage of log2 fold change standard error.\cr
+#' pvalue_shrink: shrinkage of log2 fold change p-value.\cr
+#' padj_shrink: shrinkage of log2 fold change adjusted p-value.\cr
+#' se_merge_name: merged SE names.\cr
 #'
 #' @import rtracklayer
 #' @import data.table
@@ -150,7 +149,7 @@ DASE <- function(se_in,e_in,bl_file,custom_range,
                                         condition_2=condition_2)
 
   } else if (!missing(enhancer_count_table)) {
-    cat("Step 2: calculate log2FC of constituent enhancer using Deseq2 \nwith raw enhancer count table")
+    cat("Step 2: calculate log2FC of constituent enhancer using Deseq2 \n   with raw enhancer count table.\n")
     step_2_out <- enhancerFoldchange_count(e_df=e_in,se_df=merged_se_df,
                                            raw_count=enhancer_count_table,
                                            c1_n=c1_n,
