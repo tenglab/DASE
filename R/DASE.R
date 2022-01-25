@@ -99,12 +99,16 @@
 #'
 #' # with blacklist and permutation 10 times with n-spline function
 #' se_main_list <- DASE(se_in=pooled_se,e_in=pooled_enhancer,bl_file= blacklist,
-#' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path,
+#' condition_1="s1_r1_path,s1_r2_path",
+#' condition_2="s2_r1_path,s2_r2_path",
+#' c1_pair="F,F",c2_pair="F,F"
 #' spline_fun="ns")
 #'
 #' # no blacklist nor permutation 10 times with smooth spline function
 #' se_main_list <- DASE(se_in=pooled_se,e_in=pooled_enhancer,permut=FALSE,
-#' s1_r1_bam=s1_r1_path,s1_r2_bam=s1_r2_path,s2_r1_bam=s2_r1_path,s2_r2_bam=s2_r2_path,
+#' condition_1="s1_r1_path,s1_r2_path",
+#' condition_2="s2_r1_path,s2_r2_path",
+#' c1_pair="F,F",c2_pair="F,F"
 #' spline_fun="smooth")
 #'
 
