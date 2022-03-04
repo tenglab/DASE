@@ -50,7 +50,7 @@ The users are also encouraged to refer to the help pages of R functions in this 
 ## Citation
 If you use DASE, please cite our paper at (https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkac141/6541024?login=true).
 
-Liu X, Zhao B, Shaw TI, Fridley BL, Duckett DR, Tan AC, Teng M. Summarizing internal dynamics boosts differential analysis and functional interpretation of super enhancers. Nucleic Acids Res. 2022 Mar 2:gkac141. doi: 10.1093/nar/gkac141.
+"Liu X, Zhao B, Shaw TI, Fridley BL, Duckett DR, Tan AC, Teng M. Summarizing internal dynamics boosts differential analysis and functional interpretation of super enhancers. Nucleic Acids Res. 2022 Mar 2:gkac141. doi: 10.1093/nar/gkac141."
 
 ## Help
 Feel free to leave any questions and bugs at [GitHub issues](https://github.com/tenglab/DASE/issues).
