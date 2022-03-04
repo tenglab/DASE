@@ -48,7 +48,7 @@ formats, interpret outputs files as well as some spline fitting examples.
 The users are also encouraged to refer to the help pages of R functions in this package. 
 
 ## Citation
-If you use DASE, please cite our paper at (https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkac141/6541024?login=true).
+If you use DASE, please cite our paper at (https://doi.org/10.1093/nar/gkac141).
 
 "Liu X, Zhao B, Shaw TI, Fridley BL, Duckett DR, Tan AC, Teng M. Summarizing internal dynamics boosts differential analysis and functional interpretation of super enhancers. Nucleic Acids Res. 2022 Mar 2:gkac141. doi: 10.1093/nar/gkac141."
 
