@@ -359,5 +359,5 @@ By comparing results based on different threshold cutoffs, the right plot (with 
 identified  more SEs in the *similar* category than the left plot (with smaller threshold cutoff).
 
 # Citation
-Please cite our paper when using DASE: [https://www.biorxiv.org/content/10.1101/2021.09.25.461810] 
+Please cite our paper when using DASE: [https://doi.org/10.1093/nar/gkac141] 
 
