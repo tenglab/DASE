@@ -48,7 +48,11 @@ formats, interpret outputs files as well as some spline fitting examples.
 The users are also encouraged to refer to the help pages of R functions in this package. 
 
 ## Citation
-If you use DASE, please cite our paper at (https://www.biorxiv.org/content/10.1101/2021.09.25.461810)
+If you use DASE, please cite our paper at (https://doi.org/10.1093/nar/gkac141).
+
+"Liu X, Zhao B, Shaw TI, Fridley BL, Duckett DR, Tan AC, Teng M. Summarizing internal dynamics boosts differential analysis and functional interpretation of super enhancers. Nucleic Acids Res. 2022 Mar 2:gkac141. doi: 10.1093/nar/gkac141."
 
 ## Help
 Feel free to leave any questions and bugs at [GitHub issues](https://github.com/tenglab/DASE/issues).
+
+[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Ftenglab%2FDASE&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
